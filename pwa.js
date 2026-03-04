@@ -215,15 +215,20 @@
       if (!offlineBanner) {
         const banner = document.createElement('div');
         banner.id = 'offline-banner';
-        banner.className = 'fixed top-0 left-0 right-0 bg-yellow-500 text-white p-2 text-center z-50 font-ui text-sm';
+        banner.className = 'fixed top-0 left-0 right-0 bg-yellow-500 text-white p-2 text-center z-[60] font-ui text-sm shadow-md';
         banner.innerHTML = `
           <span class="material-symbols-outlined text-sm align-middle">cloud_off</span>
-          <span class="ml-2">You are offline. Some features may be limited.</span>
+          <span class="ml-2">Estás desconectado. Algunas funciones pueden estar limitadas.</span>
         `;
-        document.body.appendChild(banner);
+        document.body.insertBefore(banner, document.body.firstChild);
+        
+        // Add padding to body to prevent content overlap
+        document.body.style.paddingTop = banner.offsetHeight + 'px';
       }
     } else {
       if (offlineBanner) {
+        // Remove padding from body
+        document.body.style.paddingTop = '0';
         offlineBanner.remove();
       }
     }
