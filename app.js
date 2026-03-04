@@ -184,8 +184,16 @@ const OfflineManager = {
         if (banner) {
             if (this.isOnline()) {
                 banner.classList.add('-translate-y-full');
+                // Remove padding from body when online
+                setTimeout(() => {
+                    document.body.style.paddingTop = '0';
+                }, 300); // Wait for animation to complete
             } else {
                 banner.classList.remove('-translate-y-full');
+                // Add padding to body to prevent content overlap
+                setTimeout(() => {
+                    document.body.style.paddingTop = banner.offsetHeight + 'px';
+                }, 10);
             }
         }
     },
@@ -193,12 +201,12 @@ const OfflineManager = {
     createBanner() {
         const banner = document.createElement('div');
         banner.id = 'offline-banner';
-        banner.className = 'fixed top-0 left-0 right-0 z-50 bg-primary shadow-md transition-transform duration-300 ease-in-out transform -translate-y-full';
+        banner.className = 'fixed top-0 left-0 right-0 z-[60] bg-primary shadow-md transition-transform duration-300 ease-in-out transform -translate-y-full';
         banner.innerHTML = `
             <div class="max-w-md mx-auto px-4 py-2 flex items-center justify-center gap-2">
                 <span aria-hidden="true" class="material-symbols-outlined text-white text-[18px]">wifi_off</span>
                 <p class="text-white text-xs font-bold tracking-wide uppercase leading-none pt-0.5">
-                    Offline Mode. Viewing cached archive.
+                    Modo sin conexión. Viendo archivo en caché.
                 </p>
             </div>
         `;
