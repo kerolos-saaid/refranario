@@ -350,19 +350,25 @@
             renderProverbs(proverbs);
         }
 
-        // Search input handler
-        document.getElementById('search-input').addEventListener('input', (e) => {
-            searchQuery = e.target.value;
-            updateView();
-        });
+        // Initialize page when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            // Make sure DataStore is initialized
+            DataStore.init();
+            
+            // Search input handler
+            document.getElementById('search-input').addEventListener('input', (e) => {
+                searchQuery = e.target.value;
+                updateView();
+            });
 
-        // Initial render
-        updateView();
-        
-        // Show admin FAB if logged in
-        if (Auth.isLoggedIn()) {
-            document.getElementById('admin-fab').style.display = 'block';
-        }
+            // Initial render
+            updateView();
+            
+            // Show admin FAB if logged in
+            if (Auth.isLoggedIn()) {
+                document.getElementById('admin-fab').style.display = 'block';
+            }
+        });
     </script>
     <script src="pwa.js"></script>
 </body>
