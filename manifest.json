@@ -1,0 +1,66 @@
+{
+  "name": "Refranario - Trilingual Proverb Archive",
+  "short_name": "Refranario",
+  "description": "A trilingual proverb archive application with Spanish, Arabic, and English translations",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f5f5f5",
+  "theme_color": "#2d8659",
+  "orientation": "portrait-primary",
+  "scope": "./",
+  "lang": "en",
+  "dir": "ltr",
+  "categories": ["education", "reference", "books"],
+  "icons": [
+    {
+      "src": "https://via.placeholder.com/72x72/2d8659/ffffff?text=R",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://via.placeholder.com/96x96/2d8659/ffffff?text=R",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://via.placeholder.com/128x128/2d8659/ffffff?text=R",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://via.placeholder.com/144x144/2d8659/ffffff?text=R",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://via.placeholder.com/152x152/2d8659/ffffff?text=R",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://via.placeholder.com/192x192/2d8659/ffffff?text=R",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://via.placeholder.com/384x384/2d8659/ffffff?text=R",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://via.placeholder.com/512x512/2d8659/ffffff?text=R",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "shortcuts": []
+}

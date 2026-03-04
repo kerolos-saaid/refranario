@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>The Scriptorium - The Scholar's Archive</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#2d8659" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Refranario" />
+    <link rel="manifest" href="/manifest.json" />
+    
+    <!-- Icons -->
+    <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192x192.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512x512.png" />
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
+    
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&amp;family=Crimson+Pro:ital,wght@0,400;0,600;1,400&amp;family=Amiri:wght@400;700&amp;family=Libre+Franklin:wght@500;700&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#2d8659",
+                        "primary-light": "#3a9d6d",
+                        "background": "#f5f5f5",
+                        "card": "#ffffff",
+                        "ink": "#1f2937",
+                        "muted": "#6b7280",
+                        "border": "#e0e2e7",
+                        "secondary": "#eff5f2",
+                    },
+                    fontFamily: {
+                        "display": ["Cinzel Decorative", "serif"],
+                        "serif": ["Crimson Pro", "serif"],
+                        "arabic": ["Amiri", "serif"],
+                        "ui": ["Libre Franklin", "sans-serif"]
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        .border-bookplate {
+            border: 1px solid #e0e2e7;
+            border-radius: 0.75rem;
+        }
+
+        .form-input {
+            border: 1px solid #e0e2e7;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+        }
+
+        .form-input:focus {
+            border-color: #2d8659;
+            box-shadow: 0 0 0 3px rgba(45, 134, 89, 0.1);
+            outline: none;
+        }
+
+        .label-ui {
+            font-family: 'Libre Franklin', sans-serif;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: #1f2937;
+        }
+
+        .arabic-rtl {
+            direction: rtl;
+            font-family: 'Amiri', serif;
+        }
+    </style>
+    <style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+    <script src="app.js"></script>
+</head>
+
+<body class="bg-background text-ink font-serif min-h-screen">
+    <div class="relative flex h-auto min-h-screen w-full flex-col max-w-2xl mx-auto bg-background">
+        <!-- TopAppBar -->
+        <header class="sticky top-0 z-10 flex items-center bg-white border-b border-border p-4 justify-between shadow-sm">
+            <a href="2-home.html" class="text-primary flex items-center justify-center cursor-pointer hover:text-primary-light transition-colors">
+                <span class="material-symbols-outlined text-2xl">arrow_back</span>
+            </a>
+            <h1 id="page-title" class="text-primary text-lg font-display font-bold tracking-wider flex-1 text-center">
+                NEW ENTRY</h1>
+            <div class="w-10"></div>
+        </header>
+        <!-- Form Content -->
+        <main class="flex flex-col p-6 gap-8 pb-32">
+            <form id="proverb-form">
+                <!-- Image Upload Area -->
+                <div class="flex flex-col mb-8">
+                    <p class="label-ui mb-2">Manuscript Visual</p>
+                    <input type="file" id="image-input" accept="image/*" class="hidden">
+                    <div id="image-preview" class="hidden mb-4">
+                        <img id="preview-img" class="w-full h-48 object-cover rounded border-2 border-primary">
+                    </div>
+                    <div id="upload-area"
+                        class="flex flex-col items-center gap-4 rounded border-2 border-dashed border-primary bg-card/50 px-6 py-10 transition-colors hover:bg-card cursor-pointer">
+                        <div class="text-primary">
+                            <span class="material-symbols-outlined text-4xl">history_edu</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-1">
+                            <p class="text-primary font-display text-sm font-bold tracking-wider">Drag parchment here</p>
+                            <p class="text-muted text-xs text-center italic">Upload a sepia-toned image for the archive</p>
+                        </div>
+                        <button type="button" id="select-file-btn"
+                            class="flex min-w-[120px] cursor-pointer items-center justify-center rounded border border-primary h-9 px-4 bg-transparent text-primary text-xs font-ui font-bold tracking-widest uppercase hover:bg-primary/10">
+                            Select File
+                        </button>
+                    </div>
+                </div>
+                <!-- Spanish Input -->
+                <div class="flex flex-col gap-1 mb-8">
+                    <label class="label-ui" for="spanish-phrase">Spanish Phrase (Origen) *</label>
+                    <textarea required
+                        class="form-input w-full bg-card p-3 text-lg font-display text-primary placeholder:text-muted/50 min-h-[100px]"
+                        id="spanish-phrase" placeholder="E.g., Más vale pájaro en mano..."></textarea>
+                </div>
+                <!-- Arabic Input -->
+                <div class="flex flex-col gap-1 mb-8">
+                    <label class="label-ui" for="arabic-phrase">Arabic Equivalent (Naskh) *</label>
+                    <textarea required
+                        class="form-input w-full bg-card p-3 text-2xl arabic-rtl text-ink placeholder:text-muted/50 min-h-[100px]"
+                        id="arabic-phrase" placeholder="...عصفور في اليد"></textarea>
+                </div>
+                <!-- English Translation -->
+                <div class="flex flex-col gap-1 mb-8">
+                    <label class="label-ui" for="english-translation">English Translation *</label>
+                    <textarea required
+                        class="form-input w-full bg-card p-3 text-lg italic text-muted placeholder:text-muted/50 min-h-[100px]"
+                        id="english-translation" placeholder="A bird in the hand is worth two in the bush."></textarea>
+                </div>
+                <!-- Category/Tags -->
+                <div class="flex flex-col gap-1 mb-8">
+                    <label class="label-ui">Taxonomy / Category *</label>
+                    <select id="category-select" required
+                        class="form-input w-full bg-card p-3 font-ui text-xs tracking-widest text-primary appearance-none">
+                        <option value="Wisdom">WISDOM</option>
+                        <option value="Prudence">PRUDENCE</option>
+                        <option value="Nature">NATURE</option>
+                        <option value="Family">FAMILY</option>
+                        <option value="Time">TIME</option>
+                        <option value="Honor">HONOR</option>
+                    </select>
+                </div>
+                <!-- Context / Usage Note -->
+                <div class="flex flex-col gap-1 mb-8">
+                    <label class="label-ui">Scholar's Note</label>
+                    <textarea
+                        class="form-input w-full bg-card p-3 text-base text-ink placeholder:text-muted/50 min-h-[80px]"
+                        id="note" placeholder="Historical usage notes or regional variations..."></textarea>
+                </div>
+            </form>
+        </main>
+        <!-- Sticky Action Bar -->
+        <footer
+            class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-background-light/95 backdrop-blur-sm border-t border-primary/30 p-4 flex gap-4 items-center">
+            <a href="2-home.html"
+                class="flex-1 px-4 py-3 text-primary font-ui font-bold text-xs tracking-widest uppercase hover:text-red-wax transition-colors text-center">
+                Cancel
+            </a>
+            <button id="save-btn"
+                class="flex-[2] bg-primary text-primary py-3 px-6 shadow-xl font-display font-bold text-sm tracking-[0.15em] uppercase hover:bg-primary/90 transition-all border border-primary/50">
+                Preserve Record
+            </button>
+        </footer>
+    </div>
+    <!-- Decorative Corner Accents (Optional visual flair) -->
+    <div
+        class="fixed top-0 left-0 w-16 h-16 border-t-2 border-l-2 border-primary/20 pointer-events-none m-4 hidden lg:block">
+    </div>
+    <div
+        class="fixed bottom-0 right-0 w-16 h-16 border-b-2 border-r-2 border-primary/20 pointer-events-none m-4 hidden lg:block">
+    </div>
+    <script>
+        // Add/Edit Form Logic
+        const editId = localStorage.getItem('editProverbId');
+        const isEditMode = !!editId;
+        let selectedImageUrl = '';
+
+        // Update page title
+        document.getElementById('page-title').textContent = isEditMode ? 'REVISE ENTRY' : 'NEW ENTRY';
+
+        // Load existing data if editing
+        if (isEditMode) {
+            const proverb = DataStore.getById(editId);
+            if (proverb) {
+                document.getElementById('spanish-phrase').value = proverb.spanish;
+                document.getElementById('arabic-phrase').value = proverb.arabic;
+                document.getElementById('english-translation').value = proverb.english;
+                document.getElementById('category-select').value = proverb.category;
+                document.getElementById('note').value = proverb.note || '';
+                selectedImageUrl = proverb.image;
+                
+                if (proverb.image) {
+                    document.getElementById('preview-img').src = proverb.image;
+                    document.getElementById('image-preview').classList.remove('hidden');
+                }
+            }
+        }
+
+        // Image upload handling
+        const imageInput = document.getElementById('image-input');
+        const uploadArea = document.getElementById('upload-area');
+        const selectFileBtn = document.getElementById('select-file-btn');
+        const imagePreview = document.getElementById('image-preview');
+        const previewImg = document.getElementById('preview-img');
+
+        selectFileBtn.onclick = () => imageInput.click();
+        uploadArea.onclick = (e) => {
+            if (e.target === selectFileBtn) return;
+            imageInput.click();
+        };
+
+        // Drag and drop
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('bg-card', 'border-primary');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('bg-card');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('bg-card');
+            const file = e.dataTransfer.files[0];
+            if (file && file.type.startsWith('image/')) {
+                handleImageFile(file);
+            }
+        });
+
+        imageInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                handleImageFile(file);
+            }
+        });
+
+        function handleImageFile(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                selectedImageUrl = e.target.result;
+                previewImg.src = selectedImageUrl;
+                imagePreview.classList.remove('hidden');
+                uploadArea.style.animation = 'fade-out 0.3s ease-out forwards';
+                setTimeout(() => {
+                    uploadArea.classList.add('hidden');
+                }, 300);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Form submission
+        const form = document.getElementById('proverb-form');
+        const saveBtn = document.getElementById('save-btn');
+
+        saveBtn.onclick = (e) => {
+            e.preventDefault();
+            
+            // Validate form
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                saveBtn.style.animation = 'shake 0.5s';
+                setTimeout(() => saveBtn.style.animation = '', 500);
+                return;
+            }
+
+            const proverbData = {
+                spanish: document.getElementById('spanish-phrase').value,
+                arabic: document.getElementById('arabic-phrase').value,
+                english: document.getElementById('english-translation').value,
+                category: document.getElementById('category-select').value,
+                note: document.getElementById('note').value || 'A proverb from the archive.',
+                image: selectedImageUrl || 'https://lh3.googleusercontent.com/aida-public/AB6AXuC627i2fYdXyeGop_xctmHHRNJpxuLlxlDShW0IEl8YkA9oQGqKwyybs37iJ64EbcR3OfNPHBswfltpSAcmrEa1uE25BUyEMShzvc5Xz_H9LPrHzEVFcvfWAX8U7nqs4Q3pg9cvBHvLgSnjKhO_VhtHToJ2scGToSbb7eEgck6v0wmrQX_8-ZD1UqY4-sZk87zOtAMDwoTLDqiDm23wlo6Jjz-0TNW1IXFrJTKF5biBm_S18xmYQaVcszO2gQp-zgLmaB4ceSN6q_I'
+            };
+
+            // Save or update
+            if (isEditMode) {
+                DataStore.update(editId, proverbData);
+                localStorage.removeItem('editProverbId');
+                UI.showToast('Entry updated successfully!');
+            } else {
+                DataStore.add(proverbData);
+                UI.showToast('Entry preserved in the archive!');
+            }
+
+            // Animate and redirect
+            saveBtn.style.animation = 'pulse 0.3s ease-out';
+            setTimeout(() => {
+                window.location.href = '2-home.html';
+            }, 800);
+        };
+    </script>
+    <script src="pwa.js"></script>
+</body>
+
+</html>

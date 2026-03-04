@@ -1,0 +1,27 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="512" height="512" fill="#2d8659" rx="80"/>
+  
+  <!-- Book icon -->
+  <g transform="translate(256, 256)">
+    <!-- Left page -->
+    <path d="M -80 -120 L -80 120 L 0 100 L 0 -100 Z" fill="#ffffff" opacity="0.9"/>
+    <!-- Right page -->
+    <path d="M 0 -100 L 0 100 L 80 120 L 80 -120 Z" fill="#ffffff" opacity="0.95"/>
+    <!-- Spine -->
+    <rect x="-5" y="-120" width="10" height="240" fill="#f5f5f5"/>
+    
+    <!-- Text lines (left page) -->
+    <line x1="-70" y1="-80" x2="-10" y2="-80" stroke="#2d8659" stroke-width="3" opacity="0.6"/>
+    <line x1="-70" y1="-50" x2="-10" y2="-50" stroke="#2d8659" stroke-width="3" opacity="0.6"/>
+    <line x1="-70" y1="-20" x2="-10" y2="-20" stroke="#2d8659" stroke-width="3" opacity="0.6"/>
+    
+    <!-- Arabic-style text (right page) -->
+    <line x1="70" y1="-80" x2="10" y2="-80" stroke="#2d8659" stroke-width="3" opacity="0.6"/>
+    <line x1="70" y1="-50" x2="10" y2="-50" stroke="#2d8659" stroke-width="3" opacity="0.6"/>
+    <line x1="70" y1="-20" x2="10" y2="-20" stroke="#2d8659" stroke-width="3" opacity="0.6"/>
+  </g>
+  
+  <!-- Decorative element -->
+  <circle cx="256" cy="256" r="15" fill="#f5f5f5"/>
+</svg>

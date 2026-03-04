@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Refranario - Home</title>
+    <meta name="description" content="Browse trilingual proverbs in Spanish, Arabic, and English. A scholarly archive of wisdom across cultures." />
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#2d8659" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Refranario" />
+    <link rel="manifest" href="/manifest.json" />
+    
+    <!-- Icons -->
+    <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192x192.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512x512.png" />
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&amp;family=Crimson+Pro:ital,wght@0,400;0,600;1,400&amp;family=Amiri:wght@400;700&amp;family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&amp;family=Libre+Franklin:wght@400;500;700&amp;display=swap"
+        rel="stylesheet" />
+    <!-- Material Symbols -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <!-- Theme Configuration -->
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#2d8659",
+                        "primary-light": "#3a9d6d",
+                        "background": "#f5f5f5",
+                        "card": "#ffffff",
+                        "vellum": "#f5f5f5",
+                        "paper": "#ffffff",
+                        "ink": "#1f2937",
+                        "gold": "#2d8659",
+                        "muted": "#6b7280",
+                        "border": "#e0e2e7",
+                        "secondary": "#eff5f2",
+                    },
+                    fontFamily: {
+                        "display": ["Cinzel Decorative", "serif"],
+                        "serif": ["Crimson Pro", "serif"],
+                        "arabic": ["Amiri", "serif"],
+                        "ui": ["Libre Franklin", "sans-serif"],
+                        "newsreader": ["Newsreader", "serif"],
+                    },
+                    boxShadow: {
+                        "floating": "0px 10px 30px rgba(45, 134, 89, 0.3)",
+                        "card": "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)"
+                    },
+                    borderRadius: {
+                        "lg": "0.75rem",
+                        "xl": "1rem",
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .bookplate-border {
+            border: 1px solid #e0e2e7;
+            border-radius: 0.75rem;
+        }
+
+        .font-arabic {
+            font-family: 'Amiri', serif;
+            line-height: 1.6;
+        }
+
+        @keyframes fade-in {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+    <style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+    <script src="app.js"></script>
+</head>
+
+<body class="bg-background text-ink font-serif antialiased">
+    <div class="relative flex h-screen w-full flex-col overflow-hidden bg-background group/design-root">
+        <!-- Sticky Header -->
+        <header class="flex-none bg-white shadow-md z-30 border-b border-border">
+            <div class="px-4 pb-4 pt-5 flex flex-col gap-3">
+                <!-- Branding -->
+                <div class="flex items-center justify-center relative">
+                    <!-- Menu Icon (Left) -->
+                    <button class="absolute left-0 text-primary hover:text-primary-light transition-colors">
+                        <span class="material-symbols-outlined text-2xl">menu_book</span>
+                    </button>
+                    <h1 class="text-primary font-display text-xl tracking-widest text-center">REFRANARIO</h1>
+                    <!-- Profile Icon (Right) -->
+                    <a href="5-login.html" class="absolute right-0 text-muted hover:text-primary transition-colors">
+                        <span class="material-symbols-outlined text-2xl">account_circle</span>
+                    </a>
+                </div>
+                <!-- Search Bar -->
+                <div class="relative w-full">
+                    <div class="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                        <span class="material-symbols-outlined text-muted text-xl">search</span>
+                    </div>
+                    <input
+                        id="search-input"
+                        class="w-full bg-white border border-border rounded-lg py-2.5 pl-10 pr-4 text-ink placeholder-muted font-ui text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                        placeholder="Search by phrase, word, or meaning..." type="text" />
+                </div>
+            </div>
+            <!-- Category Ribbon -->
+            <div id="category-ribbon" class="flex gap-2 overflow-x-auto px-4 pb-3 pt-1 no-scrollbar">
+                <!-- Categories will be populated by JavaScript -->
+            </div>
+        </header>
+        <!-- Main Content: Scrollable List -->
+        <main class="flex-1 overflow-y-auto bg-background relative scroll-smooth p-4 pb-24">
+            <div id="proverbs-container" class="relative z-10 flex flex-col gap-4 max-w-2xl mx-auto">
+                <!-- Card 1 -->
+                <article
+                    class="bg-card bookplate-border p-4 shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer"
+                    onclick="window.location.href='3-detail_view.html'">
+                    <div class="flex gap-3 items-start">
+                        <!-- Thumbnail -->
+                        <div
+                            class="flex-shrink-0 relative w-12 h-12 rounded-lg overflow-hidden border border-border bg-secondary">
+                            <img alt="Close up of an old library book page with Latin text"
+                                class="w-full h-full object-cover"
+                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuC627i2fYdXyeGop_xctmHHRNJpxuLlxlDShW0IEl8YkA9oQGqKwyybs37iJ64EbcR3OfNPHBswfltpSAcmrEa1uE25BUyEMShzvc5Xz_H9LPrHzEVFcvfWAX8U7nqs4Q3pg9cvBHvLgSnjKhO_VhtHToJ2scGToSbb7eEgck6v0wmrQX_8-ZD1UqY4-sZk87zOtAMDwoTLDqiDm23wlo6Jjz-0TNW1IXFrJTKF5biBm_S18xmYQaVcszO2gQp-zgLmaB4ceSN6q_I" />
+                        </div>
+                        <!-- Text Content -->
+                        <div class="flex-1 min-w-0 flex flex-col gap-2">
+                            <!-- Header: Spanish -->
+                            <h2 class="font-display text-base text-primary leading-tight font-bold">
+                                A quien madruga, Dios le ayuda.
+                            </h2>
+                            <!-- Middle: Arabic (RTL) -->
+                            <div class="w-full text-right border-r-2 border-primary/20 pr-2">
+                                <p class="font-arabic text-lg text-ink leading-relaxed" dir="rtl">
+                                    من جد وجد
+                                </p>
+                            </div>
+                            <!-- Footer: English -->
+                            <p class="font-newsreader italic text-muted text-sm">
+                                The early bird catches the worm.
+                            </p>
+                        </div>
+                        <!-- Chevron -->
+                        <div class="self-center text-muted">
+                            <span class="material-symbols-outlined text-xl">chevron_right</span>
+                        </div>
+                    </div>
+                </article>
+                <!-- Card 2 -->
+                <article
+                    class="bg-card bookplate-border p-4 shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer"
+                    onclick="window.location.href='3-detail_view.html'">
+                    <div class="flex gap-3 items-start">
+                        <div
+                            class="flex-shrink-0 relative w-12 h-12 rounded-lg overflow-hidden border border-border bg-secondary">
+                            <img alt="Vintage feather quill pen resting on parchment paper"
+                                class="w-full h-full object-cover"
+                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuDarIj09KV4FXp5gTXhA0H9gTh8SFHjPqIuWHpTyl-V9eFG7gfwD6ezGV90dO5tZeY8_xvZMdIHcO3gZeVIs_Tmu2CLESjLCPTSZnVT4czzSiYPLUKX00xhm1tAOioUVDuDrpoFJeSTayjGU1q3eYn0B2n-asuGh-YcMPJT2j9hJ3DCgIoyz5NpVpJ32-_mKjwS_51XsZLXPA9yzf8N4-yIZkysk0Xw0GHWndqeAQIfR_gbj2EnG-P71iIuVCQdYHxyW8aU614gGqU" />
+                        </div>
+                        <div class="flex-1 min-w-0 flex flex-col gap-2">
+                            <h2 class="font-display text-base text-primary leading-tight font-bold">
+                                Más vale pájaro en mano que ciento volando.
+                            </h2>
+                            <div class="w-full text-right border-r-2 border-primary/20 pr-2">
+                                <p class="font-arabic text-lg text-ink leading-relaxed" dir="rtl">
+                                    عصفور في اليد خير من عشرة على الشجرة
+                                </p>
+                            </div>
+                            <p class="font-newsreader italic text-muted text-sm">
+                                A bird in the hand is worth two in the bush.
+                            </p>
+                        </div>
+                        <div class="self-center text-muted">
+                            <span class="material-symbols-outlined text-xl">chevron_right</span>
+                        </div>
+                    </div>
+                </article>
+                <!-- Card 3 -->
+                <article
+                    class="bg-card bookplate-border p-4 shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer"
+                    onclick="window.location.href='3-detail_view.html'">
+                    <div class="flex gap-3 items-start">
+                        <div
+                            class="flex-shrink-0 relative w-12 h-12 rounded-lg overflow-hidden border border-border bg-secondary">
+                            <img alt="Old fashioned pocket watch on a wooden table"
+                                class="w-full h-full object-cover"
+                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuABoVGDsXTVCEkR2bavM1XGqdgYkHTRSmvRiNWzwrP_lxu3XEVq1j75oyQJ9pXSHwpyOxtU0ax-8bHWlH6omrvGz1VmLLXmIx_GuxW134-BrdXoq0KqdkmhiSwntpA7MJDCieCHu3KL6HQwKorfY3GuJdtqjmEmPEQ9ZtHeNKNZ8rZewnbskGSMU5HxtWFDxpZmTxwTtQ9yD2Q24RA1vsOzv-jRuaROS9juP1kfQ5kYtld04G8hLF_1Z5MywYogKJAhKrFk-bBYciM" />
+                        </div>
+                        <div class="flex-1 min-w-0 flex flex-col gap-2">
+                            <h2 class="font-display text-base text-primary leading-tight font-bold">
+                                El tiempo es oro.
+                            </h2>
+                            <div class="w-full text-right border-r-2 border-primary/20 pr-2">
+                                <p class="font-arabic text-lg text-ink leading-relaxed" dir="rtl">
+                                    الوقت من ذهب
+                                </p>
+                            </div>
+                            <p class="font-newsreader italic text-muted text-sm">
+                                Time is money.
+                            </p>
+                        </div>
+                        <div class="self-center text-muted">
+                            <span class="material-symbols-outlined text-xl">chevron_right</span>
+                        </div>
+                    </div>
+                </article>
+                <!-- Card 4 -->
+                <article
+                    class="bg-card bookplate-border p-4 shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer"
+                    onclick="window.location.href='3-detail_view.html'">
+                    <div class="flex gap-3 items-start">
+                        <div
+                            class="flex-shrink-0 relative w-12 h-12 rounded-lg overflow-hidden border border-border bg-secondary">
+                            <img alt="Ancient weathered stone texture from a castle wall"
+                                class="w-full h-full object-cover"
+                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuB2TCh2jWXD7qn_KClpCZQQqmJ9_GnDUwqoCMujx7D3w42_sAjjnVe716eoX5qQsofDEVmR-dvkzDLMPIFAf5x-tq_8KEJuf2PdP6sUqA9zNY65w3wEYF6wyK0_YX3inK-WlaJoOY_JQXpCIBtE-nBK3zeasA698gR1QI5gAn4ZfjetxQWlvh6bz0HMK2S8dDvwahK1AQbwx2_rQLweRevNacCdQ-Ukgj-zsA8Px2Y7G6bhU60BUdjwpMjkdIkM-rU7HneEsaPyPNk" />
+                        </div>
+                        <div class="flex-1 min-w-0 flex flex-col gap-2">
+                            <h2 class="font-display text-base text-primary leading-tight font-bold">
+                                Ojos que no ven, corazón que no siente.
+                            </h2>
+                            <div class="w-full text-right border-r-2 border-primary/20 pr-2">
+                                <p class="font-arabic text-lg text-ink leading-relaxed" dir="rtl">
+                                    بعيد عن العين بعيد عن القلب
+                                </p>
+                            </div>
+                            <p class="font-newsreader italic text-muted text-sm">
+                                Out of sight, out of mind.
+                            </p>
+                        </div>
+                        <div class="self-center text-muted">
+                            <span class="material-symbols-outlined text-xl">chevron_right</span>
+                        </div>
+                    </div>
+                </article>
+            </div>
+            <!-- End of list spacer -->
+            <div class="h-8"></div>
+        </main>
+        <!-- Admin FAB -->
+        <div class="absolute bottom-20 right-6 z-50">
+            <a href="4-add_edit.html"
+                class="flex items-center justify-center w-14 h-14 bg-primary rounded-full shadow-floating hover:bg-primary-light hover:scale-105 active:scale-95 transition-all duration-200">
+                <span class="material-symbols-outlined text-white text-2xl">edit_square</span>
+            </a>
+        </div>
+        <!-- Navigation -->
+        <nav class="flex-none bg-white border-t border-border shadow-lg">
+            <div class="flex justify-around items-center px-2 py-3">
+                <a class="flex flex-col items-center gap-1 w-16" href="2-home.html">
+                    <span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">auto_stories</span>
+                    <span class="text-[10px] font-ui font-medium text-primary">Archive</span>
+                </a>
+                <a class="flex flex-col items-center gap-1 opacity-60 hover:opacity-100 w-16 transition-opacity"
+                    href="4-add_edit.html">
+                    <span class="material-symbols-outlined text-muted">history_edu</span>
+                    <span class="text-[10px] font-ui font-medium text-muted">Ledger</span>
+                </a>
+                <a class="flex flex-col items-center gap-1 opacity-60 hover:opacity-100 w-16 transition-opacity"
+                    href="5-login.html">
+                    <span class="material-symbols-outlined text-muted">settings</span>
+                    <span class="text-[10px] font-ui font-medium text-muted">Settings</span>
+                </a>
+            </div>
+        </nav>
+    </div>
+    <script>
+        // Home Page Logic
+        let currentCategory = 'All Records';
+        let searchQuery = '';
+
+        // Render proverb cards
+        function renderProverbs(proverbs) {
+            const container = document.getElementById('proverbs-container');
+            container.innerHTML = '';
+
+            if (proverbs.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-12">
+                        <span class="material-symbols-outlined text-primary text-6xl mb-4">search_off</span>
+                        <p class="text-muted font-ui text-base">No proverbs found</p>
+                    </div>
+                `;
+                return;
+            }
+
+            proverbs.forEach((proverb, index) => {
+                const card = document.createElement('article');
+                card.className = 'bg-card bookplate-border p-4 shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer';
+                card.style.animation = `fade-in 0.3s ease-out ${index * 0.05}s both`;
+                card.onclick = () => {
+                    localStorage.setItem('currentProverbId', proverb.id);
+                    window.location.href = '3-detail_view.html';
+                };
+
+                card.innerHTML = `
+                    <div class="flex gap-3 items-start">
+                        <div class="flex-shrink-0 relative w-12 h-12 rounded-lg overflow-hidden border border-border bg-secondary">
+                            <img alt="Proverb illustration" class="w-full h-full object-cover" src="${proverb.image}" />
+                        </div>
+                        <div class="flex-1 min-w-0 flex flex-col gap-2">
+                            <h2 class="font-display text-base text-primary leading-tight font-bold">
+                                ${proverb.spanish}
+                            </h2>
+                            <div class="w-full text-right border-r-2 border-primary/20 pr-2">
+                                <p class="font-arabic text-lg text-ink leading-relaxed" dir="rtl">
+                                    ${proverb.arabic}
+                                </p>
+                            </div>
+                            <p class="font-newsreader italic text-muted text-sm">
+                                ${proverb.english}
+                            </p>
+                        </div>
+                        <div class="self-center text-muted">
+                            <span class="material-symbols-outlined text-xl">chevron_right</span>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Render category chips
+        function renderCategories() {
+            const categories = ['All Records', 'Wisdom', 'Nature', 'Family', 'Time', 'Honor', 'Prudence'];
+            const ribbon = document.getElementById('category-ribbon');
+            ribbon.innerHTML = '';
+
+            categories.forEach(category => {
+                const chip = document.createElement('button');
+                const isActive = category === currentCategory;
+                chip.className = isActive
+                    ? 'flex-none rounded-full bg-primary px-4 py-1.5 text-xs font-ui font-medium text-white shadow-sm transition-all'
+                    : 'flex-none rounded-full bg-secondary px-4 py-1.5 text-xs font-ui font-medium text-primary border border-border hover:bg-primary/10 transition-all';
+                chip.textContent = category;
+                chip.onclick = () => {
+                    currentCategory = category;
+                    updateView();
+                };
+                ribbon.appendChild(chip);
+            });
+        }
+
+        // Update view based on filters
+        function updateView() {
+            renderCategories();
+            let proverbs = DataStore.getAll();
+
+            // Apply category filter
+            if (currentCategory !== 'All Records') {
+                proverbs = DataStore.filterByCategory(currentCategory);
+            }
+
+            // Apply search filter
+            if (searchQuery) {
+                proverbs = proverbs.filter(p => 
+                    p.spanish.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    p.arabic.includes(searchQuery) ||
+                    p.english.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    p.category.toLowerCase().includes(searchQuery.toLowerCase())
+                );
+            }
+
+            renderProverbs(proverbs);
+        }
+
+        // Search input handler
+        document.getElementById('search-input').addEventListener('input', (e) => {
+            searchQuery = e.target.value;
+            updateView();
+        });
+
+        // Initial render
+        updateView();
+    </script>
+    <script src="pwa.js"></script>
+</body>
+
+</html>
