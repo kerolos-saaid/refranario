@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="es">
 
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>The Scriptorium - The Scholar's Archive</title>
+    <title>Refranario - Agregar/Editar</title>
     
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#2d8659" />
@@ -97,7 +97,7 @@
                 <span class="material-symbols-outlined text-2xl">arrow_back</span>
             </a>
             <h1 id="page-title" class="text-primary text-lg font-display font-bold tracking-wider flex-1 text-center">
-                NEW ENTRY</h1>
+                NUEVA ENTRADA</h1>
             <div class="w-10"></div>
         </header>
         <!-- Form Content -->
@@ -105,7 +105,7 @@
             <form id="proverb-form">
                 <!-- Image Upload Area -->
                 <div class="flex flex-col mb-8">
-                    <p class="label-ui mb-2">Manuscript Visual</p>
+                    <p class="label-ui mb-2">Imagen del Manuscrito</p>
                     <input type="file" id="image-input" accept="image/*" class="hidden">
                     <div id="image-preview" class="hidden mb-4">
                         <img id="preview-img" class="w-full h-48 object-cover rounded border-2 border-primary">
@@ -116,12 +116,12 @@
                             <span class="material-symbols-outlined text-4xl">history_edu</span>
                         </div>
                         <div class="flex flex-col items-center gap-1">
-                            <p class="text-primary font-display text-sm font-bold tracking-wider">Drag parchment here</p>
-                            <p class="text-muted text-xs text-center italic">Upload a sepia-toned image for the archive</p>
+                            <p class="text-primary font-display text-sm font-bold tracking-wider">Arrastra la imagen aquí</p>
+                            <p class="text-muted text-xs text-center italic">Sube una imagen en tono sepia para el archivo</p>
                         </div>
                         <button type="button" id="select-file-btn"
                             class="flex min-w-[120px] cursor-pointer items-center justify-center rounded border border-primary h-9 px-4 bg-transparent text-primary text-xs font-ui font-bold tracking-widest uppercase hover:bg-primary/10">
-                            Select File
+                            Seleccionar Archivo
                         </button>
                     </div>
                 </div>
@@ -161,11 +161,11 @@
             class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-background-light/95 backdrop-blur-sm border-t border-primary/30 p-4 flex gap-4 items-center">
             <a href="2-home.html"
                 class="flex-1 px-4 py-3 text-primary font-ui font-bold text-xs tracking-widest uppercase hover:text-red-wax transition-colors text-center">
-                Cancel
+                Cancelar
             </a>
             <button id="save-btn"
                 class="flex-[2] bg-primary text-primary py-3 px-6 shadow-xl font-display font-bold text-sm tracking-[0.15em] uppercase hover:bg-primary/90 transition-all border border-primary/50">
-                Preserve Record
+                Guardar Registro
             </button>
         </footer>
     </div>
@@ -183,7 +183,7 @@
         let selectedImageUrl = '';
 
         // Update page title
-        document.getElementById('page-title').textContent = isEditMode ? 'REVISE ENTRY' : 'NEW ENTRY';
+        document.getElementById('page-title').textContent = isEditMode ? 'REVISAR ENTRADA' : 'NUEVA ENTRADA';
 
         // Load existing data if editing
         if (isEditMode) {
@@ -283,10 +283,10 @@
             if (isEditMode) {
                 DataStore.update(editId, proverbData);
                 localStorage.removeItem('editProverbId');
-                UI.showToast('Entry updated successfully!');
+                UI.showToast('¡Entrada actualizada exitosamente!');
             } else {
                 DataStore.add(proverbData);
-                UI.showToast('Entry preserved in the archive!');
+                UI.showToast('¡Entrada guardada en el archivo!');
             }
 
             // Animate and redirect

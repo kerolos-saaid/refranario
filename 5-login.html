@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="es">
 
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>The Scholar's Archive - Access</title>
+    <title>Refranario - Acceso</title>
     
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#2d8659" />
@@ -142,10 +142,10 @@
                     <div>
                         <h1
                             class="font-display text-3xl text-primary font-bold tracking-wide uppercase leading-tight">
-                            Curator Access
+                            Acceso de Curador
                         </h1>
                         <p class="font-sans text-xs tracking-widest text-muted uppercase mt-2">
-                            The Scholar's Archive
+                            El Archivo del Académico
                         </p>
                     </div>
                     <!-- Divider -->
@@ -157,17 +157,17 @@
                     <div class="group">
                         <label class="block font-sans text-xs font-bold text-primary uppercase tracking-wider mb-2"
                             for="email">
-                            Identity (Email)
+                            Identidad (Correo)
                         </label>
                         <input autocomplete="email"
                             class="w-full input-ledger text-lg font-serif italic text-ink placeholder:text-muted/40 py-2 bg-transparent border-0 border-b-2 ring-0 focus:ring-0"
-                            id="email" name="email" placeholder="curator@archive.edu" type="email" required />
+                            id="email" name="email" placeholder="curador@archivo.edu" type="email" required />
                     </div>
                     <!-- Password Field -->
                     <div class="group relative">
                         <label class="block font-sans text-xs font-bold text-primary uppercase tracking-wider mb-2"
                             for="password">
-                            Passphrase
+                            Contraseña
                         </label>
                         <input autocomplete="current-password"
                             class="w-full input-ledger text-lg font-serif text-ink placeholder:text-muted/40 py-2 bg-transparent border-0 border-b-2 ring-0 focus:ring-0"
@@ -175,7 +175,7 @@
                         <!-- Error Message Placeholder (Hidden by default) -->
                         <p id="error-message" class="hidden text-red-wax text-sm mt-2 font-sans flex items-center gap-1">
                             <span class="material-symbols-outlined !text-sm">error</span>
-                            <span id="error-text">Invalid credentials provided.</span>
+                            <span id="error-text">Credenciales inválidas.</span>
                         </p>
                     </div>
                     <!-- Actions -->
@@ -183,14 +183,14 @@
                         <button
                             class="w-full bg-primary text-primary font-sans font-bold uppercase tracking-widest text-xs py-4 px-6 hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all duration-300 shadow-md"
                             type="submit">
-                            Unlock Archive
+                            Desbloquear Archivo
                         </button>
                         <div class="text-center">
                             <a class="inline-flex items-center gap-1 text-muted hover:text-primary font-serif italic text-base transition-colors duration-300 group/link"
                                 href="2-home.html">
                                 <span
                                     class="material-symbols-outlined !text-sm opacity-0 -ml-4 group-hover/link:opacity-100 group-hover/link:ml-0 transition-all duration-300">arrow_back</span>
-                                <span>Return to public viewing</span>
+                                <span>Volver a la vista pública</span>
                             </a>
                         </div>
                     </div>
@@ -200,7 +200,7 @@
         <!-- Footer / Copyright -->
         <div class="absolute bottom-4 left-0 right-0 text-center pointer-events-none">
             <p class="font-sans text-[10px] text-muted uppercase tracking-widest opacity-60">
-                Est. 2024 • Digitized Manuscript
+                Est. 2024 • Manuscrito Digitalizado
             </p>
         </div>
     </main>
@@ -218,7 +218,7 @@
 
             // Validate inputs
             if (!email || !password) {
-                errorText.textContent = 'Please fill in all fields.';
+                errorText.textContent = 'Por favor completa todos los campos.';
                 errorMessage.classList.remove('hidden');
                 form.style.animation = 'shake 0.5s';
                 setTimeout(() => form.style.animation = '', 500);
@@ -228,7 +228,7 @@
             // Accept any email/password for prototyping
             if (Auth.login(email, password)) {
                 errorMessage.classList.add('hidden');
-                UI.showToast('Welcome, ' + email.split('@')[0] + '!');
+                UI.showToast('¡Bienvenido, ' + email.split('@')[0] + '!');
                 
                 // Animate form out
                 form.style.animation = 'fade-out 0.3s ease-out forwards';
