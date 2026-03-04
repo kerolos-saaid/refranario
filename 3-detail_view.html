@@ -126,8 +126,9 @@
             </div>
         </div>
     </main>
+    
     <!-- Admin Action Bar -->
-    <div class="sticky bottom-0 w-full bg-white border-t border-border p-4 shadow-lg z-40">
+    <div class="sticky bottom-0 w-full bg-white border-t border-border p-4 shadow-lg z-40" id="admin-actions" style="display: none;">
         <div class="max-w-4xl mx-auto flex items-center justify-between gap-4">
             <button id="delete-btn"
                 class="text-red-600 font-ui text-sm font-medium hover:underline flex items-center gap-2 px-4 py-2">
@@ -233,23 +234,28 @@
                 UI.showToast(proverb.bookmarked ? 'Marcador eliminado' : '¡Marcado!');
             };
 
-            // Delete button
-            document.getElementById('delete-btn').onclick = () => {
-                UI.confirm('¿Estás seguro de que quieres eliminar este refrán?', () => {
-                    DataStore.delete(proverbId);
-                    UI.showToast('Refrán eliminado', 'success');
-                    setTimeout(() => {
-                        window.location.href = '2-home.html';
-                    }, 1000);
-                });
-            };
+            // Show admin actions if logged in
+            if (Auth.isLoggedIn()) {
+                document.getElementById('admin-actions').style.display = 'block';
+                
+                // Delete button
+                document.getElementById('delete-btn').onclick = () => {
+                    UI.confirm('¿Estás seguro de que quieres eliminar este refrán?', () => {
+                        DataStore.delete(proverbId);
+                        UI.showToast('Refrán eliminado', 'success');
+                        setTimeout(() => {
+                            window.location.href = '2-home.html';
+                        }, 1000);
+                    });
+                };
 
-            // Edit button - store ID for edit page
-            document.getElementById('edit-btn').onclick = (e) => {
-                e.preventDefault();
-                localStorage.setItem('editProverbId', proverbId);
-                window.location.href = '4-add_edit.html';
-            };
+                // Edit button - store ID for edit page
+                document.getElementById('edit-btn').onclick = (e) => {
+                    e.preventDefault();
+                    localStorage.setItem('editProverbId', proverbId);
+                    window.location.href = '4-add_edit.html';
+                };
+            }
         }
     </script>
     <script src="pwa.js"></script>

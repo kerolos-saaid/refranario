@@ -182,6 +182,11 @@
         const isEditMode = !!editId;
         let selectedImageUrl = '';
 
+        // Check if user is logged in
+        if (!Auth.isLoggedIn()) {
+            window.location.href = '5-login.html';
+        }
+
         // Update page title
         document.getElementById('page-title').textContent = isEditMode ? 'REVISAR ENTRADA' : 'NUEVA ENTRADA';
 

@@ -271,7 +271,7 @@
             <div class="h-8"></div>
         </main>
         <!-- Admin FAB -->
-        <div class="absolute bottom-20 right-6 z-50">
+        <div class="absolute bottom-20 right-6 z-50" id="admin-fab" style="display: none;">
             <a href="4-add_edit.html"
                 class="flex items-center justify-center w-14 h-14 bg-primary rounded-full shadow-floating hover:bg-primary-light hover:scale-105 active:scale-95 transition-all duration-200">
                 <span class="material-symbols-outlined text-white text-2xl">edit_square</span>
@@ -358,6 +358,11 @@
 
         // Initial render
         updateView();
+        
+        // Show admin FAB if logged in
+        if (Auth.isLoggedIn()) {
+            document.getElementById('admin-fab').style.display = 'block';
+        }
     </script>
     <script src="pwa.js"></script>
 </body>
