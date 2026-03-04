@@ -55,17 +55,19 @@
     console.log('[PWA] Is installed:', isInstalled);
     
     if (!isInstalled) {
-      // Wait a bit for beforeinstallprompt to fire
+      // On desktop, always show button after a delay (Chrome Desktop is restrictive)
+      const isDesktop = window.innerWidth >= 768;
+      const delay = isDesktop ? 500 : 1000;
+      
       setTimeout(() => {
         console.log('[PWA] Checking if install button exists...');
-        // If beforeinstallprompt didn't fire, show button anyway
         if (!document.getElementById('pwa-install-btn')) {
-          console.log('[PWA] Showing install button (fallback)');
+          console.log('[PWA] Showing install button');
           showInstallButton();
         } else {
           console.log('[PWA] Install button already exists');
         }
-      }, 1000);
+      }, delay);
     } else {
       console.log('[PWA] App already installed, not showing button');
     }
