@@ -113,12 +113,19 @@
         </div>
     </nav>
     <!-- Main Content Area -->
-    <main class="flex-grow w-full max-w-4xl mx-auto p-4 md:p-8">
-        <div class="bg-card border-bookplate shadow-card p-6 md:p-10 space-y-8" id="proverb-content">
-            <!-- Content will be populated by JavaScript -->
+    <main class="flex-grow w-full bg-background">
+        <!-- Hero Image -->
+        <div class="w-full h-64 md:h-80 overflow-hidden">
+            <img id="proverb-image" src="" alt="Proverb illustration" class="w-full h-full object-cover">
+        </div>
+        
+        <!-- Content Card -->
+        <div class="max-w-4xl mx-auto -mt-8 relative z-10">
+            <div class="bg-card border-bookplate shadow-lg mx-4 p-6 md:p-10 space-y-8" id="proverb-content">
+                <!-- Content will be populated by JavaScript -->
+            </div>
         </div>
     </main>
-    
     <!-- Admin Action Bar -->
     <div class="sticky bottom-0 w-full bg-white border-t border-border p-4 shadow-lg z-40">
         <div class="max-w-4xl mx-auto flex items-center justify-between gap-4">
@@ -130,7 +137,7 @@
             <a href="4-add_edit.html" id="edit-btn"
                 class="bg-primary text-white hover:bg-primary-light transition-all rounded-lg px-6 py-2.5 font-ui text-sm font-medium flex items-center gap-2 shadow-md">
                 <span class="material-symbols-outlined text-lg">edit_note</span>
-                Editar Entrada
+                Editar
             </a>
         </div>
     </div>
@@ -144,6 +151,12 @@
         } else {
             // Render proverb content
             const content = document.getElementById('proverb-content');
+            const heroImage = document.getElementById('proverb-image');
+            
+            // Set hero image
+            heroImage.src = proverb.image;
+            heroImage.alt = proverb.spanish;
+            
             content.innerHTML = `
                 <!-- Spanish Section -->
                 <section style="animation: fade-in 0.4s ease-out">
@@ -152,7 +165,7 @@
                         <span class="text-primary font-ui text-xs font-medium uppercase tracking-wide">Origen (Español)</span>
                     </div>
                     <p class="text-ink font-display text-2xl md:text-3xl leading-snug">
-                        <span class="drop-cap">${proverb.spanish.charAt(0)}</span>${proverb.spanish.slice(1)}
+                        ${proverb.spanish}
                     </p>
                 </section>
                 
@@ -182,23 +195,23 @@
                 </section>
                 
                 <!-- Usage Note -->
-                <div class="bg-secondary p-5 rounded-lg border-l-4 border-primary" style="animation: fade-in 0.8s ease-out">
-                    <h4 class="text-primary font-ui text-xs font-bold uppercase tracking-wide mb-2">Nota de Uso</h4>
-                    <p class="font-serif text-ink text-sm leading-relaxed">
-                        ${proverb.note}
-                    </p>
-                </div>
-                
-                <!-- Metadata -->
-                <div class="pt-6 border-t border-border flex flex-wrap gap-4 text-xs font-ui text-muted" style="animation: fade-in 0.9s ease-out">
-                    <span class="flex items-center gap-1">
-                        <span class="material-symbols-outlined text-base">calendar_today</span>
-                        ${proverb.date}
-                    </span>
-                    <span class="flex items-center gap-1">
-                        <span class="material-symbols-outlined text-base">person</span>
-                        ${proverb.curator}
-                    </span>
+                <div class="space-y-4" style="animation: fade-in 0.8s ease-out">
+                    <div>
+                        <h4 class="text-ink font-ui text-sm font-bold mb-2">Definición</h4>
+                        <p class="font-serif text-muted text-sm leading-relaxed text-right">
+                            ${proverb.note}
+                        </p>
+                    </div>
+                    
+                    <div class="pt-4 border-t border-border">
+                        <h4 class="text-ink font-ui text-sm font-bold mb-2">Ejemplo de Uso</h4>
+                        <div class="bg-secondary p-4 rounded-lg">
+                            <p class="font-serif text-ink text-sm leading-relaxed">
+                                <span class="text-muted font-ui text-xs uppercase block mb-1">Uso</span>
+                                No hagas cosas sin sentido, recuerda que el que come pan con leche se duerme.
+                            </p>
+                        </div>
+                    </div>
                 </div>
             `;
 
