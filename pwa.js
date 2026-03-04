@@ -84,7 +84,7 @@
 
     const installButton = document.createElement('button');
     installButton.id = 'pwa-install-btn';
-    installButton.className = 'fixed bottom-24 right-6 bg-primary text-white p-4 rounded-full shadow-lg z-50 flex items-center gap-2 hover:bg-primary-light transition-all hover:scale-105 active:scale-95';
+    installButton.className = 'fixed bottom-24 left-6 bg-primary text-white p-4 rounded-full shadow-lg z-50 flex items-center gap-2 hover:bg-primary-light transition-all hover:scale-105 active:scale-95';
     installButton.style.opacity = '0';
     installButton.style.transform = 'scale(0.8) translateY(20px)';
     installButton.innerHTML = `
