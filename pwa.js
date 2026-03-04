@@ -176,15 +176,28 @@
 
   // Show install button on page load if not installed
   window.addEventListener('load', () => {
+    console.log('[PWA] Checking install status...');
+    console.log('[PWA] Display mode:', window.matchMedia('(display-mode: standalone)').matches ? 'standalone' : 'browser');
+    console.log('[PWA] Navigator standalone:', window.navigator.standalone);
+    
     // Check if app is not installed
-    if (!window.matchMedia('(display-mode: standalone)').matches && !window.navigator.standalone) {
+    const isInstalled = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+    console.log('[PWA] Is installed:', isInstalled);
+    
+    if (!isInstalled) {
       // Wait a bit for beforeinstallprompt to fire
       setTimeout(() => {
+        console.log('[PWA] Checking if install button exists...');
         // If beforeinstallprompt didn't fire, show button anyway
         if (!document.getElementById('pwa-install-btn')) {
+          console.log('[PWA] Showing install button (fallback)');
           showInstallButton();
+        } else {
+          console.log('[PWA] Install button already exists');
         }
       }, 2000);
+    } else {
+      console.log('[PWA] App already installed, not showing button');
     }
   });
 
