@@ -1,6 +1,6 @@
 // Service Worker for Refranario PWA
-const CACHE_NAME = 'refranario-v1';
-const RUNTIME_CACHE = 'refranario-runtime-v1';
+const CACHE_NAME = 'refranario-v2';
+const RUNTIME_CACHE = 'refranario-runtime-v2';
 
 // Files to cache on install
 const STATIC_CACHE_URLS = [

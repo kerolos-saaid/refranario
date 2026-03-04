@@ -2,6 +2,7 @@
   "name": "Refranario - Trilingual Proverb Archive",
   "short_name": "Refranario",
   "description": "A trilingual proverb archive application with Spanish, Arabic, and English translations",
+  "id": "./",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#f5f5f5",
@@ -10,6 +11,7 @@
   "scope": "./",
   "lang": "es",
   "dir": "ltr",
+  "prefer_related_applications": false,
   "categories": ["education", "reference", "books"],
   "icons": [
     {
@@ -46,7 +48,13 @@
       "src": "./icons/icon-192x192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
     },
     {
       "src": "./icons/icon-384x384.png",
@@ -58,9 +66,13 @@
       "src": "./icons/icon-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
-  ],
-  "screenshots": [],
-  "shortcuts": []
+  ]
 }

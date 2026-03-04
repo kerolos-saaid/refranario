@@ -36,42 +36,13 @@
         registration.update();
       }, 60 * 60 * 1000);
       
-      // Check install button after service worker is ready
-      checkAndShowInstallButton();
 
     } catch (error) {
       console.error('[PWA] Service Worker registration failed:', error);
     }
   }
   
-  // Check and show install button
-  function checkAndShowInstallButton() {
-    console.log('[PWA] Checking install status...');
-    console.log('[PWA] Display mode:', window.matchMedia('(display-mode: standalone)').matches ? 'standalone' : 'browser');
-    console.log('[PWA] Navigator standalone:', window.navigator.standalone);
-    
-    // Check if app is not installed
-    const isInstalled = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-    console.log('[PWA] Is installed:', isInstalled);
-    
-    if (!isInstalled) {
-      // On desktop, always show button after a delay (Chrome Desktop is restrictive)
-      const isDesktop = window.innerWidth >= 768;
-      const delay = isDesktop ? 500 : 1000;
-      
-      setTimeout(() => {
-        console.log('[PWA] Checking if install button exists...');
-        if (!document.getElementById('pwa-install-btn')) {
-          console.log('[PWA] Showing install button');
-          showInstallButton();
-        } else {
-          console.log('[PWA] Install button already exists');
-        }
-      }, delay);
-    } else {
-      console.log('[PWA] App already installed, not showing button');
-    }
-  }
+
 
   // Show update notification
   function showUpdateNotification() {
@@ -206,15 +177,7 @@
     }
   }
 
-  // Show install button on page load if not installed
-  window.addEventListener('load', () => {
-    // Also check on load as backup
-    setTimeout(() => {
-      if (!document.getElementById('pwa-install-btn')) {
-        checkAndShowInstallButton();
-      }
-    }, 3000);
-  });
+
 
   // Track installation
   window.addEventListener('appinstalled', () => {
