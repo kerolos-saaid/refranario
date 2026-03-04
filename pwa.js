@@ -85,6 +85,8 @@
     const installButton = document.createElement('button');
     installButton.id = 'pwa-install-btn';
     installButton.className = 'fixed bottom-24 right-6 bg-primary text-white p-4 rounded-full shadow-lg z-50 flex items-center gap-2 hover:bg-primary-light transition-all hover:scale-105 active:scale-95';
+    installButton.style.opacity = '0';
+    installButton.style.transform = 'scale(0.8) translateY(20px)';
     installButton.innerHTML = `
       <span class="material-symbols-outlined">download</span>
       <span class="font-ui text-sm font-medium hidden sm:inline">Instalar App</span>
@@ -107,11 +109,20 @@
       // Clear the deferred prompt
       deferredPrompt = null;
 
-      // Hide the install button
-      installButton.remove();
+      // Hide the install button with animation
+      installButton.style.opacity = '0';
+      installButton.style.transform = 'scale(0.8) translateY(20px)';
+      setTimeout(() => installButton.remove(), 300);
     });
 
     document.body.appendChild(installButton);
+    
+    // Trigger animation after a brief delay
+    setTimeout(() => {
+      installButton.style.transition = 'opacity 0.4s ease-out, transform 0.4s ease-out';
+      installButton.style.opacity = '1';
+      installButton.style.transform = 'scale(1) translateY(0)';
+    }, 100);
   }
 
   // Show install instructions for browsers that don't support beforeinstallprompt
