@@ -76,16 +76,26 @@
 
   // Show install button
   function showInstallButton() {
+    // Check if already installed
+    if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
+      console.log('[PWA] App is already installed');
+      return;
+    }
+
     const installButton = document.createElement('button');
     installButton.id = 'pwa-install-btn';
-    installButton.className = 'fixed bottom-24 right-6 bg-primary text-white p-4 rounded-full shadow-lg z-50 flex items-center gap-2 hover:bg-primary-light transition-all';
+    installButton.className = 'fixed bottom-24 right-6 bg-primary text-white p-4 rounded-full shadow-lg z-50 flex items-center gap-2 hover:bg-primary-light transition-all hover:scale-105 active:scale-95';
     installButton.innerHTML = `
       <span class="material-symbols-outlined">download</span>
-      <span class="font-ui text-sm font-medium hidden sm:inline">Install App</span>
+      <span class="font-ui text-sm font-medium hidden sm:inline">Instalar App</span>
     `;
     
     installButton.addEventListener('click', async () => {
-      if (!deferredPrompt) return;
+      if (!deferredPrompt) {
+        // If no prompt available, show instructions
+        showInstallInstructions();
+        return;
+      }
 
       // Show the install prompt
       deferredPrompt.prompt();
@@ -103,6 +113,69 @@
 
     document.body.appendChild(installButton);
   }
+
+  // Show install instructions for browsers that don't support beforeinstallprompt
+  function showInstallInstructions() {
+    const isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
+    const isEdge = /Edg/.test(navigator.userAgent);
+    const isSafari = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
+    
+    let instructions = '';
+    
+    if (isChrome || isEdge) {
+      instructions = 'Haz clic en el icono de instalación en la barra de direcciones (junto a la estrella de marcadores) para instalar la aplicación.';
+    } else if (isSafari) {
+      instructions = 'Toca el botón Compartir y luego "Agregar a la pantalla de inicio" para instalar la aplicación.';
+    } else {
+      instructions = 'Busca la opción "Instalar aplicación" o "Agregar a la pantalla de inicio" en el menú de tu navegador.';
+    }
+    
+    if (typeof UI !== 'undefined' && UI.showToast) {
+      // Create custom modal instead of toast
+      const modal = document.createElement('div');
+      modal.className = 'fixed inset-0 bg-black/50 z-[100] flex items-center justify-center p-4';
+      modal.innerHTML = `
+        <div class="bg-white rounded-lg p-6 max-w-md w-full shadow-xl">
+          <div class="flex items-center gap-3 mb-4">
+            <span class="material-symbols-outlined text-primary text-3xl">info</span>
+            <h3 class="font-display text-primary text-lg font-bold">Instalar Aplicación</h3>
+          </div>
+          <p class="font-ui text-ink text-sm mb-6">${instructions}</p>
+          <button class="w-full bg-primary text-white py-3 px-6 rounded-lg font-ui font-medium hover:bg-primary-light transition-colors">
+            Entendido
+          </button>
+        </div>
+      `;
+      
+      modal.querySelector('button').addEventListener('click', () => {
+        modal.remove();
+      });
+      
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          modal.remove();
+        }
+      });
+      
+      document.body.appendChild(modal);
+    } else {
+      alert(instructions);
+    }
+  }
+
+  // Show install button on page load if not installed
+  window.addEventListener('load', () => {
+    // Check if app is not installed
+    if (!window.matchMedia('(display-mode: standalone)').matches && !window.navigator.standalone) {
+      // Wait a bit for beforeinstallprompt to fire
+      setTimeout(() => {
+        // If beforeinstallprompt didn't fire, show button anyway
+        if (!document.getElementById('pwa-install-btn')) {
+          showInstallButton();
+        }
+      }, 2000);
+    }
+  });
 
   // Track installation
   window.addEventListener('appinstalled', () => {
