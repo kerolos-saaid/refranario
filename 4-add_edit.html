@@ -146,19 +146,7 @@
                         class="form-input w-full bg-card p-3 text-lg italic text-muted placeholder:text-muted/50 min-h-[100px]"
                         id="english-translation" placeholder="A bird in the hand is worth two in the bush."></textarea>
                 </div>
-                <!-- Category/Tags -->
-                <div class="flex flex-col gap-1 mb-8">
-                    <label class="label-ui">Taxonomy / Category *</label>
-                    <select id="category-select" required
-                        class="form-input w-full bg-card p-3 font-ui text-xs tracking-widest text-primary appearance-none">
-                        <option value="Wisdom">WISDOM</option>
-                        <option value="Prudence">PRUDENCE</option>
-                        <option value="Nature">NATURE</option>
-                        <option value="Family">FAMILY</option>
-                        <option value="Time">TIME</option>
-                        <option value="Honor">HONOR</option>
-                    </select>
-                </div>
+
                 <!-- Context / Usage Note -->
                 <div class="flex flex-col gap-1 mb-8">
                     <label class="label-ui">Scholar's Note</label>
@@ -204,7 +192,6 @@
                 document.getElementById('spanish-phrase').value = proverb.spanish;
                 document.getElementById('arabic-phrase').value = proverb.arabic;
                 document.getElementById('english-translation').value = proverb.english;
-                document.getElementById('category-select').value = proverb.category;
                 document.getElementById('note').value = proverb.note || '';
                 selectedImageUrl = proverb.image;
                 
@@ -287,7 +274,7 @@
                 spanish: document.getElementById('spanish-phrase').value,
                 arabic: document.getElementById('arabic-phrase').value,
                 english: document.getElementById('english-translation').value,
-                category: document.getElementById('category-select').value,
+                category: 'General',
                 note: document.getElementById('note').value || 'A proverb from the archive.',
                 image: selectedImageUrl || 'https://lh3.googleusercontent.com/aida-public/AB6AXuC627i2fYdXyeGop_xctmHHRNJpxuLlxlDShW0IEl8YkA9oQGqKwyybs37iJ64EbcR3OfNPHBswfltpSAcmrEa1uE25BUyEMShzvc5Xz_H9LPrHzEVFcvfWAX8U7nqs4Q3pg9cvBHvLgSnjKhO_VhtHToJ2scGToSbb7eEgck6v0wmrQX_8-ZD1UqY4-sZk87zOtAMDwoTLDqiDm23wlo6Jjz-0TNW1IXFrJTKF5biBm_S18xmYQaVcszO2gQp-zgLmaB4ceSN6q_I'
             };
