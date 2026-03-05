@@ -31,10 +31,17 @@
         });
       });
 
-      // Check for updates every hour
+      // Check for updates every 5 minutes (more frequent)
       setInterval(() => {
         registration.update();
-      }, 60 * 60 * 1000);
+      }, 5 * 60 * 1000);
+      
+      // Also check for updates when page becomes visible
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) {
+          registration.update();
+        }
+      });
       
 
     } catch (error) {
@@ -47,21 +54,29 @@
   // Show update notification
   function showUpdateNotification() {
     const updateBanner = document.createElement('div');
-    updateBanner.className = 'fixed bottom-20 left-4 right-4 bg-primary text-white p-4 rounded-lg shadow-lg z-50 flex items-center justify-between';
+    updateBanner.className = 'fixed bottom-20 left-4 right-4 bg-primary text-white p-4 rounded-lg shadow-lg z-50 flex items-center justify-between animate-slide-up';
     updateBanner.innerHTML = `
       <div class="flex items-center gap-3">
         <span class="material-symbols-outlined">refresh</span>
-        <span class="font-ui text-sm">New version available!</span>
+        <span class="font-ui text-sm font-bold">¡Nueva versión disponible!</span>
       </div>
-      <button id="update-btn" class="bg-white text-primary px-4 py-2 rounded font-ui text-sm font-medium hover:bg-gray-100 transition-colors">
-        Update
+      <button id="update-btn" class="bg-white text-primary px-4 py-2 rounded font-ui text-sm font-bold hover:bg-gray-100 transition-colors">
+        Actualizar
       </button>
     `;
     document.body.appendChild(updateBanner);
 
     document.getElementById('update-btn').addEventListener('click', () => {
-      navigator.serviceWorker.controller.postMessage({ type: 'SKIP_WAITING' });
-      window.location.reload();
+      // Clear all caches before reload
+      if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+        navigator.serviceWorker.controller.postMessage({ type: 'SKIP_WAITING' });
+        navigator.serviceWorker.controller.postMessage({ type: 'CLEAR_CACHE' });
+      }
+      
+      // Force reload from server
+      setTimeout(() => {
+        window.location.reload(true);
+      }, 100);
     });
   }
 

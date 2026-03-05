@@ -1,6 +1,7 @@
-// Service Worker for Refranario PWA
-const CACHE_NAME = 'refranario-v2';
-const RUNTIME_CACHE = 'refranario-runtime-v2';
+// Service Worker for Señor Shaعbi PWA
+const CACHE_VERSION = '1.0.3'; // Increment this with each deployment
+const CACHE_NAME = `senor-shabi-v${CACHE_VERSION}`;
+const RUNTIME_CACHE = `senor-shabi-runtime-v${CACHE_VERSION}`;
 
 // Files to cache on install
 const STATIC_CACHE_URLS = [
@@ -46,7 +47,7 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Fetch event - serve from cache, fallback to network
+// Fetch event - Network First strategy for better cache invalidation
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
@@ -56,50 +57,45 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Network first for HTML pages (to get fresh content)
-  if (request.headers.get('accept').includes('text/html')) {
-    event.respondWith(
-      fetch(request)
-        .then((response) => {
-          // Clone and cache the response
-          const responseClone = response.clone();
-          caches.open(RUNTIME_CACHE).then((cache) => {
-            cache.put(request, responseClone);
-          });
-          return response;
-        })
-        .catch(() => {
-          // Fallback to cache if network fails
-          return caches.match(request).then((cachedResponse) => {
-            return cachedResponse || caches.match('/2-home.html');
-          });
-        })
-    );
-    return;
-  }
-
-  // Cache first for other resources (CSS, JS, images, fonts)
+  // Network First for ALL resources when online (better cache invalidation)
   event.respondWith(
-    caches.match(request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-
-      return fetch(request).then((response) => {
+    fetch(request)
+      .then((response) => {
         // Don't cache non-successful responses
         if (!response || response.status !== 200 || response.type === 'error') {
           return response;
         }
 
-        // Clone and cache the response
+        // Clone and cache the fresh response
         const responseClone = response.clone();
-        caches.open(RUNTIME_CACHE).then((cache) => {
+        const cacheName = request.headers.get('accept')?.includes('text/html') 
+          ? CACHE_NAME 
+          : RUNTIME_CACHE;
+        
+        caches.open(cacheName).then((cache) => {
           cache.put(request, responseClone);
         });
 
         return response;
-      });
-    })
+      })
+      .catch(() => {
+        // Fallback to cache only when network fails (offline)
+        return caches.match(request).then((cachedResponse) => {
+          if (cachedResponse) {
+            return cachedResponse;
+          }
+          
+          // If HTML page not found, return home page
+          if (request.headers.get('accept')?.includes('text/html')) {
+            return caches.match('./2-home.html');
+          }
+          
+          return new Response('Offline - Resource not available', {
+            status: 503,
+            statusText: 'Service Unavailable'
+          });
+        });
+      })
   );
 });
 
@@ -107,6 +103,19 @@ self.addEventListener('fetch', (event) => {
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
+  }
+  
+  // Force cache refresh
+  if (event.data && event.data.type === 'CLEAR_CACHE') {
+    event.waitUntil(
+      caches.keys().then((cacheNames) => {
+        return Promise.all(
+          cacheNames.map((cacheName) => caches.delete(cacheName))
+        );
+      }).then(() => {
+        console.log('[SW] All caches cleared');
+      })
+    );
   }
 });
 
@@ -130,7 +139,7 @@ self.addEventListener('push', (event) => {
     icon: '/icons/icon-192x192.png',
     badge: '/icons/icon-72x72.png',
     vibrate: [200, 100, 200],
-    tag: 'refranario-notification',
+    tag: 'senor-shabi-notification',
     actions: [
       { action: 'view', title: 'View' },
       { action: 'close', title: 'Close' }
@@ -138,7 +147,7 @@ self.addEventListener('push', (event) => {
   };
 
   event.waitUntil(
-    self.registration.showNotification('Refranario', options)
+    self.registration.showNotification('Señor Shaعbi', options)
   );
 });
 
