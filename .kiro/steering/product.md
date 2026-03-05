@@ -1,6 +1,6 @@
 # Product Overview
 
-Refranario is a trilingual proverb archive application that preserves and displays proverbs across Spanish, Arabic, and English. The app presents a scholarly, manuscript-inspired interface for browsing, viewing, and managing proverbs with their cultural equivalents and contextual notes.
+Señor Shaعbi is a trilingual proverb archive application that preserves and displays proverbs across Spanish, Arabic, and English. The app presents a scholarly, manuscript-inspired interface for browsing, viewing, and managing proverbs with their cultural equivalents and contextual notes.
 
 Key features:
 - Browse proverbs with trilingual translations (Spanish origin, Arabic equivalent, English translation)

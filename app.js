@@ -1,4 +1,4 @@
-// Refranario - Data Management & Utilities
+// Señor Shaعbi - Data Management & Utilities
 
 // ============================================================================
 // DATA LAYER - LocalStorage Management
