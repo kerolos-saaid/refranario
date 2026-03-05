@@ -8,11 +8,8 @@
 
 ## Fonts & Icons
 - Google Fonts:
-  - Cinzel Decorative (display/headers)
-  - Crimson Pro (serif body text)
-  - Amiri (Arabic text)
-  - Libre Franklin (UI elements)
-  - Newsreader (English translations)
+  - Tajawal (Arabic text)
+  - DM Sans (English and Spanish text)
 - Material Symbols Outlined (icons)
 
 ## Design System
