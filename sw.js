@@ -1,5 +1,5 @@
 // Service Worker for Señor Shaعbi PWA
-const CACHE_VERSION = '1.0.3'; // Increment this with each deployment
+const CACHE_VERSION = '2.0.0'; // Increment this with each deployment
 const CACHE_NAME = `senor-shabi-v${CACHE_VERSION}`;
 const RUNTIME_CACHE = `senor-shabi-runtime-v${CACHE_VERSION}`;
 
@@ -14,7 +14,18 @@ const STATIC_CACHE_URLS = [
   './6-offline_banner.html',
   './app.js',
   './pwa.js',
-  './manifest.json'
+  './manifest.json',
+  './new_logo.png',
+  './new_logo_name_only.png',
+  './new_logo_no_text.png',
+  './icons/icon-72x72.png',
+  './icons/icon-96x96.png',
+  './icons/icon-128x128.png',
+  './icons/icon-144x144.png',
+  './icons/icon-152x152.png',
+  './icons/icon-192x192.png',
+  './icons/icon-384x384.png',
+  './icons/icon-512x512.png'
 ];
 
 // Install event - cache static assets
