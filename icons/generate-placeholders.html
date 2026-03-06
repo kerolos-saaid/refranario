@@ -21,12 +21,12 @@
             text-align: center;
         }
         canvas {
-            border: 1px solid #ddd;
+            border: 1px solid #EEDDD6;
             border-radius: 8px;
             max-width: 100%;
         }
         button {
-            background: #2d8659;
+            background: #B02C33;
             color: white;
             border: none;
             padding: 12px 24px;
@@ -36,29 +36,51 @@
             margin: 10px 5px;
         }
         button:hover {
-            background: #3a9d6d;
+            background: #DF3D4C;
         }
         .download-link {
             display: inline-block;
             margin-top: 10px;
-            color: #2d8659;
+            color: #B02C33;
             text-decoration: none;
             font-size: 14px;
         }
     </style>
 </head>
 <body>
-    <h1>Refranario PWA Icon Generator</h1>
-    <p>Click "Generate Icons" to create placeholder icons for the PWA.</p>
+    <h1>Señor Shaعbi PWA Icon Generator</h1>
+    <p>Select <strong>new_logo.png</strong> below, then generate all required icon sizes.</p>
     
-    <button onclick="generateAllIcons()">Generate All Icons</button>
-    <button onclick="downloadAll()">Download All</button>
+    <div style="margin: 15px 0;">
+        <label for="logo-input" style="font-weight: bold; display: block; margin-bottom: 8px;">1. Select logo file:</label>
+        <input type="file" id="logo-input" accept="image/*" style="font-size: 14px;" />
+    </div>
+    
+    <button onclick="generateAllIcons()" id="gen-btn" disabled>2. Generate All Icons</button>
+    <button onclick="downloadAll()">3. Download All</button>
     
     <div class="icon-grid" id="icon-grid"></div>
 
     <script>
         const sizes = [72, 96, 128, 144, 152, 192, 384, 512];
         const icons = {};
+        let logoImage = null;
+
+        // Load logo from file input (avoids tainted canvas / CORS)
+        document.getElementById('logo-input').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+                const img = new Image();
+                img.onload = () => {
+                    logoImage = img;
+                    document.getElementById('gen-btn').disabled = false;
+                };
+                img.src = ev.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
 
         function generateIcon(size) {
             const canvas = document.createElement('canvas');
@@ -66,88 +88,39 @@
             canvas.height = size;
             const ctx = canvas.getContext('2d');
 
-            // Background
-            ctx.fillStyle = '#2d8659';
+            // Off-white background
+            ctx.fillStyle = '#FFFAF8';
             ctx.fillRect(0, 0, size, size);
 
-            // Book icon
-            const scale = size / 512;
-            ctx.save();
-            ctx.translate(size / 2, size / 2);
-            ctx.scale(scale, scale);
+            // Draw logo centered with padding
+            if (logoImage) {
+                const padding = size * 0.08;
+                const drawSize = size - (padding * 2);
+                const aspect = logoImage.width / logoImage.height;
+                let drawW, drawH, drawX, drawY;
 
-            // Left page
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-            ctx.beginPath();
-            ctx.moveTo(-80, -120);
-            ctx.lineTo(-80, 120);
-            ctx.lineTo(0, 100);
-            ctx.lineTo(0, -100);
-            ctx.closePath();
-            ctx.fill();
+                if (aspect > 1) {
+                    drawW = drawSize;
+                    drawH = drawSize / aspect;
+                } else {
+                    drawH = drawSize;
+                    drawW = drawSize * aspect;
+                }
+                drawX = (size - drawW) / 2;
+                drawY = (size - drawH) / 2;
 
-            // Right page
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-            ctx.beginPath();
-            ctx.moveTo(0, -100);
-            ctx.lineTo(0, 100);
-            ctx.lineTo(80, 120);
-            ctx.lineTo(80, -120);
-            ctx.closePath();
-            ctx.fill();
-
-            // Spine
-            ctx.fillStyle = '#f5f5f5';
-            ctx.fillRect(-5, -120, 10, 240);
-
-            // Text lines
-            ctx.strokeStyle = 'rgba(45, 134, 89, 0.6)';
-            ctx.lineWidth = 3;
-            
-            // Left page lines
-            ctx.beginPath();
-            ctx.moveTo(-70, -80);
-            ctx.lineTo(-10, -80);
-            ctx.stroke();
-            
-            ctx.beginPath();
-            ctx.moveTo(-70, -50);
-            ctx.lineTo(-10, -50);
-            ctx.stroke();
-            
-            ctx.beginPath();
-            ctx.moveTo(-70, -20);
-            ctx.lineTo(-10, -20);
-            ctx.stroke();
-
-            // Right page lines
-            ctx.beginPath();
-            ctx.moveTo(70, -80);
-            ctx.lineTo(10, -80);
-            ctx.stroke();
-            
-            ctx.beginPath();
-            ctx.moveTo(70, -50);
-            ctx.lineTo(10, -50);
-            ctx.stroke();
-            
-            ctx.beginPath();
-            ctx.moveTo(70, -20);
-            ctx.lineTo(10, -20);
-            ctx.stroke();
-
-            // Center dot
-            ctx.fillStyle = '#f5f5f5';
-            ctx.beginPath();
-            ctx.arc(0, 0, 15, 0, Math.PI * 2);
-            ctx.fill();
-
-            ctx.restore();
+                ctx.drawImage(logoImage, drawX, drawY, drawW, drawH);
+            }
 
             return canvas;
         }
 
         function generateAllIcons() {
+            if (!logoImage) {
+                alert('Please select the logo file first.');
+                return;
+            }
+
             const grid = document.getElementById('icon-grid');
             grid.innerHTML = '';
 
@@ -191,8 +164,7 @@
             });
         }
 
-        // Generate on load
-        window.addEventListener('load', generateAllIcons);
+        // No auto-generate — user must select logo first
     </script>
 </body>
 </html>

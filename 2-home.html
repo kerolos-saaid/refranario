@@ -9,7 +9,7 @@
     <meta name="description" content="Explora refranes trilingües en español, árabe e inglés. Un archivo académico de sabiduría entre culturas." />
     
     <!-- PWA Meta Tags -->
-    <meta name="theme-color" content="#2d8659" />
+    <meta name="theme-color" content="#B02C33" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Señor Shaعbi" />
@@ -42,17 +42,18 @@
             theme: {
                 extend: {
                     colors: {
-                        "primary": "#2d8659",
-                        "primary-light": "#3a9d6d",
-                        "background": "#f5f5f5",
+                        "primary": "#B02C33",
+                        "primary-light": "#DF3D4C",
+                        "accent": "#F79F3F",
+                        "background": "#F5EBE6",
                         "card": "#ffffff",
-                        "vellum": "#f5f5f5",
+                        "vellum": "#FFFAF8",
                         "paper": "#ffffff",
-                        "ink": "#1f2937",
-                        "gold": "#2d8659",
-                        "muted": "#6b7280",
-                        "border": "#e0e2e7",
-                        "secondary": "#eff5f2",
+                        "ink": "#2A1810",
+                        "gold": "#F79F3F",
+                        "muted": "#8C6F64",
+                        "border": "#EEDDD6",
+                        "secondary": "#FFF1EB",
                     },
                     fontFamily: {
                         "display": ["DM Sans", "sans-serif"],
@@ -62,8 +63,8 @@
                         "newsreader": ["DM Sans", "sans-serif"],
                     },
                     boxShadow: {
-                        "floating": "0px 10px 30px rgba(45, 134, 89, 0.3)",
-                        "card": "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)"
+                        "floating": "0px 10px 30px rgba(176, 44, 51, 0.25)",
+                        "card": "0 1px 3px 0 rgba(42, 24, 16, 0.08), 0 1px 2px 0 rgba(42, 24, 16, 0.04)"
                     },
                     borderRadius: {
                         "lg": "0.75rem",
@@ -84,8 +85,10 @@
         }
 
         .bookplate-border {
-            border: 1px solid #e0e2e7;
+            border: 1px solid rgba(176,44,51,0.08);
             border-radius: 0.75rem;
+            background: white;
+            box-shadow: 0 2px 8px rgba(42, 24, 16, 0.08), 0 1px 3px rgba(42, 24, 16, 0.05);
         }
 
         .font-arabic {
@@ -103,6 +106,11 @@
                 transform: translateY(0);
             }
         }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #DF3D4C; border-radius: 4px; }
     </style>
     <style>
         body {
@@ -114,29 +122,35 @@
 
 <body class="bg-background text-ink font-serif antialiased">
     <div class="relative flex h-screen w-full flex-col overflow-hidden bg-background group/design-root">
+        <!-- Subtle warm background gradient -->
+        <div class="absolute inset-0 pointer-events-none" style="background: linear-gradient(180deg, rgba(176,44,51,0.03) 0%, rgba(247,159,63,0.02) 50%, transparent 100%);"></div>
         <!-- Sticky Header -->
-        <header class="flex-none bg-white shadow-md z-30 border-b border-border">
-            <div class="px-4 pb-4 pt-5 flex flex-col gap-3">
+        <header class="flex-none z-30 relative" style="background: linear-gradient(135deg, #B02C33 0%, #8A1F25 100%);">
+            <!-- Subtle pattern overlay on header -->
+            <div class="absolute inset-0 opacity-[0.06] pointer-events-none" style="background-image: url('data:image/svg+xml,%3Csvg width=%2240%22 height=%2240%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cpath d=%22M0 0h20v20H0zm20 20h20v20H20z%22 fill=%22%23fff%22 fill-opacity=%220.3%22/%3E%3C/svg%3E');"></div>
+            <div class="relative px-4 pb-4 pt-5 flex flex-col gap-3">
                 <!-- Branding -->
                 <div class="flex items-center justify-center relative">
                     <!-- Menu Icon (Left) -->
-                    <button class="absolute left-0 text-primary hover:text-primary-light transition-colors">
+                    <button class="absolute left-0 text-white/80 hover:text-white transition-colors">
                         <span class="material-symbols-outlined text-2xl">menu_book</span>
                     </button>
-                    <h1 class="text-primary font-display text-xl tracking-widest text-center">SEÑOR SHAعBI</h1>
+                    <div class="flex items-center gap-2">
+                        <img src="new_logo_name_only.png" alt="Señor Shaعbi" class="h-8 object-contain brightness-0 invert" />
+                    </div>
                     <!-- Profile Icon (Right) -->
-                    <a href="5-login.html" class="absolute right-0 text-muted hover:text-primary transition-colors">
+                    <a href="5-login.html" class="absolute right-0 text-white/70 hover:text-white transition-colors">
                         <span class="material-symbols-outlined text-2xl">account_circle</span>
                     </a>
                 </div>
                 <!-- Search Bar -->
                 <div class="relative w-full">
                     <div class="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-                        <span class="material-symbols-outlined text-muted text-xl">search</span>
+                        <span class="material-symbols-outlined text-white/50 text-xl">search</span>
                     </div>
                     <input
                         id="search-input"
-                        class="w-full bg-white border border-border rounded-lg py-2.5 pl-10 pr-4 text-ink placeholder-muted font-ui text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                        class="w-full bg-white/15 border border-white/20 rounded-lg py-2.5 pl-10 pr-4 text-white placeholder-white/50 font-ui text-sm focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent/50 focus:bg-white/20 transition-all"
                         placeholder="Buscar por frase, palabra o significado..." type="text" />
                 </div>
                 
@@ -147,18 +161,20 @@
                     </div>
                 </div>
             </div>
+            <!-- Bottom accent line -->
+            <div class="absolute bottom-0 left-0 right-0 h-[3px]" style="background: linear-gradient(90deg, #F79F3F 0%, #DF3D4C 50%, #B02C33 100%);"></div>
         </header>
         <!-- Main Content: Scrollable List -->
         <main class="flex-1 overflow-y-auto bg-background relative scroll-smooth p-4 pb-24">
             <div id="proverbs-container" class="relative z-10 flex flex-col gap-4 max-w-2xl mx-auto">
                 <!-- Card 1 -->
                 <article
-                    class="bg-card bookplate-border p-4 shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer"
+                    class="bg-card bookplate-border p-4 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer group/card"
                     onclick="window.location.href='3-detail_view.html'">
                     <div class="flex gap-3 items-start">
                         <!-- Thumbnail -->
                         <div
-                            class="flex-shrink-0 relative w-12 h-12 rounded-lg overflow-hidden border border-border bg-secondary">
+                            class="flex-shrink-0 relative w-12 h-12 rounded-lg overflow-hidden border border-primary/10 group-hover/card:border-accent/30 transition-colors">
                             <img alt="Close up of an old library book page with Latin text"
                                 class="w-full h-full object-cover"
                                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuC627i2fYdXyeGop_xctmHHRNJpxuLlxlDShW0IEl8YkA9oQGqKwyybs37iJ64EbcR3OfNPHBswfltpSAcmrEa1uE25BUyEMShzvc5Xz_H9LPrHzEVFcvfWAX8U7nqs4Q3pg9cvBHvLgSnjKhO_VhtHToJ2scGToSbb7eEgck6v0wmrQX_8-ZD1UqY4-sZk87zOtAMDwoTLDqiDm23wlo6Jjz-0TNW1IXFrJTKF5biBm_S18xmYQaVcszO2gQp-zgLmaB4ceSN6q_I" />
@@ -166,11 +182,11 @@
                         <!-- Text Content -->
                         <div class="flex-1 min-w-0 flex flex-col gap-2 overflow-hidden">
                             <!-- Header: Spanish -->
-                            <h2 class="font-display text-base text-primary leading-tight font-bold">
+                            <h2 class="font-display text-base text-primary leading-tight font-bold group-hover/card:text-primary-light transition-colors">
                                 A quien madruga, Dios le ayuda.
                             </h2>
                             <!-- Middle: Arabic (RTL) -->
-                            <div class="text-right border-r-2 border-primary/20 pr-2 mr-2">
+                            <div class="text-right border-r-2 border-accent/30 pr-2 mr-2">
                                 <p class="font-arabic text-lg text-ink leading-relaxed" dir="rtl">
                                     من جد وجد
                                 </p>
@@ -181,27 +197,27 @@
                             </p>
                         </div>
                         <!-- Chevron -->
-                        <div class="self-center text-muted flex-shrink-0">
+                        <div class="self-center text-primary-light/40 group-hover/card:text-accent flex-shrink-0 transition-colors">
                             <span class="material-symbols-outlined text-xl">chevron_right</span>
                         </div>
                     </div>
                 </article>
                 <!-- Card 2 -->
                 <article
-                    class="bg-card bookplate-border p-4 shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer"
+                    class="bg-card bookplate-border p-4 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer group/card"
                     onclick="window.location.href='3-detail_view.html'">
                     <div class="flex gap-3 items-start">
                         <div
-                            class="flex-shrink-0 relative w-12 h-12 rounded-lg overflow-hidden border border-border bg-secondary">
+                            class="flex-shrink-0 relative w-12 h-12 rounded-lg overflow-hidden border border-primary/10 group-hover/card:border-accent/30 transition-colors">
                             <img alt="Vintage feather quill pen resting on parchment paper"
                                 class="w-full h-full object-cover"
                                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuDarIj09KV4FXp5gTXhA0H9gTh8SFHjPqIuWHpTyl-V9eFG7gfwD6ezGV90dO5tZeY8_xvZMdIHcO3gZeVIs_Tmu2CLESjLCPTSZnVT4czzSiYPLUKX00xhm1tAOioUVDuDrpoFJeSTayjGU1q3eYn0B2n-asuGh-YcMPJT2j9hJ3DCgIoyz5NpVpJ32-_mKjwS_51XsZLXPA9yzf8N4-yIZkysk0Xw0GHWndqeAQIfR_gbj2EnG-P71iIuVCQdYHxyW8aU614gGqU" />
                         </div>
                         <div class="flex-1 min-w-0 flex flex-col gap-2 overflow-hidden">
-                            <h2 class="font-display text-base text-primary leading-tight font-bold">
+                            <h2 class="font-display text-base text-primary leading-tight font-bold group-hover/card:text-primary-light transition-colors">
                                 Más vale pájaro en mano que ciento volando.
                             </h2>
-                            <div class="text-right border-r-2 border-primary/20 pr-2 mr-2">
+                            <div class="text-right border-r-2 border-accent/30 pr-2 mr-2">
                                 <p class="font-arabic text-lg text-ink leading-relaxed" dir="rtl">
                                     عصفور في اليد خير من عشرة على الشجرة
                                 </p>
@@ -210,27 +226,27 @@
                                 A bird in the hand is worth two in the bush.
                             </p>
                         </div>
-                        <div class="self-center text-muted flex-shrink-0">
+                        <div class="self-center text-primary-light/40 group-hover/card:text-accent flex-shrink-0 transition-colors">
                             <span class="material-symbols-outlined text-xl">chevron_right</span>
                         </div>
                     </div>
                 </article>
                 <!-- Card 3 -->
                 <article
-                    class="bg-card bookplate-border p-4 shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer"
+                    class="bg-card bookplate-border p-4 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer group/card"
                     onclick="window.location.href='3-detail_view.html'">
                     <div class="flex gap-3 items-start">
                         <div
-                            class="flex-shrink-0 relative w-12 h-12 rounded-lg overflow-hidden border border-border bg-secondary">
+                            class="flex-shrink-0 relative w-12 h-12 rounded-lg overflow-hidden border border-primary/10 group-hover/card:border-accent/30 transition-colors">
                             <img alt="Old fashioned pocket watch on a wooden table"
                                 class="w-full h-full object-cover"
                                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuABoVGDsXTVCEkR2bavM1XGqdgYkHTRSmvRiNWzwrP_lxu3XEVq1j75oyQJ9pXSHwpyOxtU0ax-8bHWlH6omrvGz1VmLLXmIx_GuxW134-BrdXoq0KqdkmhiSwntpA7MJDCieCHu3KL6HQwKorfY3GuJdtqjmEmPEQ9ZtHeNKNZ8rZewnbskGSMU5HxtWFDxpZmTxwTtQ9yD2Q24RA1vsOzv-jRuaROS9juP1kfQ5kYtld04G8hLF_1Z5MywYogKJAhKrFk-bBYciM" />
                         </div>
                         <div class="flex-1 min-w-0 flex flex-col gap-2 overflow-hidden">
-                            <h2 class="font-display text-base text-primary leading-tight font-bold">
+                            <h2 class="font-display text-base text-primary leading-tight font-bold group-hover/card:text-primary-light transition-colors">
                                 El tiempo es oro.
                             </h2>
-                            <div class="text-right border-r-2 border-primary/20 pr-2 mr-2">
+                            <div class="text-right border-r-2 border-accent/30 pr-2 mr-2">
                                 <p class="font-arabic text-lg text-ink leading-relaxed" dir="rtl">
                                     الوقت من ذهب
                                 </p>
@@ -239,27 +255,27 @@
                                 Time is money.
                             </p>
                         </div>
-                        <div class="self-center text-muted flex-shrink-0">
+                        <div class="self-center text-primary-light/40 group-hover/card:text-accent flex-shrink-0 transition-colors">
                             <span class="material-symbols-outlined text-xl">chevron_right</span>
                         </div>
                     </div>
                 </article>
                 <!-- Card 4 -->
                 <article
-                    class="bg-card bookplate-border p-4 shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer"
+                    class="bg-card bookplate-border p-4 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer group/card"
                     onclick="window.location.href='3-detail_view.html'">
                     <div class="flex gap-3 items-start">
                         <div
-                            class="flex-shrink-0 relative w-12 h-12 rounded-lg overflow-hidden border border-border bg-secondary">
+                            class="flex-shrink-0 relative w-12 h-12 rounded-lg overflow-hidden border border-primary/10 group-hover/card:border-accent/30 transition-colors">
                             <img alt="Ancient weathered stone texture from a castle wall"
                                 class="w-full h-full object-cover"
                                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuB2TCh2jWXD7qn_KClpCZQQqmJ9_GnDUwqoCMujx7D3w42_sAjjnVe716eoX5qQsofDEVmR-dvkzDLMPIFAf5x-tq_8KEJuf2PdP6sUqA9zNY65w3wEYF6wyK0_YX3inK-WlaJoOY_JQXpCIBtE-nBK3zeasA698gR1QI5gAn4ZfjetxQWlvh6bz0HMK2S8dDvwahK1AQbwx2_rQLweRevNacCdQ-Ukgj-zsA8Px2Y7G6bhU60BUdjwpMjkdIkM-rU7HneEsaPyPNk" />
                         </div>
                         <div class="flex-1 min-w-0 flex flex-col gap-2 overflow-hidden">
-                            <h2 class="font-display text-base text-primary leading-tight font-bold">
+                            <h2 class="font-display text-base text-primary leading-tight font-bold group-hover/card:text-primary-light transition-colors">
                                 Ojos que no ven, corazón que no siente.
                             </h2>
-                            <div class="text-right border-r-2 border-primary/20 pr-2 mr-2">
+                            <div class="text-right border-r-2 border-accent/30 pr-2 mr-2">
                                 <p class="font-arabic text-lg text-ink leading-relaxed" dir="rtl">
                                     بعيد عن العين بعيد عن القلب
                                 </p>
@@ -268,7 +284,7 @@
                                 Out of sight, out of mind.
                             </p>
                         </div>
-                        <div class="self-center text-muted flex-shrink-0">
+                        <div class="self-center text-primary-light/40 group-hover/card:text-accent flex-shrink-0 transition-colors">
                             <span class="material-symbols-outlined text-xl">chevron_right</span>
                         </div>
                     </div>
@@ -280,7 +296,7 @@
         <!-- Admin FAB -->
         <div class="absolute bottom-20 right-6 z-50" id="admin-fab" style="display: none;">
             <a href="4-add_edit.html"
-                class="flex items-center justify-center w-14 h-14 bg-primary rounded-full shadow-floating hover:bg-primary-light hover:scale-105 active:scale-95 transition-all duration-200">
+                class="flex items-center justify-center w-14 h-14 rounded-full shadow-[0_6px_24px_rgba(247,159,63,0.4)] hover:shadow-[0_8px_32px_rgba(247,159,63,0.5)] hover:scale-105 active:scale-95 transition-all duration-200" style="background: linear-gradient(135deg, #F79F3F 0%, #DF3D4C 100%);">
                 <span class="material-symbols-outlined text-white text-2xl">edit_square</span>
             </a>
         </div>
@@ -308,7 +324,7 @@
 
             proverbs.forEach((proverb, index) => {
                 const card = document.createElement('article');
-                card.className = 'bg-card bookplate-border p-4 shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer';
+                card.className = 'bg-card bookplate-border p-4 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer group/card';
                 card.style.animation = `fade-in 0.3s ease-out ${index * 0.05}s both`;
                 card.onclick = () => {
                     localStorage.setItem('currentProverbId', proverb.id);
@@ -317,14 +333,14 @@
 
                 card.innerHTML = `
                     <div class="flex gap-3 items-start">
-                        <div class="flex-shrink-0 relative w-12 h-12 rounded-lg overflow-hidden border border-border bg-secondary">
+                        <div class="flex-shrink-0 relative w-12 h-12 rounded-lg overflow-hidden border border-primary/10 group-hover/card:border-accent/30 transition-colors">
                             <img alt="Proverb illustration" class="w-full h-full object-cover" src="${proverb.image}" />
                         </div>
                         <div class="flex-1 min-w-0 flex flex-col gap-2 overflow-hidden">
-                            <h2 class="font-display text-base text-primary leading-tight font-bold">
+                            <h2 class="font-display text-base text-primary leading-tight font-bold group-hover/card:text-primary-light transition-colors">
                                 ${proverb.spanish}
                             </h2>
-                            <div class="text-right border-r-2 border-primary/20 pr-2 mr-2">
+                            <div class="text-right border-r-2 border-accent/30 pr-2 mr-2">
                                 <p class="font-arabic text-lg text-ink leading-relaxed" dir="rtl">
                                     ${proverb.arabic}
                                 </p>
@@ -333,7 +349,7 @@
                                 ${proverb.english}
                             </p>
                         </div>
-                        <div class="self-center text-muted flex-shrink-0">
+                        <div class="self-center text-primary-light/40 group-hover/card:text-accent flex-shrink-0 transition-colors">
                             <span class="material-symbols-outlined text-xl">chevron_right</span>
                         </div>
                     </div>
@@ -357,26 +373,26 @@
                     // Toggle selection
                     if (selectedLetter === letter) {
                         selectedLetter = '';
-                        btn.classList.remove('bg-primary', 'text-white', 'shadow-md');
-                        btn.classList.add('bg-white', 'text-muted', 'border', 'border-border');
+                        btn.classList.remove('bg-accent', 'text-white', 'shadow-md');
+                        btn.classList.add('bg-white/15', 'text-white/70', 'border', 'border-white/20');
                     } else {
                         // Clear previous selection
                         document.querySelectorAll('.alphabet-btn').forEach(b => {
-                            b.classList.remove('bg-primary', 'text-white', 'shadow-md');
-                            b.classList.add('bg-white', 'text-muted', 'border', 'border-border');
+                            b.classList.remove('bg-accent', 'text-white', 'shadow-md');
+                            b.classList.add('bg-white/15', 'text-white/70', 'border', 'border-white/20');
                         });
                         
                         // Set new selection
                         selectedLetter = letter;
-                        btn.classList.remove('bg-white', 'text-muted', 'border', 'border-border');
-                        btn.classList.add('bg-primary', 'text-white', 'shadow-md');
+                        btn.classList.remove('bg-white/15', 'text-white/70', 'border', 'border-white/20');
+                        btn.classList.add('bg-accent', 'text-white', 'shadow-md');
                     }
                     
                     updateView();
                 });
                 
                 // Initial style
-                btn.classList.add('bg-white', 'text-muted', 'border', 'border-border');
+                btn.classList.add('bg-white/15', 'text-white/70', 'border', 'border-white/20');
                 container.appendChild(btn);
             });
         }
@@ -419,8 +435,8 @@
                 if (searchQuery) {
                     selectedLetter = '';
                     document.querySelectorAll('.alphabet-btn').forEach(b => {
-                        b.classList.remove('bg-primary', 'text-white', 'shadow-md');
-                        b.classList.add('bg-white', 'text-muted', 'border', 'border-border');
+                        b.classList.remove('bg-accent', 'text-white', 'shadow-md');
+                        b.classList.add('bg-white/15', 'text-white/70', 'border', 'border-white/20');
                     });
                 }
                 updateView();

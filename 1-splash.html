@@ -8,7 +8,7 @@
     <title>Señor Shaعbi - Inicio</title>
     
     <!-- PWA Meta Tags -->
-    <meta name="theme-color" content="#2d8659" />
+    <meta name="theme-color" content="#B02C33" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Señor Shaعbi" />
@@ -40,8 +40,10 @@
             theme: {
                 extend: {
                     colors: {
-                        "primary": "#2d8659",
-                        "background": "#f5f5f5",
+                        "primary": "#B02C33",
+                        "primary-light": "#DF3D4C",
+                        "accent": "#F79F3F",
+                        "background": "#FFFAF8",
                         "card": "#ffffff",
                     },
                     fontFamily: {
@@ -77,44 +79,33 @@
     </style>
 </head>
 
-<body class="bg-white h-screen w-full overflow-hidden flex items-center justify-center">
+<body class="h-screen w-full overflow-hidden flex items-center justify-center relative" style="background: linear-gradient(145deg, #B02C33 0%, #8A1F25 40%, #5C1118 100%);">
+    <!-- Decorative radial glow -->
+    <div class="absolute inset-0 pointer-events-none" style="background: radial-gradient(ellipse at 30% 40%, rgba(247,159,63,0.18) 0%, transparent 55%), radial-gradient(ellipse at 70% 60%, rgba(223,61,76,0.15) 0%, transparent 50%);"></div>
+    <!-- Subtle noise texture overlay -->
+    <div class="absolute inset-0 pointer-events-none opacity-[0.04]" style="background-image: url('data:image/svg+xml,%3Csvg viewBox=%220 0 256 256%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22n%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.9%22 numOctaves=%224%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23n)%22/%3E%3C/svg%3E');"></div>
+    <!-- Geometric accent lines -->
+    <div class="absolute top-0 left-0 w-full h-1" style="background: linear-gradient(90deg, transparent 0%, #F79F3F 30%, #DF3D4C 70%, transparent 100%);"></div>
+    <div class="absolute bottom-0 left-0 w-full h-1" style="background: linear-gradient(90deg, transparent 0%, #DF3D4C 30%, #F79F3F 70%, transparent 100%);"></div>
     <!-- Splash Container -->
-    <div class="flex flex-col items-center justify-center p-6 animate-immersive-fade">
+    <div class="relative z-10 flex flex-col items-center justify-center p-6 animate-immersive-fade">
         <script>
-            // Auto-redirect to home after animation completes
-            setTimeout(() => {
-                window.location.href = '2-home.html';
-            }, 3500);
+            setTimeout(() => { window.location.href = '2-home.html'; }, 3500);
         </script>
-        <!-- Logo Mark: Gold Foil SVG -->
-        <!-- Simulating the Open Book + Quill icon with SVG -->
-        <div class="mb-8 relative group">
-            <!-- Glow effect behind the logo -->
-            <div class="absolute -inset-4 bg-primary/10 rounded-full blur-xl opacity-50"></div>
-            <svg class="relative z-10 text-primary drop-shadow-lg"
-                data-alt="Golden icon of an open book with a feather quill pen" fill="none" height="120"
-                viewbox="0 0 24 24" width="120" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 3V21M12 3L9 6M12 3L15 6" stroke="currentColor" stroke-linecap="round"
-                    stroke-linejoin="round" stroke-width="1"></path>
-                <!-- Book shape -->
-                <path
-                    d="M21 4H16.5C15.5 4 14.5 4.2 13.8 4.7C13.2 5.2 12.5 5.8 12 6.5C11.5 5.8 10.8 5.2 10.2 4.7C9.5 4.2 8.5 4 7.5 4H3V18H7.5C8.5 18 9.5 18.2 10.2 18.7C10.8 19.2 11.5 19.8 12 20.5C12.5 19.8 13.2 19.2 13.8 18.7C14.5 18.2 15.5 18 16.5 18H21V4Z"
-                    stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path>
-                <!-- Quill Feather detail -->
-                <path d="M18.5 2.5C18.5 2.5 20.5 4.5 20.5 8.5C20.5 12.5 16.5 16.5 16.5 16.5" stroke="currentColor"
-                    stroke-linecap="round" stroke-width="1.5"></path>
-                <path d="M17 14L20 11" stroke="currentColor" stroke-linecap="round" stroke-width="1"></path>
-            </svg>
+        <!-- Logo Image -->
+        <div class="mb-6 relative">
+            <!-- Outer soft glow -->
+            <div class="absolute -inset-14 rounded-full blur-[60px] opacity-60" style="background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, rgba(247,159,63,0.3) 40%, transparent 100%);"></div>
+            <!-- Solid white circle backdrop -->
+            <div class="absolute inset-2 rounded-full bg-white/90 shadow-[0_0_60px_rgba(255,255,255,0.4)]"></div>
+            <img src="new_logo_no_text.png" alt="Señor Shaعbi Logo" class="relative z-10 w-52 h-52 object-contain" />
         </div>
-        <!-- Brand Title -->
-        <h1
-            class="font-display text-primary text-2xl md:text-3xl tracking-[0.2em] font-bold text-center">
-            SEÑOR SHAعBI
-        </h1>
         <!-- Subtitle -->
-        <p class="mt-3 font-sans text-gray-600 text-xs uppercase tracking-widest text-center">
+        <p class="mt-2 font-sans text-white/60 text-xs uppercase tracking-[0.35em] text-center font-medium">
             El Archivo Trilingüe
         </p>
+        <!-- Decorative divider -->
+        <div class="mt-4 w-16 h-px" style="background: linear-gradient(90deg, transparent, #F79F3F, transparent);"></div>
     </div>
     <script src="pwa.js"></script>
 </body>

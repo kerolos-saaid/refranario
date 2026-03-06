@@ -8,7 +8,7 @@
     <title>Señor Shaعbi - Agregar/Editar</title>
     
     <!-- PWA Meta Tags -->
-    <meta name="theme-color" content="#2d8659" />
+    <meta name="theme-color" content="#B02C33" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Señor Shaعbi" />
@@ -32,14 +32,15 @@
             theme: {
                 extend: {
                     colors: {
-                        "primary": "#2d8659",
-                        "primary-light": "#3a9d6d",
-                        "background": "#f5f5f5",
+                        "primary": "#B02C33",
+                        "primary-light": "#DF3D4C",
+                        "accent": "#F79F3F",
+                        "background": "#FFFAF8",
                         "card": "#ffffff",
-                        "ink": "#1f2937",
-                        "muted": "#6b7280",
-                        "border": "#e0e2e7",
-                        "secondary": "#eff5f2",
+                        "ink": "#2A1810",
+                        "muted": "#8C6F64",
+                        "border": "#EEDDD6",
+                        "secondary": "#FFF1EB",
                     },
                     fontFamily: {
                         "display": ["DM Sans", "sans-serif"],
@@ -52,33 +53,40 @@
     </script>
     <style>
         .border-bookplate {
-            border: 1px solid #e0e2e7;
+            border: 1px solid rgba(176,44,51,0.1);
             border-radius: 0.75rem;
         }
 
         .form-input {
-            border: 1px solid #e0e2e7;
+            border: 1px solid rgba(176,44,51,0.15);
             border-radius: 0.5rem;
             transition: all 0.2s ease;
         }
 
         .form-input:focus {
-            border-color: #2d8659;
-            box-shadow: 0 0 0 3px rgba(45, 134, 89, 0.1);
+            border-color: #F79F3F;
+            box-shadow: 0 0 0 3px rgba(247,159,63,0.15);
             outline: none;
         }
 
         .label-ui {
             font-family: 'Libre Franklin', sans-serif;
             font-size: 0.75rem;
-            font-weight: 500;
-            color: #1f2937;
+            font-weight: 700;
+            color: #B02C33;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
 
         .arabic-rtl {
             direction: rtl;
             font-family: 'Amiri', serif;
         }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #DF3D4C; border-radius: 4px; }
     </style>
     <style>
         body {
@@ -91,13 +99,15 @@
 <body class="bg-background text-ink font-serif min-h-screen">
     <div class="relative flex h-auto min-h-screen w-full flex-col max-w-2xl mx-auto bg-background">
         <!-- TopAppBar -->
-        <header class="sticky top-0 z-10 flex items-center bg-white border-b border-border p-4 justify-between shadow-sm">
-            <a href="2-home.html" class="text-primary flex items-center justify-center cursor-pointer hover:text-primary-light transition-colors">
+        <header class="sticky top-0 z-10 flex items-center p-4 justify-between shadow-lg relative" style="background: linear-gradient(135deg, #B02C33 0%, #8A1F25 100%);">
+            <div class="absolute inset-0 opacity-[0.06] pointer-events-none" style="background-image: url('data:image/svg+xml,%3Csvg width=%2240%22 height=%2240%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cpath d=%22M0 0h20v20H0zm20 20h20v20H20z%22 fill=%22%23fff%22 fill-opacity=%220.3%22/%3E%3C/svg%3E');"></div>
+            <a href="2-home.html" class="relative text-white/80 flex items-center justify-center cursor-pointer hover:text-white transition-colors">
                 <span class="material-symbols-outlined text-2xl">arrow_back</span>
             </a>
-            <h1 id="page-title" class="text-primary text-lg font-display font-bold tracking-wider flex-1 text-center">
-                NUEVA ENTRADA</h1>
+            <img src="new_logo_name_only.png" alt="Señor Shaعbi" class="relative h-7 object-contain flex-1 mx-4 brightness-0 invert" id="page-logo" />
             <div class="w-10"></div>
+            <!-- Bottom accent line -->
+            <div class="absolute bottom-0 left-0 right-0 h-[3px]" style="background: linear-gradient(90deg, #F79F3F 0%, #DF3D4C 50%, #B02C33 100%);"></div>
         </header>
         <!-- Form Content -->
         <main class="flex flex-col p-6 gap-8 pb-32">
@@ -110,8 +120,8 @@
                         <img id="preview-img" class="w-full h-48 object-cover rounded border-2 border-primary">
                     </div>
                     <div id="upload-area"
-                        class="flex flex-col items-center gap-4 rounded border-2 border-dashed border-primary bg-card/50 px-6 py-10 transition-colors hover:bg-card cursor-pointer">
-                        <div class="text-primary">
+                        class="flex flex-col items-center gap-4 rounded-lg border-2 border-dashed border-accent/50 bg-accent/5 px-6 py-10 transition-colors hover:bg-accent/10 hover:border-accent cursor-pointer">
+                        <div class="text-accent">
                             <span class="material-symbols-outlined text-4xl">history_edu</span>
                         </div>
                         <div class="flex flex-col items-center gap-1">
@@ -119,7 +129,7 @@
                             <p class="text-muted text-xs text-center">Sube una imagen en tono sepia para el archivo</p>
                         </div>
                         <button type="button" id="select-file-btn"
-                            class="flex min-w-[120px] cursor-pointer items-center justify-center rounded border border-primary h-9 px-4 bg-transparent text-primary text-xs font-ui font-bold tracking-widest uppercase hover:bg-primary/10">
+                            class="flex min-w-[120px] cursor-pointer items-center justify-center rounded-lg h-9 px-4 text-white text-xs font-ui font-bold tracking-widest uppercase shadow-md transition-all hover:shadow-lg" style="background: linear-gradient(135deg, #F79F3F 0%, #DF3D4C 100%);">
                             Seleccionar Archivo
                         </button>
                     </div>
@@ -157,23 +167,23 @@
         </main>
         <!-- Sticky Action Bar -->
         <footer
-            class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-background-light/95 backdrop-blur-sm border-t border-primary/30 p-4 flex gap-4 items-center">
+            class="fixed bottom-0 left-0 right-0 max-w-md mx-auto backdrop-blur-md border-t border-primary/10 p-4 flex gap-4 items-center" style="background: rgba(255,250,248,0.95);">
             <a href="2-home.html"
-                class="flex-1 px-4 py-3 text-primary font-ui font-bold text-xs tracking-widest uppercase hover:text-red-wax transition-colors text-center">
+                class="flex-1 px-4 py-3 text-primary font-ui font-bold text-xs tracking-widest uppercase hover:text-primary-light transition-colors text-center border border-primary/20 rounded-lg">
                 Cancelar
             </a>
             <button id="save-btn"
-                class="flex-[2] bg-primary text-white py-3 px-6 shadow-xl font-display font-bold text-sm tracking-[0.15em] uppercase hover:bg-primary/90 transition-all border border-primary/50">
+                class="flex-[2] text-white py-3 px-6 shadow-[0_4px_20px_rgba(247,159,63,0.35)] font-display font-bold text-sm tracking-[0.15em] uppercase hover:shadow-[0_6px_28px_rgba(247,159,63,0.45)] transition-all rounded-lg" style="background: linear-gradient(135deg, #DF3D4C 0%, #F79F3F 100%);">
                 Guardar Registro
             </button>
         </footer>
     </div>
-    <!-- Decorative Corner Accents (Optional visual flair) -->
+    <!-- Decorative Corner Accents -->
     <div
-        class="fixed top-0 left-0 w-16 h-16 border-t-2 border-l-2 border-primary/20 pointer-events-none m-4 hidden lg:block">
+        class="fixed top-0 left-0 w-16 h-16 border-t-2 border-l-2 border-accent/30 pointer-events-none m-4 hidden lg:block">
     </div>
     <div
-        class="fixed bottom-0 right-0 w-16 h-16 border-b-2 border-r-2 border-primary/20 pointer-events-none m-4 hidden lg:block">
+        class="fixed bottom-0 right-0 w-16 h-16 border-b-2 border-r-2 border-accent/30 pointer-events-none m-4 hidden lg:block">
     </div>
     <script>
         // Add/Edit Form Logic
@@ -185,9 +195,6 @@
         if (!Auth.isLoggedIn()) {
             window.location.href = '5-login.html';
         }
-
-        // Update page title
-        document.getElementById('page-title').textContent = isEditMode ? 'REVISAR ENTRADA' : 'NUEVA ENTRADA';
 
         // Load existing data if editing
         if (isEditMode) {

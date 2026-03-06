@@ -10,7 +10,7 @@
             max-width: 800px;
             margin: 50px auto;
             padding: 20px;
-            background: #f5f5f5;
+            background: #FFFAF8;
         }
         .container {
             background: white;
@@ -19,11 +19,11 @@
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
         h1 {
-            color: #2d8659;
+            color: #B02C33;
             margin-bottom: 20px;
         }
         button {
-            background: #2d8659;
+            background: #B02C33;
             color: white;
             border: none;
             padding: 15px 30px;
@@ -33,13 +33,13 @@
             margin: 10px 5px;
         }
         button:hover {
-            background: #3a9d6d;
+            background: #DF3D4C;
         }
         .status {
             margin-top: 20px;
             padding: 15px;
-            background: #eff5f2;
-            border-left: 4px solid #2d8659;
+            background: #FFF1EB;
+            border-left: 4px solid #B02C33;
             border-radius: 4px;
         }
         .preview {
@@ -52,23 +52,28 @@
             text-align: center;
         }
         .preview-item img {
-            border: 2px solid #e0e2e7;
+            border: 2px solid #EEDDD6;
             border-radius: 8px;
         }
         .preview-item p {
             margin-top: 5px;
             font-size: 12px;
-            color: #6b7280;
+            color: #8C6F64;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🎨 Generate PWA Icons for Refranario</h1>
-        <p>Click the button below to generate all required icon sizes for the PWA.</p>
+        <h1>🎨 Generate PWA Icons for Señor Shaعbi</h1>
+        <p>Select <strong>new_logo.png</strong> below, then generate all required icon sizes for the PWA.</p>
         
-        <button onclick="generateAllIcons()">Generate All Icons</button>
-        <button onclick="downloadAllIcons()">Download All Icons as ZIP</button>
+        <div style="margin: 15px 0;">
+            <label for="logo-input" style="font-weight: bold; display: block; margin-bottom: 8px;">1. Select logo file:</label>
+            <input type="file" id="logo-input" accept="image/*" style="font-size: 14px;" />
+        </div>
+        
+        <button onclick="generateAllIcons()" id="gen-btn" disabled>2. Generate All Icons</button>
+        <button onclick="downloadAllIcons()">3. Download All Icons as ZIP</button>
         
         <div id="status" class="status" style="display: none;"></div>
         
@@ -79,6 +84,26 @@
     <script>
         const sizes = [72, 96, 128, 144, 152, 192, 384, 512];
         const generatedIcons = {};
+        let logoImage = null;
+
+        // Load logo from file input (avoids tainted canvas / CORS)
+        document.getElementById('logo-input').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+                const img = new Image();
+                img.onload = () => {
+                    logoImage = img;
+                    document.getElementById('gen-btn').disabled = false;
+                    const status = document.getElementById('status');
+                    status.style.display = 'block';
+                    status.innerHTML = '<strong>✅ Logo loaded! Click "Generate All Icons".</strong>';
+                };
+                img.src = ev.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
 
         function createIcon(size) {
             const canvas = document.createElement('canvas');
@@ -86,50 +111,38 @@
             canvas.height = size;
             const ctx = canvas.getContext('2d');
 
-            // Background
-            ctx.fillStyle = '#2d8659';
+            // Off-white background with rounded corners (simulated)
+            ctx.fillStyle = '#FFFAF8';
             ctx.fillRect(0, 0, size, size);
 
-            // Draw book icon
-            const padding = size * 0.2;
-            const bookWidth = size - (padding * 2);
-            const bookHeight = size - (padding * 2);
-            const centerX = size / 2;
-            const centerY = size / 2;
+            // Draw logo centered, filling the canvas with some padding
+            if (logoImage) {
+                const padding = size * 0.08;
+                const drawSize = size - (padding * 2);
+                const aspect = logoImage.width / logoImage.height;
+                let drawW, drawH, drawX, drawY;
 
-            // Book pages (white)
-            ctx.fillStyle = '#ffffff';
-            ctx.beginPath();
-            ctx.moveTo(centerX, padding);
-            ctx.lineTo(centerX + bookWidth/2, padding);
-            ctx.lineTo(centerX + bookWidth/2, size - padding);
-            ctx.lineTo(centerX, size - padding - bookHeight * 0.1);
-            ctx.closePath();
-            ctx.fill();
+                if (aspect > 1) {
+                    drawW = drawSize;
+                    drawH = drawSize / aspect;
+                } else {
+                    drawH = drawSize;
+                    drawW = drawSize * aspect;
+                }
+                drawX = (size - drawW) / 2;
+                drawY = (size - drawH) / 2;
 
-            ctx.beginPath();
-            ctx.moveTo(centerX, padding);
-            ctx.lineTo(centerX - bookWidth/2, padding);
-            ctx.lineTo(centerX - bookWidth/2, size - padding);
-            ctx.lineTo(centerX, size - padding - bookHeight * 0.1);
-            ctx.closePath();
-            ctx.fill();
-
-            // Book spine shadow
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
-            ctx.fillRect(centerX - 2, padding, 4, bookHeight);
-
-            // Letter "R"
-            ctx.fillStyle = '#2d8659';
-            ctx.font = `bold ${size * 0.4}px "Arial", sans-serif`;
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText('R', centerX, centerY);
+                ctx.drawImage(logoImage, drawX, drawY, drawW, drawH);
+            }
 
             return canvas;
         }
 
         function generateAllIcons() {
+            if (!logoImage) {
+                alert('Please select the logo file first.');
+                return;
+            }
             const preview = document.getElementById('preview');
             const status = document.getElementById('status');
             preview.innerHTML = '';
@@ -141,7 +154,6 @@
                 const dataUrl = canvas.toDataURL('image/png');
                 generatedIcons[size] = dataUrl;
 
-                // Create preview
                 const previewItem = document.createElement('div');
                 previewItem.className = 'preview-item';
                 
@@ -165,7 +177,7 @@
                 preview.appendChild(previewItem);
             });
 
-            status.innerHTML = '<strong>✅ Icons generated successfully!</strong><br>Click "Download All Icons as ZIP" or download individually.';
+            status.innerHTML = '<strong>✅ Icons generated from new_logo.png!</strong><br>Click "Download All Icons as ZIP" or download individually.';
         }
 
         function downloadIcon(size, dataUrl) {
@@ -205,8 +217,11 @@
             status.innerHTML = '<strong>✅ ZIP file downloaded!</strong><br>Extract the icons to the "icons/" folder in your project.';
         }
 
-        // Auto-generate on load
-        window.addEventListener('load', generateAllIcons);
+        // Ready on load
+        window.addEventListener('load', () => {
+            document.getElementById('status').style.display = 'block';
+            document.getElementById('status').innerHTML = '<strong>Select new_logo.png to get started.</strong>';
+        });
     </script>
 </body>
 </html>

@@ -8,7 +8,7 @@
     <title>The Scholar's Archive - Offline Banner</title>
 
     <!-- PWA Meta Tags -->
-    <meta name="theme-color" content="#2d8659" />
+    <meta name="theme-color" content="#B02C33" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Señor Shaعbi" />
@@ -41,12 +41,14 @@
             theme: {
                 extend: {
                     colors: {
-                        "primary": "#2d8659",
-                        "background-light": "#f0f4f2",
-                        "background-dark": "#111721",
-                        "gold-leaf": "#2d8659",
-                        "oxford-navy": "#2d8659",
-                        "ink": "#1a1a1a",
+                        "primary": "#B02C33",
+                        "primary-light": "#DF3D4C",
+                        "accent": "#F79F3F",
+                        "background-light": "#FFFAF8",
+                        "background-dark": "#2A1810",
+                        "gold-leaf": "#F79F3F",
+                        "oxford-navy": "#B02C33",
+                        "ink": "#2A1810",
                     },
                     fontFamily: {
                         "display": ["DM Sans", "sans-serif"],
@@ -73,7 +75,7 @@
         }
 
         ::-webkit-scrollbar-thumb {
-            background: #C5A059;
+            background: #DF3D4C;
             border-radius: 4px;
         }
     </style>
@@ -86,102 +88,103 @@
 
 <body
     class="bg-background-light dark:bg-background-dark font-display text-ink antialiased min-h-screen flex flex-col relative overflow-hidden">
+    <!-- Subtle warm background gradient -->
+    <div class="absolute inset-0 pointer-events-none" style="background: linear-gradient(180deg, rgba(176,44,51,0.04) 0%, rgba(247,159,63,0.02) 50%, transparent 100%);"></div>
     <!-- Offline Banner Component -->
-    <!-- Sticky banner: stays at top on scroll but pushes content down instead of overlapping -->
     <div
-        class="sticky top-0 left-0 right-0 z-[60] bg-primary shadow-md transition-transform duration-300 ease-in-out transform translate-y-0">
-        <div class="max-w-md mx-auto px-4 py-2 flex items-center justify-center gap-2">
+        class="sticky top-0 left-0 right-0 z-[60] shadow-lg transition-transform duration-300 ease-in-out transform translate-y-0" style="background: linear-gradient(135deg, #F79F3F 0%, #DF3D4C 100%);">
+        <div class="max-w-md mx-auto px-4 py-2.5 flex items-center justify-center gap-2">
             <span aria-hidden="true" class="material-symbols-outlined text-white text-[18px]">wifi_off</span>
             <p class="text-white text-xs font-bold tracking-wide uppercase font-display leading-none pt-0.5">
                 Modo sin conexión. Viendo archivo en caché.
             </p>
         </div>
     </div>
-    <!-- Main Content Area (Blurred/Dimmed to simulate context) -->
-    <main class="flex-1 w-full max-w-md mx-auto pt-2 pb-24 px-4 overflow-y-auto">
+    <!-- Main Content Area -->
+    <main class="relative flex-1 w-full max-w-md mx-auto pt-2 pb-24 px-4 overflow-y-auto">
         <!-- Header Section -->
         <header class="mb-6 mt-4">
             <div class="flex justify-between items-center mb-6">
                 <button
-                    class="text-oxford-navy dark:text-slate-100 p-2 -ml-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors">
+                    class="text-primary dark:text-slate-100 p-2 -ml-2 rounded-full hover:bg-primary/10 dark:hover:bg-slate-800 transition-colors">
                     <span class="material-symbols-outlined text-[28px]">menu</span>
                 </button>
                 <div class="flex flex-col items-center">
-                    <span class="material-symbols-outlined text-gold-leaf text-[32px] mb-1">auto_stories</span>
-                    <h1 class="font-header text-oxford-navy dark:text-white text-xl tracking-widest">SEÑOR SHAعBI</h1>
+                    <span class="material-symbols-outlined text-accent text-[32px] mb-1">auto_stories</span>
+                    <img src="new_logo_name_only.png" alt="Señor Shaعbi" class="h-7 object-contain" />
                 </div>
                 <button
-                    class="text-oxford-navy dark:text-slate-100 p-2 -mr-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors relative">
+                    class="text-primary dark:text-slate-100 p-2 -mr-2 rounded-full hover:bg-primary/10 dark:hover:bg-slate-800 transition-colors relative">
                     <span class="material-symbols-outlined text-[28px]">notifications</span>
-                    <span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
+                    <span class="absolute top-2 right-2 w-2 h-2 bg-accent rounded-full border border-white"></span>
                 </button>
             </div>
             <!-- Search Bar -->
             <div class="relative group">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <span class="material-symbols-outlined text-gold-leaf">search</span>
+                    <span class="material-symbols-outlined text-accent">search</span>
                 </div>
                 <input
-                    class="block w-full pl-10 pr-3 py-3 border border-gold-leaf rounded bg-white dark:bg-background-dark text-ink dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent font-serif shadow-sm"
+                    class="block w-full pl-10 pr-3 py-3 border border-primary/20 rounded-lg bg-white dark:bg-background-dark text-ink dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent font-serif shadow-sm"
                     placeholder="Search by phrase, word, or meaning..." type="text" />
             </div>
         </header>
-        <!-- Content Feed (Simulating "The Archive") -->
+        <!-- Content Feed -->
         <div class="space-y-4">
             <!-- Card 1 -->
             <article
-                class="bg-white dark:bg-[#1a2332] border-2 border-double border-gold-leaf p-5 rounded shadow-sm relative group cursor-pointer hover:shadow-deep transition-shadow duration-300">
+                class="bg-white dark:bg-[#1a2332] border-l-[3px] border-l-primary-light border border-primary/10 p-5 rounded-lg shadow-sm relative group cursor-pointer hover:shadow-[0_8px_24px_rgba(176,44,51,0.12)] transition-all duration-300">
                 <div class="flex justify-between items-start mb-3">
                     <span
-                        class="inline-block px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-oxford-navy dark:text-slate-300 text-[10px] font-bold uppercase tracking-wider rounded">Wisdom</span>
-                    <span class="material-symbols-outlined text-gold-leaf text-[20px]">bookmark</span>
+                        class="inline-block px-2.5 py-0.5 bg-accent/10 text-accent text-[10px] font-bold uppercase tracking-wider rounded-full">Wisdom</span>
+                    <span class="material-symbols-outlined text-accent text-[20px]">bookmark</span>
                 </div>
-                <h2 class="font-header text-lg text-oxford-navy dark:text-slate-100 mb-2 leading-tight">
+                <h2 class="font-display text-lg text-primary dark:text-slate-100 mb-2 leading-tight font-bold">
                     Más vale pájaro en mano que ciento volando
                 </h2>
                 <div class="text-right mb-3" dir="rtl">
                     <p class="font-arabic text-xl text-ink dark:text-slate-300">عصفور في اليد خير من عشرة على الشجرة</p>
                 </div>
                 <p
-                    class="font-serif text-slate-500 dark:text-slate-400 text-sm border-t border-slate-100 dark:border-slate-700 pt-3 mt-2">
+                    class="font-serif text-muted dark:text-slate-400 text-sm border-t border-primary/10 dark:border-slate-700 pt-3 mt-2">
                     A bird in the hand is worth two in the bush.
                 </p>
             </article>
             <!-- Card 2 -->
             <article
-                class="bg-white dark:bg-[#1a2332] border-2 border-double border-gold-leaf p-5 rounded shadow-sm relative group cursor-pointer hover:shadow-deep transition-shadow duration-300">
+                class="bg-white dark:bg-[#1a2332] border-l-[3px] border-l-accent border border-primary/10 p-5 rounded-lg shadow-sm relative group cursor-pointer hover:shadow-[0_8px_24px_rgba(176,44,51,0.12)] transition-all duration-300">
                 <div class="flex justify-between items-start mb-3">
                     <span
-                        class="inline-block px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-oxford-navy dark:text-slate-300 text-[10px] font-bold uppercase tracking-wider rounded">Time</span>
-                    <span class="material-symbols-outlined text-slate-300 text-[20px]">bookmark_border</span>
+                        class="inline-block px-2.5 py-0.5 bg-primary-light/10 text-primary-light text-[10px] font-bold uppercase tracking-wider rounded-full">Time</span>
+                    <span class="material-symbols-outlined text-primary/30 text-[20px]">bookmark_border</span>
                 </div>
-                <h2 class="font-header text-lg text-oxford-navy dark:text-slate-100 mb-2 leading-tight">
+                <h2 class="font-display text-lg text-primary dark:text-slate-100 mb-2 leading-tight font-bold">
                     No por mucho madrugar amanece más temprano
                 </h2>
                 <div class="text-right mb-3" dir="rtl">
                     <p class="font-arabic text-xl text-ink dark:text-slate-300">كل شيء في وقته حلو</p>
                 </div>
                 <p
-                    class="font-serif text-slate-500 dark:text-slate-400 text-sm border-t border-slate-100 dark:border-slate-700 pt-3 mt-2">
+                    class="font-serif text-muted dark:text-slate-400 text-sm border-t border-primary/10 dark:border-slate-700 pt-3 mt-2">
                     Everything happens in its own time; rushing does not speed up the sun.
                 </p>
             </article>
             <!-- Card 3 -->
             <article
-                class="bg-white dark:bg-[#1a2332] border-2 border-double border-gold-leaf p-5 rounded shadow-sm relative group cursor-pointer hover:shadow-deep transition-shadow duration-300 opacity-60">
+                class="bg-white dark:bg-[#1a2332] border-l-[3px] border-l-primary border border-primary/10 p-5 rounded-lg shadow-sm relative group cursor-pointer hover:shadow-[0_8px_24px_rgba(176,44,51,0.12)] transition-all duration-300 opacity-60">
                 <div class="flex justify-between items-start mb-3">
                     <span
-                        class="inline-block px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-oxford-navy dark:text-slate-300 text-[10px] font-bold uppercase tracking-wider rounded">Fate</span>
-                    <span class="material-symbols-outlined text-slate-300 text-[20px]">bookmark_border</span>
+                        class="inline-block px-2.5 py-0.5 bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-wider rounded-full">Fate</span>
+                    <span class="material-symbols-outlined text-primary/30 text-[20px]">bookmark_border</span>
                 </div>
-                <h2 class="font-header text-lg text-oxford-navy dark:text-slate-100 mb-2 leading-tight">
+                <h2 class="font-display text-lg text-primary dark:text-slate-100 mb-2 leading-tight font-bold">
                     A quien madruga, Dios le ayuda
                 </h2>
                 <div class="text-right mb-3" dir="rtl">
                     <p class="font-arabic text-xl text-ink dark:text-slate-300">من جد وجد ومن زرع حصد</p>
                 </div>
                 <p
-                    class="font-serif text-slate-500 dark:text-slate-400 text-sm border-t border-slate-100 dark:border-slate-700 pt-3 mt-2">
+                    class="font-serif text-muted dark:text-slate-400 text-sm border-t border-primary/10 dark:border-slate-700 pt-3 mt-2">
                     The early bird catches the worm.
                 </p>
             </article>
