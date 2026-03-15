@@ -1,7 +1,7 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { logger } from 'hono/logger'
-import type { D1Database, D1PreparedStatement } from '@cloudflare/workers-types'
+import type { D1Database, R2Bucket } from '@cloudflare/workers-types'
 
 // Simple JWT implementation using HMAC-SHA256
 const JWT_SECRET = 'senor-shabi-secret-key-2024'
@@ -84,6 +84,7 @@ type User = {
 
 type Env = {
   senor_shabi_db: D1Database
+  senor_shabi_images: R2Bucket
 }
 
 const app = new Hono<{ Bindings: Env }>()
@@ -259,10 +260,11 @@ app.post('/api/proverbs', requireAdmin, async (c) => {
   return c.json({ proverb: rowToProverb(result) }, 201)
 })
 
-// Admin-only: Upload image
+// Admin-only: Upload image to R2
 app.post('/api/upload', requireAdmin, async (c) => {
   const body = await c.req.json()
   const { image, filename } = body
+  const r2 = c.env.senor_shabi_images
   
   if (!image) {
     return c.json({ error: 'No image provided' }, 400)
@@ -275,17 +277,44 @@ app.post('/api/upload', requireAdmin, async (c) => {
     return c.json({ error: 'Invalid image format' }, 400)
   }
   
+  // Extract base64 data and mime type
+  const base64Data = image.replace(/^data:[^;]+;base64,/, '')
+  const mimeType = image.match(/^data:([^;]+);/)?.[1] || 'image/jpeg'
+  const imageBuffer = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0))
+  
   // Generate unique ID for the image
   const imageId = `${Date.now()}-${Math.random().toString(36).substring(7)}`
-  const extension = filename?.split('.').pop() || 'jpg'
+  const extension = filename?.split('.').pop() || mimeType.split('/')[1] || 'jpg'
   const storedFilename = `${imageId}.${extension}`
   
-  // Return the base64 as data URL
+  // Upload to R2
+  await r2.put(storedFilename, imageBuffer, {
+    httpMetadata: {
+      contentType: mimeType
+    }
+  })
+  
+  // Return R2 public URL (using R2's direct URL format)
+  const publicUrl = `https://pub-${'e932169c-2609-44f5-9478-547d7b95c946'}.r2.cloudflarestorage.com/${storedFilename}`
+  
   return c.json({ 
     success: true, 
-    url: image,
+    url: publicUrl,
     filename: storedFilename
   })
+})
+
+// Admin-only: Delete image from R2
+app.delete('/api/upload/:filename', requireAdmin, async (c) => {
+  const filename = c.req.param('filename')
+  const r2 = c.env.senor_shabi_images
+  
+  try {
+    await r2.delete(filename)
+    return c.json({ success: true })
+  } catch (e) {
+    return c.json({ error: 'Failed to delete image' }, 500)
+  }
 })
 
 // Admin-only: Update proverb
@@ -293,6 +322,25 @@ app.put('/api/proverbs/:id', requireAdmin, async (c) => {
   const id = c.req.param('id')
   const body = await c.req.json()
   const db = c.env.senor_shabi_db
+  const r2 = c.env.senor_shabi_images
+  
+  // Get current proverb to check for image change
+  const currentProverb = await db.prepare('SELECT * FROM proverbs WHERE id = ?').bind(id).first() as { image: string } | undefined
+  
+  // If image is being updated and old image was an R2 image, delete old image
+  if (body.image !== undefined && currentProverb?.image && body.image !== currentProverb.image) {
+    const oldUrl = currentProverb.image
+    // Extract filename from R2 URL
+    const oldFilename = oldUrl.split('/').pop()
+    if (oldFilename && oldUrl.includes('r2.cloudflarestorage.com')) {
+      try {
+        await r2.delete(oldFilename)
+        console.log('[R2] Deleted old image:', oldFilename)
+      } catch (e) {
+        console.error('[R2] Failed to delete old image:', e)
+      }
+    }
+  }
   
   // Build update query dynamically
   const fields: string[] = []

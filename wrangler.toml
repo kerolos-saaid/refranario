@@ -13,3 +13,7 @@ vars = { ENVIRONMENT = "preview" }
 binding = "senor_shabi_db"
 database_name = "senor-shabi-db"
 database_id = "e932169c-2609-44f5-9478-547d7b95c946"
+
+[[r2_buckets]]
+bucket_name = "senor-shabi-images"
+binding = "senor_shabi_images"
