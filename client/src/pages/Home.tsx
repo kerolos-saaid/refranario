@@ -18,6 +18,8 @@ export default function Home() {
   const [page, setPage] = useState(1)
   const [hasMore, setHasMore] = useState(true)
   const [searchLoading, setSearchLoading] = useState(false)
+  const [newItemIds, setNewItemIds] = useState<Set<string>>(new Set())
+  const [newBatchStartIndex, setNewBatchStartIndex] = useState(0)
 
   useEffect(() => {
     const loggedIn = localStorage.getItem('isLoggedIn') === 'true'
@@ -62,8 +64,14 @@ export default function Home() {
       
       if (shouldReset) {
         setProverbs(data.proverbs)
+        setNewItemIds(new Set()) // No animation on initial/reset load
+        setNewBatchStartIndex(0)
       } else {
+        const newIds = data.proverbs.map((p: Proverb) => p.id)
+        setNewBatchStartIndex(proverbs.length) // Current length = start index of new batch
         setProverbs(prev => [...prev, ...data.proverbs])
+        // Only mark the freshly loaded items as new (replace, don't accumulate)
+        setNewItemIds(new Set(newIds))
       }
       setHasMore(data.pagination?.hasMore ?? false)
       setPage(currentPage)
@@ -198,13 +206,15 @@ export default function Home() {
               <p className="text-muted font-ui text-base md:text-lg">No se encontraron refranes</p>
             </div>
           ) : (
-            filteredProverbs.map((proverb, index) => (
+            filteredProverbs.map((proverb, index) => {
+              const isNew = newItemIds.has(proverb.id)
+              return (
               <Link
                 key={proverb.id}
                 to={`/detail/${proverb.id}`}
-                className="bg-card bookplate-border p-4 md:p-5 shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer group/card hover:-translate-y-1 md:hover:-translate-y-2"
+                className={`bg-card bookplate-border p-4 md:p-5 shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer group/card hover:-translate-y-1 md:hover:-translate-y-2 ${isNew ? 'animate-slide-up' : ''}`}
                 style={{ 
-                  animation: `fade-slide-in 0.4s ease-out ${Math.min(index * 0.06, 0.4)}s both`
+                  animationDelay: isNew ? `${Math.min((index - newBatchStartIndex) * 0.08, 0.5)}s` : '0s'
                 }}
               >
                 <div className="flex gap-3 md:gap-4 items-start">
@@ -241,7 +251,8 @@ export default function Home() {
                   </div>
                 </div>
               </Link>
-            ))
+              )
+            })
           )}
           
           {/* Load More */}
@@ -293,6 +304,10 @@ export default function Home() {
           from { opacity: 0; transform: translateY(20px); }
           to { opacity: 1; transform: translateY(0); }
         }
+        @keyframes slide-up {
+          from { opacity: 0; transform: translateY(30px) scale(0.95); }
+          to { opacity: 1; transform: translateY(0) scale(1); }
+        }
         @keyframes fade-in {
           from { opacity: 0; }
           to { opacity: 1; }
@@ -310,6 +325,7 @@ export default function Home() {
           to { opacity: 1; transform: scale(1); }
         }
         .animate-fade-in { animation: fade-in 0.3s ease-out forwards; }
+        .animate-slide-up { animation: slide-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
         .animate-bounce-once { animation: bounce-once 0.5s ease-out; }
         .animate-bounce-vertical { animation: bounce-vertical 1s ease-in-out infinite; }
         .animate-scale-in { animation: scale-in 0.3s ease-out forwards; }
