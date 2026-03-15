@@ -1,6 +1,7 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { logger } from 'hono/logger'
+import type { D1Database } from '@cloudflare/workers-types'
 
 type Proverb = {
   id: string
@@ -83,7 +84,7 @@ let proverbs: Proverb[] = [
 
 const users: User[] = [
   { username: 'admin', password: 'password123' },
-  { username: 'user', user: 'user123' }
+  { username: 'user', password: 'user123' }
 ]
 
 // Proverb routes
