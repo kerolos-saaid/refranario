@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { fetchProverbs, type Proverb } from '../lib/api'
 import { OptimizedImage } from '../components/OptimizedImage'
@@ -81,6 +81,26 @@ export default function Home() {
     }
   }
 
+  // Ripple effect handler
+  const createRipple = (event: React.MouseEvent<HTMLButtonElement>) => {
+    const button = event.currentTarget
+    const circle = document.createElement('span')
+    const diameter = Math.max(button.clientWidth, button.clientHeight)
+    const radius = diameter / 2
+
+    circle.style.width = circle.style.height = `${diameter}px`
+    circle.style.left = `${event.clientX - button.getBoundingClientRect().left - radius}px`
+    circle.style.top = `${event.clientY - button.getBoundingClientRect().top - radius}px`
+    circle.classList.add('ripple')
+
+    const ripple = button.getElementsByClassName('ripple')[0]
+    if (ripple) {
+      ripple.remove()
+    }
+
+    button.appendChild(circle)
+  }
+
   const handleSearch = useCallback((value: string) => {
     setSearchQuery(value)
     setSelectedLetter('')
@@ -139,11 +159,12 @@ export default function Home() {
               {ALPHABET.map((letter, i) => (
                 <button
                   key={letter}
-                  onClick={() => {
+                  onClick={(e) => {
+                    createRipple(e)
                     setSelectedLetter(selectedLetter === letter ? '' : letter)
                     setSearchQuery('')
                   }}
-                  className={`px-2 md:px-3 py-1 text-xs md:text-sm rounded transition-all duration-300 ${
+                  className={`btn-press px-2 md:px-3 py-1 text-xs md:text-sm rounded transition-all duration-300 ${
                     selectedLetter === letter 
                       ? 'bg-accent text-white scale-110' 
                       : 'text-white/70 hover:text-white hover:bg-white/10 hover:scale-105'
@@ -227,11 +248,14 @@ export default function Home() {
           
           {!loading && !loadingMore && hasMore && filteredProverbs.length > 0 && (
             <button
-              onClick={loadMore}
-              className="mx-auto mt-4 md:mt-6 px-8 py-3 rounded-full text-sm md:text-base font-medium transition-all hover:scale-105 active:scale-95 shadow-md"
+              onClick={(e) => {
+                createRipple(e)
+                loadMore()
+              }}
+              className="btn-press mx-auto mt-4 md:mt-6 px-8 py-3 rounded-full text-sm md:text-base font-medium transition-all hover:scale-105 active:scale-95 shadow-md"
               style={{ background: 'linear-gradient(135deg, #F79F3F 0%, #DF3D4C 100%)' }}
             >
-              <span className="text-white">Cargar más refranes</span>
+              <span className="text-white relative z-10">Cargar más refranes</span>
             </button>
           )}
           
@@ -247,10 +271,10 @@ export default function Home() {
       
       {/* Admin FAB */}
       {isLoggedIn && (
-        <div className="absolute bottom-24 md:bottom-8 right-6 md:right-8 z-40">
+        <div className="absolute bottom-28 md:bottom-8 right-6 md:right-8 z-40">
           <Link
             to="/add"
-            className="flex items-center justify-center w-14 h-14 md:w-16 md:h-16 rounded-full shadow-[0_6px_24px_rgba(247,159,63,0.4)] hover:shadow-[0_8px_32px_rgba(247,159,63,0.5)] hover:scale-110 active:scale-95 transition-all duration-300 animate-bounce-once"
+            className="btn-press flex items-center justify-center w-14 h-14 md:w-16 md:h-16 rounded-full shadow-[0_6px_24px_rgba(247,159,63,0.4)] hover:shadow-[0_8px_32px_rgba(247,159,63,0.5)] hover:scale-110 active:scale-95 transition-all duration-300 animate-bounce-once"
             style={{ background: 'linear-gradient(135deg, #F79F3F 0%, #DF3D4C 100%)' }}
           >
             <span className="material-symbols-outlined text-white text-2xl md:text-3xl">edit_square</span>
