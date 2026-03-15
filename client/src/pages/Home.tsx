@@ -44,7 +44,7 @@ export default function Home() {
   }
 
   return (
-    <div className="relative flex h-screen w-full flex-col overflow-hidden bg-background">
+    <div className="relative flex min-h-screen w-full flex-col bg-background">
       {/* Subtle warm background gradient */}
       <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(180deg, rgba(176,44,51,0.03) 0%, rgba(247,159,63,0.02) 50%, transparent 100%)' }} />
       
