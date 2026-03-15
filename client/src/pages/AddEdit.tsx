@@ -207,8 +207,7 @@ export default function AddEdit() {
                     id="preview-img" 
                     src={formData.image} 
                     alt="Preview" 
-                    className="w-full h-48 object-cover rounded-lg border-2 border-primary shadow-md cursor-pointer"
-                    onClick={() => fileInputRef.current?.click()}
+                    className="w-full h-48 object-cover rounded-lg border-2 border-primary shadow-md"
                   />
                   {/* Remove button */}
                   <button
@@ -218,10 +217,25 @@ export default function AddEdit() {
                   >
                     <span className="material-symbols-outlined text-lg">close</span>
                   </button>
-                  {/* Change image hint */}
-                  <p className="text-center text-xs text-muted mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    Click image to change
-                  </p>
+                  {/* Change Image Button */}
+                  <div className="flex gap-2 mt-3 justify-center">
+                    <button 
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-accent text-white text-xs font-bold hover:opacity-90 transition-opacity"
+                    >
+                      <span className="material-symbols-outlined text-sm">upload</span>
+                      Cambiar Imagen
+                    </button>
+                    <button 
+                      type="button"
+                      onClick={removeImage}
+                      className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-red-500 text-white text-xs font-bold hover:opacity-90 transition-opacity"
+                    >
+                      <span className="material-symbols-outlined text-sm">delete</span>
+                      Eliminar
+                    </button>
+                  </div>
                 </div>
               ) : (
                 /* Upload Area - Drag & Drop */
