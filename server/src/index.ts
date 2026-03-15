@@ -294,8 +294,8 @@ app.post('/api/upload', requireAdmin, async (c) => {
     }
   })
   
-  // Return R2 public URL (using R2's direct URL format)
-  const publicUrl = `https://pub-${'e932169c-2609-44f5-9478-547d7b95c946'}.r2.cloudflarestorage.com/${storedFilename}`
+  // Return R2 public URL (using r2.dev format)
+  const publicUrl = `https://pub-15bc35ea99c24da4a92e7cd73a098679.r2.dev/${storedFilename}`
   
   return c.json({ 
     success: true, 
