@@ -155,3 +155,47 @@ button *,
     transform: scale(0.95);
   }
 }
+
+/* Icon Animations */
+.material-symbols-outlined {
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+              opacity 0.2s ease;
+}
+
+.material-symbols-outlined.animate-bounce {
+  animation: icon-bounce 0.6s ease infinite;
+}
+
+@keyframes icon-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+.material-symbols-outlined.animate-pulse {
+  animation: icon-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes icon-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.1); }
+}
+
+/* Smooth icon hover effects */
+.group:hover .material-symbols-outlined:not(:first-child) {
+  transform: translateX(4px);
+}
+
+/* Card hover lift with icon animation */
+.group/card:hover .material-symbols-outlined {
+  animation: icon-slide-right 0.3s ease forwards;
+}
+
+@keyframes icon-slide-right {
+  from { transform: translateX(0); opacity: 0.4; }
+  to { transform: translateX(6px); opacity: 1; }
+}
+
+/* Smooth all transitions */
+* {
+  -webkit-tap-highlight-color: transparent;
+}

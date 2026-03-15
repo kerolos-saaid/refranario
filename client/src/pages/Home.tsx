@@ -232,9 +232,9 @@ export default function Home() {
                       {proverb.english}
                     </p>
                   </div>
-                  {/* Chevron */}
-                  <div className="self-center text-primary-light/40 group-hover/card:text-accent flex-shrink-0 transition-all group-hover/card:translate-x-1 md:group-hover/card:translate-x-2">
-                    <span className="material-symbols-outlined text-xl md:text-2xl">chevron_right</span>
+                  {/* Chevron with elegant animation */}
+                  <div className="self-center text-primary-light/40 group-hover/card:text-accent flex-shrink-0 transition-all duration-300 group-hover/card:translate-x-2">
+                    <span className="material-symbols-outlined text-xl md:text-2xl transform group-hover/card:scale-110 transition-transform duration-300">chevron_right</span>
                   </div>
                 </div>
               </Link>
