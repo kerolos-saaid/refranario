@@ -207,7 +207,8 @@ export default function AddEdit() {
                     id="preview-img" 
                     src={formData.image} 
                     alt="Preview" 
-                    className="w-full h-48 object-cover rounded-lg border-2 border-primary shadow-md"
+                    className="w-full h-48 object-cover rounded-lg border-2 border-primary shadow-md cursor-pointer"
+                    onClick={() => fileInputRef.current?.click()}
                   />
                   {/* Remove button */}
                   <button
@@ -217,6 +218,10 @@ export default function AddEdit() {
                   >
                     <span className="material-symbols-outlined text-lg">close</span>
                   </button>
+                  {/* Change image hint */}
+                  <p className="text-center text-xs text-muted mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    Click image to change
+                  </p>
                 </div>
               ) : (
                 /* Upload Area - Drag & Drop */
