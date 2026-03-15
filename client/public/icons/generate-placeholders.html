@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generate PWA Icons</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .icon-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        .icon-item {
+            text-align: center;
+        }
+        canvas {
+            border: 1px solid #EEDDD6;
+            border-radius: 8px;
+            max-width: 100%;
+        }
+        button {
+            background: #B02C33;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #DF3D4C;
+        }
+        .download-link {
+            display: inline-block;
+            margin-top: 10px;
+            color: #B02C33;
+            text-decoration: none;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Señor Shaعbi PWA Icon Generator</h1>
+    <p>Select <strong>new_logo.png</strong> below, then generate all required icon sizes.</p>
+    
+    <div style="margin: 15px 0;">
+        <label for="logo-input" style="font-weight: bold; display: block; margin-bottom: 8px;">1. Select logo file:</label>
+        <input type="file" id="logo-input" accept="image/*" style="font-size: 14px;" />
+    </div>
+    
+    <button onclick="generateAllIcons()" id="gen-btn" disabled>2. Generate All Icons</button>
+    <button onclick="downloadAll()">3. Download All</button>
+    
+    <div class="icon-grid" id="icon-grid"></div>
+
+    <script>
+        const sizes = [72, 96, 128, 144, 152, 192, 384, 512];
+        const icons = {};
+        let logoImage = null;
+
+        // Load logo from file input (avoids tainted canvas / CORS)
+        document.getElementById('logo-input').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+                const img = new Image();
+                img.onload = () => {
+                    logoImage = img;
+                    document.getElementById('gen-btn').disabled = false;
+                };
+                img.src = ev.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+
+        function generateIcon(size) {
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+
+            // Off-white background
+            ctx.fillStyle = '#FFFAF8';
+            ctx.fillRect(0, 0, size, size);
+
+            // Draw logo centered with padding
+            if (logoImage) {
+                const padding = size * 0.08;
+                const drawSize = size - (padding * 2);
+                const aspect = logoImage.width / logoImage.height;
+                let drawW, drawH, drawX, drawY;
+
+                if (aspect > 1) {
+                    drawW = drawSize;
+                    drawH = drawSize / aspect;
+                } else {
+                    drawH = drawSize;
+                    drawW = drawSize * aspect;
+                }
+                drawX = (size - drawW) / 2;
+                drawY = (size - drawH) / 2;
+
+                ctx.drawImage(logoImage, drawX, drawY, drawW, drawH);
+            }
+
+            return canvas;
+        }
+
+        function generateAllIcons() {
+            if (!logoImage) {
+                alert('Please select the logo file first.');
+                return;
+            }
+
+            const grid = document.getElementById('icon-grid');
+            grid.innerHTML = '';
+
+            sizes.forEach(size => {
+                const canvas = generateIcon(size);
+                icons[size] = canvas;
+
+                const item = document.createElement('div');
+                item.className = 'icon-item';
+                item.innerHTML = `
+                    <canvas width="${size}" height="${size}"></canvas>
+                    <p>${size}x${size}</p>
+                    <a href="#" class="download-link" onclick="downloadIcon(${size}); return false;">Download</a>
+                `;
+                
+                const displayCanvas = item.querySelector('canvas');
+                const ctx = displayCanvas.getContext('2d');
+                ctx.drawImage(canvas, 0, 0);
+                
+                grid.appendChild(item);
+            });
+        }
+
+        function downloadIcon(size) {
+            const canvas = icons[size];
+            if (!canvas) return;
+
+            canvas.toBlob(blob => {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `icon-${size}x${size}.png`;
+                a.click();
+                URL.revokeObjectURL(url);
+            });
+        }
+
+        function downloadAll() {
+            sizes.forEach((size, index) => {
+                setTimeout(() => downloadIcon(size), index * 200);
+            });
+        }
+
+        // No auto-generate — user must select logo first
+    </script>
+</body>
+</html>

@@ -1,0 +1,75 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #B02C33;
+  --color-primary-light: #DF3D4C;
+  --color-accent: #F79F3F;
+  --color-background: #F5EBE6;
+  --color-vellum: #FFFAF8;
+  --color-card: #ffffff;
+  --color-ink: #2A1810;
+  --color-gold: #F79F3F;
+  --color-muted: #8C6F64;
+  --color-border: #EEDDD6;
+  --color-secondary: #FFF1EB;
+  
+  --font-display: "DM Sans", sans-serif;
+  --font-serif: "DM Sans", sans-serif;
+  --font-arabic: "Tajawal", sans-serif;
+  --font-ui: "DM Sans", sans-serif;
+  --font-newsreader: "DM Sans", sans-serif;
+  
+  --shadow-floating: 0px 10px 30px rgba(176, 44, 51, 0.25);
+  --shadow-card: 0 1px 3px 0 rgba(42, 24, 16, 0.08), 0 1px 2px 0 rgba(42, 24, 16, 0.04);
+  
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+}
+
+@layer base {
+  body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-family: var(--font-serif);
+    min-height: max(884px, 100dvh);
+  }
+  
+  .font-arabic {
+    font-family: 'Amiri', 'Tajawal', serif;
+    line-height: 1.6;
+  }
+  
+  /* Custom scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #DF3D4C; border-radius: 4px; }
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .bookplate-border {
+    border: 1px solid rgba(176,44,51,0.08);
+    border-radius: 0.75rem;
+    background: white;
+    box-shadow: 0 2px 8px rgba(42, 24, 16, 0.08), 0 1px 3px rgba(42, 24, 16, 0.05);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
