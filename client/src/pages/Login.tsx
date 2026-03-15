@@ -16,10 +16,15 @@ export default function Login() {
     setError('')
 
     try {
-      await login(username, password)
-      localStorage.setItem('isLoggedIn', 'true')
-      localStorage.setItem('username', username)
-      navigate('/home')
+      const result = await login(username, password)
+      // Check if user is admin
+      if (result.role === 'admin') {
+        navigate('/home')
+      } else {
+        setError('Acceso denegado: solo administradores')
+        setShake(true)
+        setTimeout(() => setShake(false), 820)
+      }
     } catch (err) {
       setError('Usuario o contraseña incorrectos')
       setShake(true)

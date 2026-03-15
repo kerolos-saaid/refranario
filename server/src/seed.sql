@@ -33,6 +33,6 @@ INSERT INTO proverbs (id, spanish, arabic, english, category, note, image, curat
 ('30', 'Antes de actuar, piensa.', 'فكر قبل أن تتصرف', 'Think before you act.', 'Wisdom', 'Consider consequences before taking action.', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400', 'A. Al-Fayed', '25th Oct, 2023', 0);
 
 -- Insert default users (password: password123)
-INSERT INTO users (username, password) VALUES
-('admin', 'password123'),
-('user', 'user123');
+INSERT INTO users (username, password, role) VALUES
+('admin', 'password123', 'admin'),
+('user', 'user123', 'user');

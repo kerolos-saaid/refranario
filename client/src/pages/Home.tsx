@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
-import { fetchProverbs, type Proverb } from '../lib/api'
+import { fetchProverbs, isAdmin, type Proverb } from '../lib/api'
 import { OptimizedImage } from '../components/OptimizedImage'
 import { ProverbCardSkeleton, ProverbListSkeleton } from '../components/Skeleton'
 
@@ -14,16 +14,14 @@ export default function Home() {
   const [loadingMore, setLoadingMore] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedLetter, setSelectedLetter] = useState('')
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [isAdminUser, setIsAdminUser] = useState(false)
   const [page, setPage] = useState(1)
   const [hasMore, setHasMore] = useState(true)
   const [searchLoading, setSearchLoading] = useState(false)
   const [newItemIds, setNewItemIds] = useState<Set<string>>(new Set())
-  const [newBatchStartIndex, setNewBatchStartIndex] = useState(0)
 
   useEffect(() => {
-    const loggedIn = localStorage.getItem('isLoggedIn') === 'true'
-    setIsLoggedIn(loggedIn)
+    setIsAdminUser(isAdmin())
   }, [])
 
   // Initial load and search/filter changes with debounce
@@ -64,13 +62,10 @@ export default function Home() {
       
       if (shouldReset) {
         setProverbs(data.proverbs)
-        setNewItemIds(new Set()) // No animation on initial/reset load
-        setNewBatchStartIndex(0)
+        setNewItemIds(new Set())
       } else {
         const newIds = data.proverbs.map((p: Proverb) => p.id)
-        setNewBatchStartIndex(proverbs.length) // Current length = start index of new batch
         setProverbs(prev => [...prev, ...data.proverbs])
-        // Only mark the freshly loaded items as new (replace, don't accumulate)
         setNewItemIds(new Set(newIds))
       }
       setHasMore(data.pagination?.hasMore ?? false)
@@ -214,7 +209,7 @@ export default function Home() {
                 to={`/detail/${proverb.id}`}
                 className={`bg-card bookplate-border p-4 md:p-5 shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer group/card hover:-translate-y-1 md:hover:-translate-y-2 ${isNew ? 'animate-slide-up' : ''}`}
                 style={{ 
-                  animationDelay: isNew ? `${Math.min((index - newBatchStartIndex) * 0.08, 0.5)}s` : '0s'
+                  animationDelay: isNew ? `${Math.min(index * 0.08, 0.5)}s` : '0s'
                 }}
               >
                 <div className="flex gap-3 md:gap-4 items-start">
@@ -286,7 +281,7 @@ export default function Home() {
       </main>
       
       {/* Admin FAB - rendered via portal to escape ancestor transforms that break position:fixed */}
-      {isLoggedIn && createPortal(
+      {isAdminUser && createPortal(
         <div className="fixed bottom-20 md:bottom-8 right-6 md:right-8 z-40">
           <Link
             to="/add"

@@ -30,6 +30,41 @@ const app = new Hono<{ Bindings: Env }>()
 app.use('*', logger())
 app.use('*', cors())
 
+// Auth middleware - check if user is admin
+async function requireAdmin(c: any, next: () => Promise<void>) {
+  const authHeader = c.req.header('Authorization')
+  
+  if (!authHeader) {
+    return c.json({ error: 'Unauthorized - No token' }, 401)
+  }
+  
+  try {
+    // Decode base64 credentials
+    const credentials = atob(authHeader.replace('Basic ', ''))
+    const [username, password] = credentials.split(':')
+    
+    // Verify credentials and get role
+    const db = c.env.senor_shabi_db
+    const user = await db.prepare(
+      'SELECT username, role FROM users WHERE username = ? AND password = ?'
+    ).bind(username, password).first()
+    
+    if (!user) {
+      return c.json({ error: 'Unauthorized - Invalid credentials' }, 401)
+    }
+    
+    if (user.role !== 'admin') {
+      return c.json({ error: 'Forbidden - Admin only' }, 403)
+    }
+    
+    // Store user info in context
+    c.set('user', user)
+    await next()
+  } catch (e) {
+    return c.json({ error: 'Unauthorized - Invalid token' }, 401)
+  }
+}
+
 // Helper to convert D1 result to Proverb
 function rowToProverb(row: any): Proverb {
   return {
@@ -121,48 +156,8 @@ app.get('/api/proverbs', async (c) => {
   })
 })
 
-app.get('/api/proverbs/:id', async (c) => {
-  const id = c.req.param('id')
-  const db = c.env.senor_shabi_db
-  
-  const result = await db.prepare('SELECT * FROM proverbs WHERE id = ?').bind(id).first()
-  
-  if (!result) {
-    return c.json({ error: 'Proverb not found' }, 404)
-  }
-  
-  return c.json({ proverb: rowToProverb(result) })
-})
-
-app.post('/api/proverbs', async (c) => {
-  const body = await c.req.json()
-  const db = c.env.senor_shabi_db
-  
-  const id = Date.now().toString()
-  const date = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
-  
-  await db.prepare(`
-    INSERT INTO proverbs (id, spanish, arabic, english, category, note, image, curator, date, bookmarked)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
-  `).bind(
-    id,
-    body.spanish,
-    body.arabic,
-    body.english,
-    body.category || 'Wisdom',
-    body.note || '',
-    body.image || '',
-    body.curator || 'Admin',
-    date
-  ).run()
-  
-  const result = await db.prepare('SELECT * FROM proverbs WHERE id = ?').bind(id).first()
-  
-  return c.json({ proverb: rowToProverb(result) }, 201)
-})
-
-// Image upload endpoint (base64)
-app.post('/api/upload', async (c) => {
+// Admin-only: Upload image
+app.post('/api/upload', requireAdmin, async (c) => {
   const body = await c.req.json()
   const { image, filename } = body
   
@@ -190,7 +185,8 @@ app.post('/api/upload', async (c) => {
   })
 })
 
-app.put('/api/proverbs/:id', async (c) => {
+// Admin-only: Update proverb
+app.put('/api/proverbs/:id', requireAdmin, async (c) => {
   const id = c.req.param('id')
   const body = await c.req.json()
   const db = c.env.senor_shabi_db
@@ -229,7 +225,8 @@ app.put('/api/proverbs/:id', async (c) => {
   return c.json({ proverb: rowToProverb(result) })
 })
 
-app.delete('/api/proverbs/:id', async (c) => {
+// Admin-only: Delete proverb
+app.delete('/api/proverbs/:id', requireAdmin, async (c) => {
   const id = c.req.param('id')
   const db = c.env.senor_shabi_db
   
@@ -253,7 +250,7 @@ app.post('/api/login', async (c) => {
   const result = await db.prepare('SELECT * FROM users WHERE username = ? AND password = ?').bind(username, password).first()
   
   if (result) {
-    return c.json({ success: true, username: result.username })
+    return c.json({ success: true, username: result.username, role: result.role })
   }
   return c.json({ error: 'Invalid credentials' }, 401)
 })
