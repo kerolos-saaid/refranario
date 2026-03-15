@@ -1,6 +1,8 @@
 // Use relative path when deployed on same domain, or full URL for separate deployment
 // Note: The URL should include /api suffix
-const API_BASE = import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/api` : '/api'
+const API_BASE = import.meta.env.VITE_API_URL 
+  ? `${import.meta.env.VITE_API_URL}/api` 
+  : 'https://senor-shabi-api.kerolos-saaid.workers.dev/api'
 
 export async function fetchProverbs() {
   const res = await fetch(`${API_BASE}/proverbs`)

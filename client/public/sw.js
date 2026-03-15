@@ -1,6 +1,6 @@
-const CACHE_NAME = 'senor-shabi-v1';
-const STATIC_CACHE = 'senor-shabi-static-v1';
-const DATA_CACHE = 'senor-shabi-data-v1';
+const CACHE_NAME = 'senor-shabi-v3';
+const STATIC_CACHE = 'senor-shabi-static-v3';
+const DATA_CACHE = 'senor-shabi-data-v3';
 
 // Static assets to cache immediately
 const STATIC_ASSETS = [
@@ -18,19 +18,20 @@ const API_ENDPOINTS = [
 
 // Install event - cache static assets
 self.addEventListener('install', (event) => {
-  console.log('[SW] Installing service worker...');
+  console.log('[SW] Installing service worker v3...');
   event.waitUntil(
     caches.open(STATIC_CACHE).then((cache) => {
       console.log('[SW] Caching static assets');
       return cache.addAll(STATIC_ASSETS);
     })
   );
+  // Activate immediately instead of waiting for all tabs to close
   self.skipWaiting();
 });
 
-// Activate event - clean up old caches
+// Activate event - clean up old caches and claim clients
 self.addEventListener('activate', (event) => {
-  console.log('[SW] Activating service worker...');
+  console.log('[SW] Activating service worker v3...');
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
@@ -41,9 +42,11 @@ self.addEventListener('activate', (event) => {
             return caches.delete(name);
           })
       );
+    }).then(() => {
+      // Take control of all clients immediately
+      return self.clients.claim();
     })
   );
-  self.clients.claim();
 });
 
 // Fetch event - implement caching strategies
@@ -100,14 +103,32 @@ async function handleApiRequest(request) {
   }
 }
 
-// Handle static requests with cache-first strategy
+// Handle static requests with network-first strategy for HTML, cache-first for assets
 async function handleStaticRequest(request) {
   const cache = await caches.open(STATIC_CACHE);
   
-  // Try cache first
+  // Network-first for navigation (HTML) requests - fixes SPA routing
+  if (request.mode === 'navigate') {
+    try {
+      const response = await fetch(request);
+      if (response.ok) {
+        const responseClone = response.clone();
+        cache.put(request, responseClone);
+      }
+      return response;
+    } catch (error) {
+      // Fallback to cache on network failure
+      const cachedResponse = await cache.match(request);
+      if (cachedResponse) {
+        return cachedResponse;
+      }
+      return cache.match('/index.html') || new Response('Offline', { status: 503 });
+    }
+  }
+  
+  // Cache-first for other static assets (JS, CSS, images)
   const cachedResponse = await cache.match(request);
   if (cachedResponse) {
-    // Return cached and update in background
     updateCacheInBackground(request, cache);
     return cachedResponse;
   }
@@ -115,18 +136,12 @@ async function handleStaticRequest(request) {
   // Cache miss - fetch from network
   try {
     const response = await fetch(request);
-    
     if (response.ok) {
       const responseClone = response.clone();
       cache.put(request, responseClone);
     }
-    
     return response;
   } catch (error) {
-    // Return offline page for navigation requests
-    if (request.mode === 'navigate') {
-      return cache.match('/index.html') || new Response('Offline', { status: 503 });
-    }
     return new Response('Offline', { status: 503 });
   }
 }

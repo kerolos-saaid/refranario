@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
 import { fetchProverbs, type Proverb } from '../lib/api'
 import { OptimizedImage } from '../components/OptimizedImage'
@@ -31,9 +32,10 @@ export default function Home() {
     return () => clearTimeout(timer)
   }, [searchQuery, selectedLetter])
 
-  const loadProverbs = async (reset = false) => {
-    const currentPage = reset ? 1 : page
-    const shouldReset = reset || page === 1
+  const loadProverbs = async (reset = false, targetPage?: number) => {
+    const currentPage = targetPage ?? (reset ? 1 : page)
+    // Reset only if explicitly reset=true OR when loading page 1 without a target
+    const shouldReset = reset || (targetPage === undefined && page === 1)
     
     if (shouldReset) {
       setLoading(true)
@@ -45,7 +47,7 @@ export default function Home() {
     try {
       const API_BASE = import.meta.env.VITE_API_URL 
         ? `${import.meta.env.VITE_API_URL}/api` 
-        : '/api'
+        : 'https://senor-shabi-api.kerolos-saaid.workers.dev/api'
       
       const params = new URLSearchParams({
         page: currentPage.toString(),
@@ -76,8 +78,9 @@ export default function Home() {
 
   const loadMore = () => {
     if (!loadingMore && hasMore) {
-      setPage(prev => prev + 1)
-      loadProverbs(false)
+      const nextPage = page + 1
+      setPage(nextPage)
+      loadProverbs(false, nextPage)
     }
   }
 
@@ -109,12 +112,12 @@ export default function Home() {
   const filteredProverbs = proverbs
 
   return (
-    <div className="relative flex min-h-screen w-full flex-col bg-background">
+    <div className="relative flex flex-col min-h-screen w-full bg-background">
       {/* Subtle warm background gradient */}
       <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(180deg, rgba(176,44,51,0.03) 0%, rgba(247,159,63,0.02) 50%, transparent 100%)' }} />
       
       {/* Sticky Header */}
-      <header className="flex-none z-30 relative" style={{ background: 'linear-gradient(135deg, #B02C33 0%, #8A1F25 100%)' }}>
+      <header className="flex-none z-30 sticky top-0 backdrop-blur-md bg-primary/98" style={{ background: 'linear-gradient(135deg, #B02C33 0%, #8A1F25 100%)' }}>
         {/* Subtle pattern overlay on header */}
         <div className="absolute inset-0 opacity-[0.06] pointer-events-none" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='40' height='40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0h20v20H0zm20 20h20v20H20z' fill='%23fff' fill-opacity='0.3'/%3E%3C/svg%3E\")" }} />
         
@@ -154,8 +157,8 @@ export default function Home() {
           </div>
           
           {/* Alphabet Filter Bar */}
-          <div className="w-full overflow-x-auto no-scrollbar">
-            <div className="flex gap-1 justify-start min-w-max px-1">
+          <div className="w-full overflow-x-auto md:overflow-visible no-scrollbar">
+            <div className="flex gap-1 justify-start min-w-max md:min-w-0 md:flex-wrap md:justify-center px-1">
               {ALPHABET.map((letter, i) => (
                 <button
                   key={letter}
@@ -248,13 +251,15 @@ export default function Home() {
           
           {!loading && !loadingMore && hasMore && filteredProverbs.length > 0 && (
             <button
+              type="button"
               onClick={(e) => {
-                createRipple(e)
+                e.preventDefault()
                 loadMore()
               }}
-              className="btn-press mx-auto mt-4 md:mt-6 px-8 py-3 rounded-full text-sm md:text-base font-medium transition-all hover:scale-105 active:scale-95 shadow-md"
+              className="btn-press mx-auto mt-4 md:mt-6 px-8 py-3 rounded-full text-sm md:text-base font-medium transition-all hover:scale-105 active:scale-95 shadow-md flex items-center gap-2"
               style={{ background: 'linear-gradient(135deg, #F79F3F 0%, #DF3D4C 100%)' }}
             >
+              <span className="material-symbols-outlined text-white text-lg animate-bounce-vertical">expand_more</span>
               <span className="text-white relative z-10">Cargar más refranes</span>
             </button>
           )}
@@ -269,9 +274,9 @@ export default function Home() {
         <div className="h-4 md:h-8" />
       </main>
       
-      {/* Admin FAB - positioned above PWA install banner */}
-      {isLoggedIn && (
-        <div className="absolute bottom-32 md:bottom-8 right-6 md:right-8 z-40">
+      {/* Admin FAB - rendered via portal to escape ancestor transforms that break position:fixed */}
+      {isLoggedIn && createPortal(
+        <div className="fixed bottom-20 md:bottom-8 right-6 md:right-8 z-40">
           <Link
             to="/add"
             className="btn-press flex items-center justify-center w-14 h-14 md:w-16 md:h-16 rounded-full shadow-[0_6px_24px_rgba(247,159,63,0.4)] hover:shadow-[0_8px_32px_rgba(247,159,63,0.5)] hover:scale-110 active:scale-95 transition-all duration-300 animate-bounce-once"
@@ -279,7 +284,8 @@ export default function Home() {
           >
             <span className="material-symbols-outlined text-white text-2xl md:text-3xl">edit_square</span>
           </Link>
-        </div>
+        </div>,
+        document.body
       )}
       
       <style>{`
@@ -295,8 +301,18 @@ export default function Home() {
           0%, 100% { transform: scale(1); }
           50% { transform: scale(1.1); }
         }
+        @keyframes bounce-vertical {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(3px); }
+        }
+        @keyframes scale-in {
+          from { opacity: 0; transform: scale(0.95); }
+          to { opacity: 1; transform: scale(1); }
+        }
         .animate-fade-in { animation: fade-in 0.3s ease-out forwards; }
         .animate-bounce-once { animation: bounce-once 0.5s ease-out; }
+        .animate-bounce-vertical { animation: bounce-vertical 1s ease-in-out infinite; }
+        .animate-scale-in { animation: scale-in 0.3s ease-out forwards; }
         .line-clamp-1 { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
         .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
       `}</style>
