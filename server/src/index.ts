@@ -22,7 +22,7 @@ type User = {
 }
 
 type Env = {
-  DB: D1Database
+  senor_shabi_db: D1Database
 }
 
 const app = new Hono<{ Bindings: Env }>()
@@ -53,44 +53,64 @@ app.get('/api/proverbs', async (c) => {
   const search = c.req.query('search')?.toLowerCase()
   const letter = c.req.query('letter')?.toUpperCase()
   
-  const db = c.env.DB
+  const db = c.env.senor_shabi_db
   
-  // Build WHERE clause
-  let whereClause = ''
-  const params: any[] = []
+  let proverbs: any[] = []
+  let total = 0
   
-  if (search) {
-    whereClause = 'WHERE (spanish LIKE ?1 OR english LIKE ?2)'
-    params.push(`%${search}%`, `%${search}%`)
+  try {
+    // Simple queries without complex param building
+    if (search && letter) {
+      const countResult = await db.prepare(
+        `SELECT COUNT(*) as total FROM proverbs WHERE (spanish LIKE ?1 OR english LIKE ?2) AND spanish LIKE ?3`
+      ).bind(`%${search}%`, `%${search}%`, `${letter}%`).first<{ total: number }>()
+      total = countResult?.total || 0
+      
+      const offset = (page - 1) * limit
+      const result = await db.prepare(
+        `SELECT * FROM proverbs WHERE (spanish LIKE ?1 OR english LIKE ?2) AND spanish LIKE ?3 ORDER BY spanish ASC LIMIT ?4 OFFSET ?5`
+      ).bind(`%${search}%`, `%${search}%`, `${letter}%`, limit, offset).all()
+      proverbs = result.results || []
+    } else if (search) {
+      const countResult = await db.prepare(
+        `SELECT COUNT(*) as total FROM proverbs WHERE spanish LIKE ?1 OR english LIKE ?2`
+      ).bind(`%${search}%`, `%${search}%`).first<{ total: number }>()
+      total = countResult?.total || 0
+      
+      const offset = (page - 1) * limit
+      const result = await db.prepare(
+        `SELECT * FROM proverbs WHERE spanish LIKE ?1 OR english LIKE ?2 ORDER BY spanish ASC LIMIT ?3 OFFSET ?4`
+      ).bind(`%${search}%`, `%${search}%`, limit, offset).all()
+      proverbs = result.results || []
+    } else if (letter) {
+      const countResult = await db.prepare(
+        `SELECT COUNT(*) as total FROM proverbs WHERE spanish LIKE ?1`
+      ).bind(`${letter}%`).first<{ total: number }>()
+      total = countResult?.total || 0
+      
+      const offset = (page - 1) * limit
+      const result = await db.prepare(
+        `SELECT * FROM proverbs WHERE spanish LIKE ?1 ORDER BY spanish ASC LIMIT ?2 OFFSET ?3`
+      ).bind(`${letter}%`, limit, offset).all()
+      proverbs = result.results || []
+    } else {
+      const countResult = await db.prepare(`SELECT COUNT(*) as total FROM proverbs`).first<{ total: number }>()
+      total = countResult?.total || 0
+      
+      const offset = (page - 1) * limit
+      const result = await db.prepare(`SELECT * FROM proverbs ORDER BY spanish ASC LIMIT ?1 OFFSET ?2`).bind(limit, offset).all()
+      proverbs = result.results || []
+    }
+  } catch (e) {
+    console.error('D1 Query Error:', e)
+    return c.json({ error: 'Database error', details: String(e) }, 500)
   }
   
-  if (letter) {
-    whereClause = whereClause ? whereClause + ' AND spanish LIKE ?' : 'WHERE spanish LIKE ?'
-    params.push(`${letter}%`)
-  }
-  
-  // Get total count
-  const countQuery = `SELECT COUNT(*) as total FROM proverbs ${whereClause}`
-  const countStmt = db.prepare(countQuery)
-  const countResult = params.length > 0 ? await countStmt.bind(...params).first<{ total: number }>() : await countStmt.first<{ total: number }>()
-  const total = countResult?.total || 0
-  
-  // Get paginated results
-  const offset = (page - 1) * limit
-  const orderBy = whereClause ? 'ORDER BY spanish ASC' : 'ORDER BY spanish ASC'
-  const query = `SELECT * FROM proverbs ${whereClause ? whereClause + ' ' + orderBy : orderBy} LIMIT ? OFFSET ?`
-  
-  const stmt = db.prepare(query)
-  const allParams = [...params, limit, offset]
-  const result = allParams.length > params.length + 2 
-    ? await stmt.bind(...allParams).all() 
-    : await stmt.bind(limit, offset).all()
-  
-  const proverbs = (result.results || []).map(rowToProverb)
+  const proverbObjects = proverbs.map(rowToProverb)
   const totalPages = Math.ceil(total / limit)
   
   return c.json({ 
-    proverbs,
+    proverbs: proverbObjects,
     pagination: {
       page,
       limit,
@@ -103,7 +123,7 @@ app.get('/api/proverbs', async (c) => {
 
 app.get('/api/proverbs/:id', async (c) => {
   const id = c.req.param('id')
-  const db = c.env.DB
+  const db = c.env.senor_shabi_db
   
   const result = await db.prepare('SELECT * FROM proverbs WHERE id = ?').bind(id).first()
   
@@ -116,7 +136,7 @@ app.get('/api/proverbs/:id', async (c) => {
 
 app.post('/api/proverbs', async (c) => {
   const body = await c.req.json()
-  const db = c.env.DB
+  const db = c.env.senor_shabi_db
   
   const id = Date.now().toString()
   const date = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
@@ -173,7 +193,7 @@ app.post('/api/upload', async (c) => {
 app.put('/api/proverbs/:id', async (c) => {
   const id = c.req.param('id')
   const body = await c.req.json()
-  const db = c.env.DB
+  const db = c.env.senor_shabi_db
   
   // Build update query dynamically
   const fields: string[] = []
@@ -211,7 +231,7 @@ app.put('/api/proverbs/:id', async (c) => {
 
 app.delete('/api/proverbs/:id', async (c) => {
   const id = c.req.param('id')
-  const db = c.env.DB
+  const db = c.env.senor_shabi_db
   
   // Check if exists
   const checkResult = await db.prepare('SELECT id FROM proverbs WHERE id = ?').bind(id).first()
@@ -228,7 +248,7 @@ app.delete('/api/proverbs/:id', async (c) => {
 app.post('/api/login', async (c) => {
   const body = await c.req.json()
   const { username, password } = body
-  const db = c.env.DB
+  const db = c.env.senor_shabi_db
   
   const result = await db.prepare('SELECT * FROM users WHERE username = ? AND password = ?').bind(username, password).first()
   
