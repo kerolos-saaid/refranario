@@ -167,9 +167,9 @@ export default function Home() {
         <div className="h-8" />
       </main>
       
-      {/* Admin FAB */}
+      {/* Admin FAB - positioned above PWA install banner */}
       {isLoggedIn && (
-        <div className="absolute bottom-20 right-6 z-50">
+        <div className="absolute bottom-24 right-6 z-40">
           <Link
             to="/add"
             className="flex items-center justify-center w-14 h-14 rounded-full shadow-[0_6px_24px_rgba(247,159,63,0.4)] hover:shadow-[0_8px_32px_rgba(247,159,63,0.5)] hover:scale-105 active:scale-95 transition-all duration-200"
