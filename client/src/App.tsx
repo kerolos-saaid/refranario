@@ -5,6 +5,7 @@ import Detail from './pages/Detail'
 import AddEdit from './pages/AddEdit'
 import Login from './pages/Login'
 import OfflineBanner from './components/OfflineBanner'
+import { PWAInstallBanner } from './hooks/usePWAInstall'
 
 export default function App() {
   return (
@@ -19,6 +20,7 @@ export default function App() {
         <Route path="/login" element={<Login />} />
       </Routes>
       <OfflineBanner />
+      <PWAInstallBanner />
     </BrowserRouter>
   )
 }

@@ -1,68 +1,197 @@
-const CACHE_NAME = 'senor-shabi-v1'
+const CACHE_NAME = 'senor-shabi-v1';
+const STATIC_CACHE = 'senor-shabi-static-v1';
+const DATA_CACHE = 'senor-shabi-data-v1';
+
+// Static assets to cache immediately
 const STATIC_ASSETS = [
   '/',
   '/index.html',
   '/manifest.json',
-]
+  '/new_logo_no_text.png',
+  '/new_logo_name_only.png',
+];
 
+// API endpoints to cache
+const API_ENDPOINTS = [
+  '/api/proverbs',
+];
+
+// Install event - cache static assets
 self.addEventListener('install', (event) => {
-  console.log('[SW] Installing service worker...')
+  console.log('[SW] Installing service worker...');
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(STATIC_ASSETS)
+    caches.open(STATIC_CACHE).then((cache) => {
+      console.log('[SW] Caching static assets');
+      return cache.addAll(STATIC_ASSETS);
     })
-  )
-  self.skipWaiting()
-})
+  );
+  self.skipWaiting();
+});
 
+// Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
+  console.log('[SW] Activating service worker...');
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames
-          .filter((name) => name !== CACHE_NAME)
-          .map((name) => caches.delete(name))
-      )
+          .filter((name) => name !== STATIC_CACHE && name !== DATA_CACHE)
+          .map((name) => {
+            console.log('[SW] Deleting old cache:', name);
+            return caches.delete(name);
+          })
+      );
     })
-  )
-  self.clients.claim()
-})
+  );
+  self.clients.claim();
+});
 
+// Fetch event - implement caching strategies
 self.addEventListener('fetch', (event) => {
-  // Skip non-GET requests
-  if (event.request.method !== 'GET') return
+  const url = new URL(event.request.url);
 
-  // Skip API requests - let them go to network
-  if (event.request.url.includes('/api/')) {
-    event.respondWith(
-      fetch(event.request).catch(() => {
-        return new Response(JSON.stringify({ error: 'Offline' }), {
-          status: 503,
-          headers: { 'Content-Type': 'application/json' },
-        })
-      })
-    )
-    return
+  // Skip non-GET requests
+  if (event.request.method !== 'GET') {
+    return;
   }
 
-  // For other requests, try network first, fall back to cache
-  event.respondWith(
-    fetch(event.request)
-      .then((response) => {
-        // Cache successful responses
-        if (response.ok) {
-          const responseClone = response.clone()
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseClone)
-          })
+  // Handle API requests - Network first, then cache
+  if (url.pathname.startsWith('/api/')) {
+    event.respondWith(handleApiRequest(event.request));
+    return;
+  }
+
+  // Handle static assets - Cache first, then network
+  event.respondWith(handleStaticRequest(event.request));
+});
+
+// Handle API requests with network-first strategy
+async function handleApiRequest(request) {
+  const cache = await caches.open(DATA_CACHE);
+  
+  try {
+    // Try network first
+    const response = await fetch(request);
+    
+    if (response.ok) {
+      // Clone and cache successful responses
+      const responseClone = response.clone();
+      cache.put(request, responseClone);
+    }
+    
+    return response;
+  } catch (error) {
+    // Network failed, try cache
+    console.log('[SW] API network failed, trying cache:', request.url);
+    const cachedResponse = await cache.match(request);
+    
+    if (cachedResponse) {
+      return cachedResponse;
+    }
+    
+    // Return offline error for API
+    return new Response(
+      JSON.stringify({ error: 'Offline', cached: false }),
+      {
+        status: 503,
+        headers: { 'Content-Type': 'application/json' },
+      }
+    );
+  }
+}
+
+// Handle static requests with cache-first strategy
+async function handleStaticRequest(request) {
+  const cache = await caches.open(STATIC_CACHE);
+  
+  // Try cache first
+  const cachedResponse = await cache.match(request);
+  if (cachedResponse) {
+    // Return cached and update in background
+    updateCacheInBackground(request, cache);
+    return cachedResponse;
+  }
+  
+  // Cache miss - fetch from network
+  try {
+    const response = await fetch(request);
+    
+    if (response.ok) {
+      const responseClone = response.clone();
+      cache.put(request, responseClone);
+    }
+    
+    return response;
+  } catch (error) {
+    // Return offline page for navigation requests
+    if (request.mode === 'navigate') {
+      return cache.match('/index.html') || new Response('Offline', { status: 503 });
+    }
+    return new Response('Offline', { status: 503 });
+  }
+}
+
+// Update cache in background without blocking
+async function updateCacheInBackground(request, cache) {
+  try {
+    const response = await fetch(request);
+    if (response.ok) {
+      cache.put(request, response);
+    }
+  } catch (error) {
+    // Silently fail - we already have cached version
+  }
+}
+
+// Handle background sync when online
+self.addEventListener('sync', (event) => {
+  console.log('[SW] Background sync:', event.tag);
+  
+  if (event.tag === 'sync-proverbs') {
+    event.waitUntil(syncProverbs());
+  }
+});
+
+// Sync pending data when back online
+async function syncProverbs() {
+  // Get pending operations from IndexedDB
+  // This is a placeholder - implement based on your needs
+  console.log('[SW] Syncing pending proverbs...');
+}
+
+// Handle push notifications (optional)
+self.addEventListener('push', (event) => {
+  if (event.data) {
+    const data = event.data.json();
+    console.log('[SW] Push notification:', data);
+    
+    self.registration.showNotification(data.title || 'Señor Shaعbi', {
+      body: data.body || 'New content available',
+      icon: '/icons/icon-192x192.png',
+      badge: '/icons/icon-72x72.png',
+      tag: data.tag || 'default',
+    });
+  }
+});
+
+// Handle notification clicks
+self.addEventListener('notificationclick', (event) => {
+  console.log('[SW] Notification clicked:', event.notification.tag);
+  event.notification.close();
+  
+  // Open the app
+  event.waitUntil(
+    clients.matchAll({ type: 'window' }).then((clientList) => {
+      // Focus existing window if open
+      for (const client of clientList) {
+        if (client.url === '/' && 'focus' in client) {
+          return client.focus();
         }
-        return response
-      })
-      .catch(() => {
-        // Fall back to cache
-        return caches.match(event.request).then((cachedResponse) => {
-          return cachedResponse || new Response('Offline', { status: 503 })
-        })
-      })
-  )
-})
+      }
+      // Open new window
+      if (clients.openWindow) {
+        return clients.openWindow('/');
+      }
+    })
+  );
+});

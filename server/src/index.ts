@@ -87,9 +87,45 @@ const users: User[] = [
   { username: 'user', password: 'user123' }
 ]
 
-// Proverb routes
+// Proverb routes with pagination
 app.get('/api/proverbs', (c) => {
-  return c.json({ proverbs })
+  const page = parseInt(c.req.query('page') || '1')
+  const limit = parseInt(c.req.query('limit') || '10')
+  const search = c.req.query('search')?.toLowerCase()
+  const letter = c.req.query('letter')?.toUpperCase()
+  
+  let filtered = [...proverbs]
+  
+  // Filter by search
+  if (search) {
+    filtered = filtered.filter(p => 
+      p.spanish.toLowerCase().includes(search) ||
+      p.arabic.includes(search) ||
+      p.english.toLowerCase().includes(search)
+    )
+  }
+  
+  // Filter by letter
+  if (letter) {
+    filtered = filtered.filter(p => p.spanish.toUpperCase().startsWith(letter))
+  }
+  
+  // Paginate
+  const total = filtered.length
+  const totalPages = Math.ceil(total / limit)
+  const start = (page - 1) * limit
+  const paginated = filtered.slice(start, start + limit)
+  
+  return c.json({ 
+    proverbs: paginated,
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages,
+      hasMore: page < totalPages
+    }
+  })
 })
 
 app.get('/api/proverbs/:id', (c) => {
