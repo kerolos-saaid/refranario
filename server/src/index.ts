@@ -3,6 +3,67 @@ import { cors } from 'hono/cors'
 import { logger } from 'hono/logger'
 import type { D1Database, D1PreparedStatement } from '@cloudflare/workers-types'
 
+// Simple JWT implementation using HMAC-SHA256
+const JWT_SECRET = 'senor-shabi-secret-key-2024'
+
+function base64UrlEncode(data: Uint8Array): string {
+  return btoa(String.fromCharCode(...data))
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=/g, '')
+}
+
+async function hmacSign(data: string, key: string): Promise<string> {
+  const encoder = new TextEncoder()
+  const keyData = encoder.encode(key)
+  const cryptoKey = await crypto.subtle.importKey(
+    'raw',
+    keyData,
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign']
+  )
+  const signature = await crypto.subtle.sign('HMAC', cryptoKey, encoder.encode(data))
+  return base64UrlEncode(new Uint8Array(signature))
+}
+
+function base64UrlDecode(data: string): string {
+  const pad = data.length % 4
+  const padded = pad ? data + '='.repeat(4 - pad) : data
+  return atob(padded.replace(/-/g, '+').replace(/_/g, '/'))
+}
+
+async function verifyJWT(token: string): Promise<{ username: string; role: string } | null> {
+  try {
+    const parts = token.split('.')
+    if (parts.length !== 3) return null
+    
+    const header = parts[0]
+    const payload = parts[1]
+    const signature = parts[2]
+    
+    if (!header || !payload || !signature) return null
+    
+    const expectedSig = await hmacSign(`${header}.${payload}`, JWT_SECRET)
+    
+    if (signature !== expectedSig) return null
+    
+    const payloadJson = base64UrlDecode(payload)
+    return JSON.parse(payloadJson)
+  } catch {
+    return null
+  }
+}
+
+async function signJWT(payload: { username: string; role: string }): Promise<string> {
+  const header = { alg: 'HS256', typ: 'JWT' }
+  const headerB64 = base64UrlEncode(new Uint8Array(new TextEncoder().encode(JSON.stringify(header))))
+  const payloadB64 = base64UrlEncode(new Uint8Array(new TextEncoder().encode(JSON.stringify(payload))))
+  const signature = await hmacSign(`${headerB64}.${payloadB64}`, JWT_SECRET)
+  
+  return `${headerB64}.${payloadB64}.${signature}`
+}
+
 type Proverb = {
   id: string
   spanish: string
@@ -30,7 +91,7 @@ const app = new Hono<{ Bindings: Env }>()
 app.use('*', logger())
 app.use('*', cors())
 
-// Auth middleware - check if user is admin
+// Auth middleware - check if user is admin using JWT
 async function requireAdmin(c: any, next: () => Promise<void>) {
   const authHeader = c.req.header('Authorization')
   
@@ -39,26 +100,21 @@ async function requireAdmin(c: any, next: () => Promise<void>) {
   }
   
   try {
-    // Decode base64 credentials
-    const credentials = atob(authHeader.replace('Basic ', ''))
-    const [username, password] = credentials.split(':')
+    // Extract JWT token (Bearer <token>)
+    const token = authHeader.replace('Bearer ', '')
     
-    // Verify credentials and get role
-    const db = c.env.senor_shabi_db
-    const user = await db.prepare(
-      'SELECT username, role FROM users WHERE username = ? AND password = ?'
-    ).bind(username, password).first()
-    
-    if (!user) {
-      return c.json({ error: 'Unauthorized - Invalid credentials' }, 401)
+    // Verify JWT
+    const payload = await verifyJWT(token)
+    if (!payload) {
+      return c.json({ error: 'Unauthorized - Invalid token' }, 401)
     }
     
-    if (user.role !== 'admin') {
+    if (payload.role !== 'admin') {
       return c.json({ error: 'Forbidden - Admin only' }, 403)
     }
     
     // Store user info in context
-    c.set('user', user)
+    c.set('user', payload)
     await next()
   } catch (e) {
     return c.json({ error: 'Unauthorized - Invalid token' }, 401)
@@ -175,6 +231,34 @@ app.get('/api/proverbs/:id', async (c) => {
   }
 })
 
+// Admin-only: Create proverb
+app.post('/api/proverbs', requireAdmin, async (c) => {
+  const body = await c.req.json()
+  const db = c.env.senor_shabi_db
+  
+  const id = Date.now().toString()
+  const date = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+  
+  await db.prepare(`
+    INSERT INTO proverbs (id, spanish, arabic, english, category, note, image, curator, date, bookmarked)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
+  `).bind(
+    id,
+    body.spanish,
+    body.arabic,
+    body.english,
+    body.category || 'Wisdom',
+    body.note || '',
+    body.image || '',
+    body.curator || 'Admin',
+    date
+  ).run()
+  
+  const result = await db.prepare('SELECT * FROM proverbs WHERE id = ?').bind(id).first()
+  
+  return c.json({ proverb: rowToProverb(result) }, 201)
+})
+
 // Admin-only: Upload image
 app.post('/api/upload', requireAdmin, async (c) => {
   const body = await c.req.json()
@@ -266,10 +350,12 @@ app.post('/api/login', async (c) => {
   const { username, password } = body
   const db = c.env.senor_shabi_db
   
-  const result = await db.prepare('SELECT * FROM users WHERE username = ? AND password = ?').bind(username, password).first()
+  const result = await db.prepare('SELECT * FROM users WHERE username = ? AND password = ?').bind(username, password).first() as { username: string; role: string } | undefined
   
   if (result) {
-    return c.json({ success: true, username: result.username, role: result.role })
+    // Generate JWT token
+    const token = await signJWT({ username: result.username, role: result.role })
+    return c.json({ success: true, username: result.username, role: result.role, token })
   }
   return c.json({ error: 'Invalid credentials' }, 401)
 })

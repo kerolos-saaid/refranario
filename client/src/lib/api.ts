@@ -4,13 +4,16 @@ const API_BASE = import.meta.env.VITE_API_URL
   ? `${import.meta.env.VITE_API_URL}/api` 
   : 'https://senor-shabi-api.kerolos-saaid.workers.dev/api'
 
-// Get auth header for protected requests
+// Get JWT token for protected requests
+function getToken(): string | null {
+  return localStorage.getItem('token')
+}
+
+// Get auth header for protected requests using JWT
 function getAuthHeader(): Record<string, string> {
-  const username = localStorage.getItem('username')
-  const password = localStorage.getItem('password')
-  if (username && password) {
-    const credentials = btoa(`${username}:${password}`)
-    return { 'Authorization': `Basic ${credentials}` }
+  const token = getToken()
+  if (token) {
+    return { 'Authorization': `Bearer ${token}` }
   }
   return {}
 }
@@ -72,6 +75,21 @@ export async function deleteProverb(id: string) {
   return true
 }
 
+export async function uploadImage(imageData: string, filename: string) {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+  const authHeader = getAuthHeader()
+  Object.assign(headers, authHeader)
+  
+  const res = await fetch(`${API_BASE}/upload`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ image: imageData, filename }),
+  })
+  const data = await res.json()
+  if (!res.ok) throw new Error(data.error || 'Failed to upload')
+  return data
+}
+
 export async function login(username: string, password: string) {
   const res = await fetch(`${API_BASE}/login`, {
     method: 'POST',
@@ -84,19 +102,19 @@ export async function login(username: string, password: string) {
   }
   const data = await res.json()
   
-  // Store credentials and role for protected requests
-  localStorage.setItem('username', username)
-  localStorage.setItem('password', password)
+  // Store JWT token and role (NOT username/password)
+  localStorage.setItem('token', data.token)
   localStorage.setItem('role', data.role || 'user')
+  localStorage.setItem('username', data.username)
   localStorage.setItem('isLoggedIn', 'true')
   
   return data
 }
 
 export function logout() {
-  localStorage.removeItem('username')
-  localStorage.removeItem('password')
+  localStorage.removeItem('token')
   localStorage.removeItem('role')
+  localStorage.removeItem('username')
   localStorage.removeItem('isLoggedIn')
 }
 

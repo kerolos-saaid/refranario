@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
-import { fetchProverb, createProverb, updateProverb } from '../lib/api'
+import { fetchProverb, createProverb, updateProverb, uploadImage } from '../lib/api'
 
 const API_BASE = import.meta.env.VITE_API_URL 
   ? `${import.meta.env.VITE_API_URL}/api` 
-  : '/api'
+  : 'https://senor-shabi-api.kerolos-saaid.workers.dev/api'
 
 export default function AddEdit() {
   const { id } = useParams<{ id: string }>()
@@ -101,14 +101,8 @@ export default function AddEdit() {
       reader.onload = async () => {
         const base64 = reader.result as string
         
-        // Upload to API
-        const res = await fetch(`${API_BASE}/upload`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ image: base64, filename: file.name }),
-        })
-        
-        const data = await res.json()
+        // Upload to API using uploadImage function with JWT auth
+        const data = await uploadImage(base64, file.name)
         
         if (data.success) {
           setFormData(prev => ({ ...prev, image: data.url }))

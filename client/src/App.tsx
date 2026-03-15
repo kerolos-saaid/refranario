@@ -7,6 +7,25 @@ import AddEdit from './pages/AddEdit'
 import Login from './pages/Login'
 import OfflineBanner from './components/OfflineBanner'
 import { PWAInstallBanner } from './hooks/usePWAInstall'
+import { logout } from './lib/api'
+
+// Handle Ctrl+Shift+R to clear auth token
+function useClearAuthOnKeyCombo() {
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ctrl+Shift+R (or Cmd+Shift+R on Mac)
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'r') {
+        e.preventDefault()
+        logout()
+        window.location.href = '/home'
+        console.log('Auth token cleared')
+      }
+    }
+    
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [])
+}
 
 // Update Banner Component
 function UpdateBanner() {
@@ -48,6 +67,8 @@ function AnimatedRoutes() {
 }
 
 export default function App() {
+  useClearAuthOnKeyCombo()
+  
   return (
     <BrowserRouter>
       <UpdateBanner />
