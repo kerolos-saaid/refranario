@@ -77,6 +77,7 @@ export function usePWAInstall() {
   // Dismiss the prompt (store for later)
   const dismiss = () => {
     setDeferredPrompt(null)
+    setIsInstallable(false)
     // Store dismissed state in localStorage to not show again for a while
     localStorage.setItem('pwa_install_dismissed', Date.now().toString())
   }
@@ -125,7 +126,8 @@ export function PWAInstallBanner() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <button
+            <button
+            type="button"
             onClick={install}
             className="px-4 py-2 bg-accent text-white text-sm font-medium rounded-lg hover:opacity-90 transition-opacity"
             style={{ background: '#F79F3F' }}
@@ -133,6 +135,7 @@ export function PWAInstallBanner() {
             Install
           </button>
           <button
+            type="button"
             onClick={dismiss}
             className="p-2 text-white/70 hover:text-white transition-colors"
           >
