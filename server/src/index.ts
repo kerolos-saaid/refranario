@@ -149,6 +149,37 @@ app.post('/api/proverbs', async (c) => {
   return c.json({ proverb: newProverb }, 201)
 })
 
+// Image upload endpoint (base64)
+app.post('/api/upload', async (c) => {
+  const body = await c.req.json()
+  const { image, filename } = body
+  
+  if (!image) {
+    return c.json({ error: 'No image provided' }, 400)
+  }
+  
+  // Validate it's a proper base64 image
+  const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
+  const matches = image.match(/^data:([a-z]+\/[a-z0-9-+.]+(;[a-z-]+=[a-z0-9-]+)?)?;base64,([a-z0-9!$&',()*+;=\-._~:@\/?%\s]*?)$/i)
+  
+  if (!matches) {
+    return c.json({ error: 'Invalid image format' }, 400)
+  }
+  
+  // Generate unique ID for the image
+  const imageId = `${Date.now()}-${Math.random().toString(36).substring(7)}`
+  const extension = filename?.split('.').pop() || 'jpg'
+  const storedFilename = `${imageId}.${extension}`
+  
+  // Store in-memory (in production, use R2 or KV)
+  // For now, return the base64 as data URL
+  return c.json({ 
+    success: true, 
+    url: image,
+    filename: storedFilename
+  })
+})
+
 app.put('/api/proverbs/:id', async (c) => {
   const id = c.req.param('id')
   const body = await c.req.json()
