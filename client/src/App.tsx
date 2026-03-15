@@ -34,38 +34,16 @@ function UpdateBanner() {
 }
 
 function AnimatedRoutes() {
-  const location = useLocation()
-  const [displayLocation, setDisplayLocation] = useState(location)
-  const [transitionStage, setTransitionStage] = useState('fadeIn')
-
-  useEffect(() => {
-    if (location !== displayLocation) {
-      setTransitionStage('fadeOut')
-    }
-  }, [location, displayLocation])
-
-  const handleTransitionEnd = () => {
-    if (transitionStage === 'fadeOut') {
-      setTransitionStage('fadeIn')
-      setDisplayLocation(location)
-    }
-  }
-
   return (
-    <div 
-      className={`page-transition-${transitionStage}`}
-      onAnimationEnd={handleTransitionEnd}
-    >
-      <Routes location={displayLocation}>
-        <Route path="/" element={<Navigate to="/splash" replace />} />
-        <Route path="/splash" element={<Splash />} />
-        <Route path="/home" element={<Home />} />
-        <Route path="/detail/:id" element={<Detail />} />
-        <Route path="/add" element={<AddEdit />} />
-        <Route path="/edit/:id" element={<AddEdit />} />
-        <Route path="/login" element={<Login />} />
-      </Routes>
-    </div>
+    <Routes>
+      <Route path="/" element={<Navigate to="/splash" replace />} />
+      <Route path="/splash" element={<Splash />} />
+      <Route path="/home" element={<Home />} />
+      <Route path="/detail/:id" element={<Detail />} />
+      <Route path="/add" element={<AddEdit />} />
+      <Route path="/edit/:id" element={<AddEdit />} />
+      <Route path="/login" element={<Login />} />
+    </Routes>
   )
 }
 

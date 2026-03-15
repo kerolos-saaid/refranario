@@ -156,6 +156,25 @@ app.get('/api/proverbs', async (c) => {
   })
 })
 
+// Get single proverb by ID
+app.get('/api/proverbs/:id', async (c) => {
+  const id = c.req.param('id')
+  const db = c.env.senor_shabi_db
+
+  try {
+    const result = await db.prepare('SELECT * FROM proverbs WHERE id = ?').bind(id).first()
+
+    if (!result) {
+      return c.json({ error: 'Proverb not found' }, 404)
+    }
+
+    return c.json({ proverb: rowToProverb(result) })
+  } catch (e) {
+    console.error('D1 Query Error:', e)
+    return c.json({ error: 'Database error', details: String(e) }, 500)
+  }
+})
+
 // Admin-only: Upload image
 app.post('/api/upload', requireAdmin, async (c) => {
   const body = await c.req.json()
