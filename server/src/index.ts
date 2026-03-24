@@ -255,7 +255,10 @@ app.post('/api/proverbs', requireAdmin, async (c) => {
     date
   ).run()
   
-  const result = await db.prepare('SELECT * FROM proverbs WHERE id = ?').bind(id).first()
+  const result = await db
+    .prepare('SELECT * FROM proverbs WHERE id = ?')
+    .bind(id)
+    .first<Record<string, unknown> & { arabic: string }>()
   
   return c.json({ proverb: rowToProverb(result) }, 201)
 })
