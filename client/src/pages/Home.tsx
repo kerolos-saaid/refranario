@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
 import { fetchProverbs, isAdmin, type Proverb } from '../lib/api'
@@ -24,7 +24,6 @@ export default function Home() {
     setIsAdminUser(isAdmin())
   }, [])
 
-  // Initial load and search/filter changes with debounce
   useEffect(() => {
     const timer = setTimeout(() => {
       loadProverbs(true)
@@ -34,9 +33,8 @@ export default function Home() {
 
   const loadProverbs = async (reset = false, targetPage?: number) => {
     const currentPage = targetPage ?? (reset ? 1 : page)
-    // Reset only if explicitly reset=true OR when loading page 1 without a target
     const shouldReset = reset || (targetPage === undefined && page === 1)
-    
+
     if (shouldReset) {
       setLoading(true)
     } else {
@@ -45,27 +43,27 @@ export default function Home() {
     setSearchLoading(true)
 
     try {
-      const API_BASE = import.meta.env.VITE_API_URL 
-        ? `${import.meta.env.VITE_API_URL}/api` 
+      const API_BASE = import.meta.env.VITE_API_URL
+        ? `${import.meta.env.VITE_API_URL}/api`
         : 'https://senor-shabi-api.kerolos-saaid.workers.dev/api'
-      
+
       const params = new URLSearchParams({
         page: currentPage.toString(),
         limit: ITEMS_PER_PAGE.toString(),
       })
-      
+
       if (searchQuery) params.append('search', searchQuery)
       if (selectedLetter) params.append('letter', selectedLetter)
-      
+
       const res = await fetch(`${API_BASE}/proverbs?${params}`)
       const data = await res.json()
-      
+
       if (shouldReset) {
         setProverbs(data.proverbs)
         setNewItemIds(new Set())
       } else {
         const newIds = data.proverbs.map((p: Proverb) => p.id)
-        setProverbs(prev => [...prev, ...data.proverbs])
+        setProverbs((prev) => [...prev, ...data.proverbs])
         setNewItemIds(new Set(newIds))
       }
       setHasMore(data.pagination?.hasMore ?? false)
@@ -87,7 +85,6 @@ export default function Home() {
     }
   }
 
-  // Ripple effect handler
   const createRipple = (event: React.MouseEvent<HTMLButtonElement>) => {
     const button = event.currentTarget
     const circle = document.createElement('span')
@@ -113,70 +110,85 @@ export default function Home() {
   }, [])
 
   const filteredProverbs = proverbs
+  const resultsSummary = loading
+    ? 'Cargando refranes.'
+    : filteredProverbs.length === 0
+      ? 'No se encontraron refranes.'
+      : `Mostrando ${filteredProverbs.length} refranes${selectedLetter ? ` para la letra ${selectedLetter}` : ''}${searchQuery ? ` para la búsqueda ${searchQuery}` : ''}.`
 
   return (
     <div className="relative flex flex-col min-h-screen w-full bg-background">
-      {/* Subtle warm background gradient */}
       <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(180deg, rgba(176,44,51,0.03) 0%, rgba(247,159,63,0.02) 50%, transparent 100%)' }} />
-      
-      {/* Sticky Header */}
+
       <header className="flex-none z-30 sticky top-0 backdrop-blur-md bg-primary/98" style={{ background: 'linear-gradient(135deg, #B02C33 0%, #8A1F25 100%)' }}>
-        {/* Subtle pattern overlay on header */}
         <div className="absolute inset-0 opacity-[0.06] pointer-events-none" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='40' height='40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0h20v20H0zm20 20h20v20H20z' fill='%23fff' fill-opacity='0.3'/%3E%3C/svg%3E\")" }} />
-        
+
         <div className="relative px-4 md:px-8 pb-4 pt-5 flex flex-col gap-3 max-w-4xl mx-auto">
-          {/* Branding */}
           <div className="flex items-center justify-center relative">
-            {/* Menu Icon (Left) */}
-            <button className="absolute left-0 text-white/80 hover:text-white transition-colors">
-              <span className="material-symbols-outlined text-2xl">menu_book</span>
-            </button>
             <div className="flex items-center gap-3">
               <img src="/new_logo_name_only.png" alt="Señor Shaعbi" className="h-8 md:h-10 object-contain brightness-0 invert" />
             </div>
-            {/* Profile Icon (Right) */}
-            <Link to="/login" className="absolute right-0 text-white/70 hover:text-white transition-colors">
-              <span className="material-symbols-outlined text-2xl">account_circle</span>
+            <Link
+              to="/login"
+              aria-label="Abrir acceso de curador"
+              className="absolute right-0 text-white/70 hover:text-white transition-colors"
+            >
+              <span className="material-symbols-outlined text-2xl" aria-hidden="true">account_circle</span>
             </Link>
           </div>
-          
-          {/* Search Bar */}
+
           <div className="relative w-full max-w-xl mx-auto">
+            <label className="sr-only" htmlFor="search-input">
+              Buscar refranes
+            </label>
             <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
               {searchLoading ? (
-                <span className="material-symbols-outlined text-white/50 text-xl animate-spin">sync</span>
+                <span className="material-symbols-outlined text-white/50 text-xl animate-spin" aria-hidden="true">sync</span>
               ) : (
-                <span className="material-symbols-outlined text-white/50 text-xl">search</span>
+                <span className="material-symbols-outlined text-white/50 text-xl" aria-hidden="true">search</span>
               )}
             </div>
             <input
               id="search-input"
+              aria-controls="proverb-results"
               className="w-full bg-white/15 border border-white/20 rounded-xl py-3 md:py-2.5 pl-12 pr-4 text-white placeholder-white/50 font-ui text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent/50 focus:bg-white/20 transition-all"
               placeholder="Buscar por frase, palabra o significado..."
-              type="text"
+              type="search"
+              autoComplete="off"
               value={searchQuery}
               onChange={(e) => handleSearch(e.target.value)}
             />
           </div>
-          
-          {/* Alphabet Filter Bar */}
-          <div className="w-full overflow-x-auto md:overflow-visible no-scrollbar">
-            <div className="flex gap-1 justify-start min-w-max md:min-w-0 md:flex-wrap md:justify-center px-1">
+
+          <div
+            className="w-full overflow-x-auto md:overflow-visible no-scrollbar py-1"
+            role="toolbar"
+            aria-label="Filtrar refranes por letra inicial"
+          >
+            <div className="flex gap-1 justify-start min-w-max md:min-w-0 md:flex-wrap md:justify-center px-1 py-1">
               {ALPHABET.map((letter, i) => (
                 <button
+                  type="button"
                   key={letter}
+                  aria-controls="proverb-results"
+                  aria-pressed={selectedLetter === letter}
+                  aria-label={
+                    selectedLetter === letter
+                      ? `Quitar filtro de la letra ${letter}`
+                      : `Filtrar por la letra ${letter}`
+                  }
                   onClick={(e) => {
                     createRipple(e)
                     setSelectedLetter(selectedLetter === letter ? '' : letter)
                     setSearchQuery('')
                   }}
                   className={`btn-press px-2 md:px-3 py-1 text-xs md:text-sm rounded transition-all duration-300 ${
-                    selectedLetter === letter 
-                      ? 'bg-accent text-white scale-110' 
-                      : 'text-white/70 hover:text-white hover:bg-white/10 hover:scale-105'
+                    selectedLetter === letter
+                      ? 'bg-accent text-white shadow-[0_4px_12px_rgba(247,159,63,0.25)] ring-1 ring-white/20'
+                      : 'text-white/70 hover:text-white hover:bg-white/10'
                   }`}
-                  style={{ 
-                    animationDelay: `${i * 15}ms`
+                  style={{
+                    animationDelay: `${i * 15}ms`,
                   }}
                 >
                   {letter}
@@ -185,76 +197,77 @@ export default function Home() {
             </div>
           </div>
         </div>
-        
-        {/* Bottom accent line */}
+
         <div className="absolute bottom-0 left-0 right-0 h-[3px]" style={{ background: 'linear-gradient(90deg, #F79F3F 0%, #DF3D4C 50%, #B02C33 100%)' }} />
       </header>
-      
-      {/* Main Content: Scrollable List */}
-      <main className="flex-1 overflow-y-auto bg-background relative scroll-smooth p-4 md:p-6 pb-32">
-        <div className="relative z-10 flex flex-col gap-4 max-w-3xl mx-auto">
+
+      <main
+        id="main-content"
+        tabIndex={-1}
+        aria-busy={loading || loadingMore || searchLoading}
+        className="flex-1 overflow-y-auto bg-background relative scroll-smooth p-4 md:p-6 pb-32"
+        style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + var(--fixed-bottom-stack-height, 0px) + 8rem)' }}
+      >
+        <div className="relative z-10 flex flex-col gap-4 max-w-3xl mx-auto" id="proverb-results">
+          <h1 className="sr-only">Archivo de refranes</h1>
+          <div className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+            {resultsSummary}
+          </div>
           {loading ? (
             <ProverbListSkeleton count={5} />
           ) : filteredProverbs.length === 0 ? (
             <div className="text-center py-12 md:py-20 animate-fade-in">
-              <span className="material-symbols-outlined text-primary text-6xl md:text-7xl mb-4">search_off</span>
+              <span className="material-symbols-outlined text-primary text-6xl md:text-7xl mb-4" aria-hidden="true">search_off</span>
               <p className="text-muted font-ui text-base md:text-lg">No se encontraron refranes</p>
             </div>
           ) : (
             filteredProverbs.map((proverb, index) => {
               const isNew = newItemIds.has(proverb.id)
               return (
-              <Link
-                key={proverb.id}
-                to={`/detail/${proverb.id}`}
-                className={`bg-card bookplate-border p-4 md:p-5 shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer group/card hover:-translate-y-1 md:hover:-translate-y-2 ${isNew ? 'animate-slide-up' : ''}`}
-                style={{ 
-                  animationDelay: isNew ? `${Math.min(index * 0.08, 0.5)}s` : '0s'
-                }}
-              >
-                <div className="flex gap-3 md:gap-4 items-start">
-                  {/* Optimized Thumbnail */}
-                  <div className="flex-shrink-0 relative w-14 md:w-16 h-14 md:h-16 rounded-lg overflow-hidden border border-primary/10 group-hover/card:border-accent/30 transition-colors shadow-sm">
-                    <OptimizedImage
-                      src={proverb.image}
-                      alt={proverb.spanish}
-                      className="w-full h-full"
-                      fallbackIcon="history_edu"
-                    />
-                  </div>
-                  
-                  {/* Text Content */}
-                  <div className="flex-1 min-w-0 flex flex-col gap-1 md:gap-2 overflow-hidden">
-                    {/* Header: Spanish */}
-                    <h2 className="font-display text-base md:text-lg text-primary leading-tight font-bold group-hover/card:text-primary-light transition-colors line-clamp-2">
-                      {proverb.spanish}
-                    </h2>
-                    {/* Middle: Arabic (RTL) */}
-                    <div className="text-right border-r-2 border-accent/30 pr-2 md:pr-3 mr-1">
-                      <p className="font-arabic text-lg md:text-xl text-ink leading-relaxed line-clamp-1" dir="rtl">
-                        {proverb.arabic}
+                <Link
+                  key={proverb.id}
+                  to={`/detail/${proverb.id}`}
+                  className={`bg-card bookplate-border p-4 md:p-5 shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer group/card hover:-translate-y-1 md:hover:-translate-y-2 ${isNew ? 'animate-slide-up' : ''}`}
+                  style={{
+                    animationDelay: isNew ? `${Math.min(index * 0.08, 0.5)}s` : '0s',
+                  }}
+                >
+                  <div className="flex gap-3 md:gap-4 items-start">
+                    <div className="flex-shrink-0 relative w-14 md:w-16 h-14 md:h-16 rounded-lg overflow-hidden border border-primary/10 group-hover/card:border-accent/30 transition-colors shadow-sm">
+                      <OptimizedImage
+                        src={proverb.image}
+                        alt={proverb.spanish}
+                        className="w-full h-full"
+                        fallbackIcon="history_edu"
+                      />
+                    </div>
+
+                    <div className="flex-1 min-w-0 flex flex-col gap-1 md:gap-2 overflow-hidden">
+                      <h2 className="font-display text-base md:text-lg text-primary leading-tight font-bold group-hover/card:text-primary-light transition-colors line-clamp-2" lang="es">
+                        {proverb.spanish}
+                      </h2>
+                      <div className="text-right border-r-2 border-accent/30 pr-2 md:pr-3 mr-1">
+                        <p className="font-arabic text-lg md:text-xl text-ink leading-relaxed line-clamp-1" dir="rtl" lang="ar">
+                          {proverb.arabic}
+                        </p>
+                      </div>
+                      <p className="font-newsreader text-muted text-sm md:text-base line-clamp-1" lang="en">
+                        {proverb.english}
                       </p>
                     </div>
-                    {/* Footer: English */}
-                    <p className="font-newsreader text-muted text-sm md:text-base line-clamp-1">
-                      {proverb.english}
-                    </p>
+                    <div className="self-center text-primary-light/40 group-hover/card:text-accent flex-shrink-0 transition-all duration-300 group-hover/card:translate-x-2">
+                      <span className="material-symbols-outlined text-xl md:text-2xl transform group-hover/card:scale-110 transition-transform duration-300" aria-hidden="true">chevron_right</span>
+                    </div>
                   </div>
-                  {/* Chevron with elegant animation */}
-                  <div className="self-center text-primary-light/40 group-hover/card:text-accent flex-shrink-0 transition-all duration-300 group-hover/card:translate-x-2">
-                    <span className="material-symbols-outlined text-xl md:text-2xl transform group-hover/card:scale-110 transition-transform duration-300">chevron_right</span>
-                  </div>
-                </div>
-              </Link>
+                </Link>
               )
             })
           )}
-          
-          {/* Load More */}
+
           {loadingMore && (
             <ProverbListSkeleton count={2} />
           )}
-          
+
           {!loading && !loadingMore && hasMore && filteredProverbs.length > 0 && (
             <button
               type="button"
@@ -265,12 +278,11 @@ export default function Home() {
               className="btn-press mx-auto mt-4 md:mt-6 px-8 py-3 rounded-full text-sm md:text-base font-medium transition-all hover:scale-105 active:scale-95 shadow-md flex items-center gap-2"
               style={{ background: 'linear-gradient(135deg, #F79F3F 0%, #DF3D4C 100%)' }}
             >
-              <span className="material-symbols-outlined text-white text-lg animate-bounce-vertical">expand_more</span>
+              <span className="material-symbols-outlined text-white text-lg animate-bounce-vertical" aria-hidden="true">expand_more</span>
               <span className="text-white relative z-10">Cargar más refranes</span>
             </button>
           )}
-          
-          {/* End of list */}
+
           {!hasMore && filteredProverbs.length > 0 && (
             <p className="text-center text-muted text-sm md:text-base py-6 animate-fade-in">
               Has llegado al final del archivo
@@ -279,21 +291,24 @@ export default function Home() {
         </div>
         <div className="h-4 md:h-8" />
       </main>
-      
-      {/* Admin FAB - rendered via portal to escape ancestor transforms that break position:fixed */}
+
       {isAdminUser && createPortal(
-        <div className="fixed bottom-20 md:bottom-8 right-6 md:right-8 z-40">
+        <div
+          className="fixed right-6 md:right-8 z-40"
+          style={{ bottom: 'calc(env(safe-area-inset-bottom, 0px) + var(--fixed-bottom-stack-height, 0px) + 1.5rem)' }}
+        >
           <Link
             to="/add"
+            aria-label="Agregar un nuevo refrán"
             className="btn-press flex items-center justify-center w-14 h-14 md:w-16 md:h-16 rounded-full shadow-[0_6px_24px_rgba(247,159,63,0.4)] hover:shadow-[0_8px_32px_rgba(247,159,63,0.5)] hover:scale-110 active:scale-95 transition-all duration-300 animate-bounce-once"
             style={{ background: 'linear-gradient(135deg, #F79F3F 0%, #DF3D4C 100%)' }}
           >
-            <span className="material-symbols-outlined text-white text-2xl md:text-3xl">edit_square</span>
+            <span className="material-symbols-outlined text-white text-2xl md:text-3xl" aria-hidden="true">edit_square</span>
           </Link>
         </div>,
         document.body
       )}
-      
+
       <style>{`
         @keyframes fade-slide-in {
           from { opacity: 0; transform: translateY(20px); }

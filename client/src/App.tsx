@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import Splash from './pages/Splash'
 import Home from './pages/Home'
@@ -7,27 +7,7 @@ import AddEdit from './pages/AddEdit'
 import Login from './pages/Login'
 import OfflineBanner from './components/OfflineBanner'
 import { PWAInstallBanner } from './hooks/usePWAInstall'
-import { logout } from './lib/api'
 
-// Handle Ctrl+Shift+R to clear auth token
-function useClearAuthOnKeyCombo() {
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // Ctrl+Shift+R (or Cmd+Shift+R on Mac)
-      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'r') {
-        e.preventDefault()
-        logout()
-        window.location.href = '/home'
-        console.log('Auth token cleared')
-      }
-    }
-    
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [])
-}
-
-// Update Banner Component
 function UpdateBanner() {
   const [showUpdate, setShowUpdate] = useState(false)
 
@@ -40,13 +20,18 @@ function UpdateBanner() {
   if (!showUpdate) return null
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-[60] bg-accent text-white px-4 py-2 flex items-center justify-center gap-3 shadow-lg">
-      <span className="text-sm font-medium">New version available!</span>
+    <div
+      className="fixed top-0 left-0 right-0 z-[60] bg-accent text-white px-4 py-2 flex items-center justify-center gap-3 shadow-lg"
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
+    >
+      <span className="text-sm font-medium">Hay una nueva versión disponible.</span>
       <button
         onClick={() => window.location.reload()}
         className="px-4 py-1 bg-white text-accent text-sm font-medium rounded-full hover:bg-white/90 transition-colors"
       >
-        Update
+        Actualizar
       </button>
     </div>
   )
@@ -67,10 +52,14 @@ function AnimatedRoutes() {
 }
 
 export default function App() {
-  useClearAuthOnKeyCombo()
-  
   return (
     <BrowserRouter>
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[70] focus:rounded-md focus:bg-white focus:px-4 focus:py-2 focus:text-primary focus:shadow-lg"
+      >
+        Saltar al contenido principal
+      </a>
       <UpdateBanner />
       <AnimatedRoutes />
       <OfflineBanner />
