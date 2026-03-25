@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "bun run --hot server/src/index.ts",
     "dev:client": "vite",
+    "test:e2e:server": "bun test server/test/e2e",
     "build": "vite build",
     "preview": "vite preview",
     "bump-sw": "node -e \"const fs=require('fs'); const f='client/public/sw.js'; let c=fs.readFileSync(f,'utf8'); const v=c.match(/senor-shabi-v(\\d+)/); if(v){c=c.replace(/senor-shabi-v\\d+/g,'senor-shabi-v'+(parseInt(v[1])+1)); fs.writeFileSync(f,c); console.log('Bumped to v'+(parseInt(v[1])+1));}\"",
