@@ -7,8 +7,11 @@ import { createProverbImageJobRouter } from '../modules/proverb-images/proverb-i
 import { createProverbRouter } from '../modules/proverbs/proverb.routes'
 import { createUploadRouter } from '../modules/uploads/upload.routes'
 import { createRequireAdmin } from '../shared/middleware/require-admin'
+import { createRateLimit } from '../shared/middleware/rate-limit'
+import { apiRateLimitPolicies } from '../shared/rate-limit/api-rate-limit.policy'
 import type { AppEnv } from '../shared/types/app-env'
 import {
+  createApiRateLimitService,
   createAuthService,
   createProverbImageJobService,
   createProverbService,
@@ -20,14 +23,40 @@ import {
 export function createApp() {
   const app = new Hono<AppEnv>()
   const requireAdmin = createRequireAdmin(getTokenService(), createUserRepository)
+  const publicProverbsListRateLimit = createRateLimit(createApiRateLimitService, apiRateLimitPolicies.publicProverbsList)
+  const publicProverbDetailRateLimit = createRateLimit(createApiRateLimitService, apiRateLimitPolicies.publicProverbDetail)
+  const loginRateLimit = createRateLimit(createApiRateLimitService, apiRateLimitPolicies.login)
+  const adminProverbMutationsRateLimit = createRateLimit(createApiRateLimitService, apiRateLimitPolicies.adminProverbMutations)
+  const adminUploadsRateLimit = createRateLimit(createApiRateLimitService, apiRateLimitPolicies.adminUploads)
+  const adminUploadDeletesRateLimit = createRateLimit(createApiRateLimitService, apiRateLimitPolicies.adminUploadDeletes)
+  const imageJobStatusRateLimit = createRateLimit(createApiRateLimitService, apiRateLimitPolicies.imageJobStatus)
+  const imageJobBackfillRateLimit = createRateLimit(createApiRateLimitService, apiRateLimitPolicies.imageJobBackfill)
+  const imageJobRegenerateRateLimit = createRateLimit(createApiRateLimitService, apiRateLimitPolicies.imageJobRegenerate)
 
   app.use('*', logger())
   app.use('*', cors())
 
-  app.route('/api', createProverbRouter(createProverbService, requireAdmin))
-  app.route('/api', createProverbImageJobRouter(createProverbImageJobService, requireAdmin))
-  app.route('/api', createUploadRouter(createUploadService, requireAdmin))
-  app.route('/api', createAuthRouter(createAuthService))
+  app.route('/api', createProverbRouter(
+    createProverbService,
+    requireAdmin,
+    publicProverbsListRateLimit,
+    publicProverbDetailRateLimit,
+    adminProverbMutationsRateLimit
+  ))
+  app.route('/api', createProverbImageJobRouter(
+    createProverbImageJobService,
+    requireAdmin,
+    imageJobBackfillRateLimit,
+    imageJobStatusRateLimit,
+    imageJobRegenerateRateLimit
+  ))
+  app.route('/api', createUploadRouter(
+    createUploadService,
+    requireAdmin,
+    adminUploadsRateLimit,
+    adminUploadDeletesRateLimit
+  ))
+  app.route('/api', createAuthRouter(createAuthService, loginRateLimit))
 
   app.get('*', (c) => {
     return c.text('API Running - Deploy frontend to Pages')

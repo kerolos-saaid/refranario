@@ -8,25 +8,28 @@ type ProverbImageJobServiceFactory = (bindings: AppBindings) => ProverbImageJobS
 
 export function createProverbImageJobRouter(
   getProverbImageJobService: ProverbImageJobServiceFactory,
-  requireAdmin: MiddlewareHandler<AppEnv>
+  requireAdmin: MiddlewareHandler<AppEnv>,
+  imageJobBackfillRateLimit: MiddlewareHandler<AppEnv>,
+  imageJobStatusRateLimit: MiddlewareHandler<AppEnv>,
+  imageJobRegenerateRateLimit: MiddlewareHandler<AppEnv>
 ) {
   const router = new Hono<AppEnv>()
 
-  router.post('/proverb-image-jobs/backfill', requireAdmin, async (c) => {
+  router.post('/proverb-image-jobs/backfill', requireAdmin, imageJobBackfillRateLimit, async (c) => {
     const body = await c.req.json<{ limit?: number }>().catch(() => ({}) as { limit?: number })
     const result = await getProverbImageJobService(c.env).backfill(body.limit)
 
     return c.json(result)
   })
 
-  router.get('/proverb-image-jobs', requireAdmin, async (c) => {
+  router.get('/proverb-image-jobs', requireAdmin, imageJobStatusRateLimit, async (c) => {
     const limit = parseInt(c.req.query('limit') || '50')
     const jobs = await getProverbImageJobService(c.env).listActiveJobs(limit)
 
     return c.json({ jobs })
   })
 
-  router.post('/proverbs/:id/regenerate-image', requireAdmin, async (c) => {
+  router.post('/proverbs/:id/regenerate-image', requireAdmin, imageJobRegenerateRateLimit, async (c) => {
     const result = await getProverbImageJobService(c.env).regenerate(c.req.param('id'))
 
     if (result.kind === 'not-found') {

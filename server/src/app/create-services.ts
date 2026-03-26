@@ -12,6 +12,7 @@ import { D1UserRepository } from '../modules/auth/user.repository'
 import { D1ProverbRepository } from '../modules/proverbs/proverb.repository'
 import { ProverbService } from '../modules/proverbs/proverb.service'
 import { UploadService } from '../modules/uploads/upload.service'
+import { D1ApiRateLimitService } from '../shared/rate-limit/api-rate-limit.service'
 import { HmacJwtService } from '../shared/security/jwt.service'
 import { R2ImageStorage } from '../shared/storage/r2-image-storage'
 import type { AppBindings } from '../shared/types/app-env'
@@ -31,6 +32,10 @@ export function createAuthService(bindings: AppBindings) {
 
 export function createUserRepository(bindings: AppBindings) {
   return new D1UserRepository(bindings.senor_shabi_db)
+}
+
+export function createApiRateLimitService(bindings: AppBindings) {
+  return new D1ApiRateLimitService(bindings.senor_shabi_db)
 }
 
 export function createProverbService(bindings: AppBindings) {

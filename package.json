@@ -18,6 +18,7 @@
     "d1:migrate:image-prompts": "npx wrangler@4.77.0 d1 execute senor-shabi-db --local --file=./server/src/migrations/002_proverb_image_generation_prompt.sql",
     "d1:migrate:user-token-version": "npx wrangler@4.77.0 d1 execute senor-shabi-db --local --file=./server/src/migrations/003_user_token_version.sql",
     "d1:migrate:user-token-trigger": "npx wrangler@4.77.0 d1 execute senor-shabi-db --local --file=./server/src/migrations/004_users_password_bump_token_version_trigger.sql",
+    "d1:migrate:api-rate-limits": "npx wrangler@4.77.0 d1 execute senor-shabi-db --local --file=./server/src/migrations/005_api_rate_limits.sql",
     "d1:seed": "npx wrangler@4.77.0 d1 execute senor-shabi-db --local --file=./server/src/seed.sql",
     "pages:deploy": "npm run bump-sw && npm run build && npx wrangler@4.77.0 pages deploy dist/client"
   },

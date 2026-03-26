@@ -9,11 +9,14 @@ type ProverbServiceFactory = (bindings: AppBindings) => ProverbService
 
 export function createProverbRouter(
   getProverbService: ProverbServiceFactory,
-  requireAdmin: MiddlewareHandler<AppEnv>
+  requireAdmin: MiddlewareHandler<AppEnv>,
+  publicProverbsListRateLimit: MiddlewareHandler<AppEnv>,
+  publicProverbDetailRateLimit: MiddlewareHandler<AppEnv>,
+  adminProverbMutationsRateLimit: MiddlewareHandler<AppEnv>
 ) {
   const router = new Hono<AppEnv>()
 
-  router.get('/proverbs', async (c) => {
+  router.get('/proverbs', publicProverbsListRateLimit, async (c) => {
     const page = parseInt(c.req.query('page') || '1')
     const limit = parseInt(c.req.query('limit') || '10')
     const search = c.req.query('search')?.toLowerCase()
@@ -28,7 +31,7 @@ export function createProverbRouter(
     }
   })
 
-  router.get('/proverbs/:id', async (c) => {
+  router.get('/proverbs/:id', publicProverbDetailRateLimit, async (c) => {
     try {
       const proverb = await getProverbService(c.env).getById(c.req.param('id'))
 
@@ -43,14 +46,14 @@ export function createProverbRouter(
     }
   })
 
-  router.post('/proverbs', requireAdmin, async (c) => {
+  router.post('/proverbs', requireAdmin, adminProverbMutationsRateLimit, async (c) => {
     const body = await c.req.json<CreateProverbInput>()
     const proverb = await getProverbService(c.env).create(body)
 
     return c.json({ proverb }, 201)
   })
 
-  router.put('/proverbs/:id', requireAdmin, async (c) => {
+  router.put('/proverbs/:id', requireAdmin, adminProverbMutationsRateLimit, async (c) => {
     const body = await c.req.json<UpdateProverbInput>()
     const result = await getProverbService(c.env).update(c.req.param('id'), body)
 
@@ -65,7 +68,7 @@ export function createProverbRouter(
     return c.json({ proverb: result.proverb })
   })
 
-  router.delete('/proverbs/:id', requireAdmin, async (c) => {
+  router.delete('/proverbs/:id', requireAdmin, adminProverbMutationsRateLimit, async (c) => {
     const result = await getProverbService(c.env).delete(c.req.param('id'))
 
     if (result.kind === 'not-found') {

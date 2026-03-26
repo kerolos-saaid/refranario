@@ -33,7 +33,7 @@ function base64UrlDecode(data: string): string {
   return atob(padded.replace(/-/g, '+').replace(/_/g, '/'))
 }
 
-async function verifyJWT(token: string): Promise<{ username: string; role: string } | null> {
+async function verifyJWT(token: string): Promise<{ username: string; role: string; tokenVersion: number } | null> {
   try {
     const parts = token.split('.')
     if (parts.length !== 3) return null
@@ -55,7 +55,7 @@ async function verifyJWT(token: string): Promise<{ username: string; role: strin
   }
 }
 
-async function signJWT(payload: { username: string; role: string }): Promise<string> {
+async function signJWT(payload: { username: string; role: string; tokenVersion: number }): Promise<string> {
   const header = { alg: 'HS256', typ: 'JWT' }
   const headerB64 = base64UrlEncode(new Uint8Array(new TextEncoder().encode(JSON.stringify(header))))
   const payloadB64 = base64UrlEncode(new Uint8Array(new TextEncoder().encode(JSON.stringify(payload))))
@@ -373,7 +373,7 @@ export function createLegacyApp() {
     ).bind(username, password).first() as { username: string; role: string } | undefined
 
     if (result) {
-      const token = await signJWT({ username: result.username, role: result.role })
+      const token = await signJWT({ username: result.username, role: result.role, tokenVersion: 1 })
       return c.json({ success: true, username: result.username, role: result.role, token })
     }
     return c.json({ error: 'Invalid credentials' }, 401)

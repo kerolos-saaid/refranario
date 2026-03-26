@@ -8,11 +8,13 @@ type UploadServiceFactory = (bindings: AppBindings) => UploadService
 
 export function createUploadRouter(
   getUploadService: UploadServiceFactory,
-  requireAdmin: MiddlewareHandler<AppEnv>
+  requireAdmin: MiddlewareHandler<AppEnv>,
+  uploadRateLimit: MiddlewareHandler<AppEnv>,
+  deleteRateLimit: MiddlewareHandler<AppEnv>
 ) {
   const router = new Hono<AppEnv>()
 
-  router.post('/upload', requireAdmin, async (c) => {
+  router.post('/upload', requireAdmin, uploadRateLimit, async (c) => {
     const body = await c.req.json<{ image?: string; filename?: string }>()
     const result = await getUploadService(c.env).upload(body.image, body.filename)
 
@@ -27,7 +29,7 @@ export function createUploadRouter(
     return c.json(result.payload)
   })
 
-  router.delete('/upload/:filename', requireAdmin, async (c) => {
+  router.delete('/upload/:filename', requireAdmin, deleteRateLimit, async (c) => {
     try {
       await getUploadService(c.env).delete(c.req.param('filename'))
       return c.json({ success: true })

@@ -1,14 +1,18 @@
 import { Hono } from 'hono'
+import type { MiddlewareHandler } from 'hono'
 
 import type { AppBindings, AppEnv } from '../../shared/types/app-env'
 import type { AuthService } from './auth.service'
 
 type AuthServiceFactory = (bindings: AppBindings) => AuthService
 
-export function createAuthRouter(getAuthService: AuthServiceFactory) {
+export function createAuthRouter(
+  getAuthService: AuthServiceFactory,
+  loginRateLimit: MiddlewareHandler<AppEnv>
+) {
   const router = new Hono<AppEnv>()
 
-  router.post('/login', async (c) => {
+  router.post('/login', loginRateLimit, async (c) => {
     const body = await c.req.json<{ username: string; password: string }>()
     const result = await getAuthService(c.env).login(body.username, body.password)
 

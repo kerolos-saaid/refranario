@@ -48,6 +48,7 @@ async function resetDevDatabase(database: D1Database): Promise<void> {
   const seed = normalizeSql(await readFile(SEED_PATH, 'utf8'))
 
   await executeStatements(database, [
+    'DROP TABLE IF EXISTS api_rate_limits',
     'DROP TABLE IF EXISTS proverbs',
     'DROP TABLE IF EXISTS users',
     ...splitSqlStatements(schema),
@@ -108,3 +109,4 @@ function splitSqlStatements(sql: string) {
 
   return statements
 }
+
