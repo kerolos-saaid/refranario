@@ -214,32 +214,31 @@ export default function ImageJobs() {
         style={{ background: 'linear-gradient(135deg, #B02C33 0%, #8A1F25 100%)' }}
       >
         <div className="absolute inset-0 opacity-[0.06] pointer-events-none" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='40' height='40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0h20v20H0zm20 20h20v20H20z' fill='%23fff' fill-opacity='0.3'/%3E%3C/svg%3E\")" }} />
-        <div className="relative mx-auto max-w-5xl px-4 pb-4 pt-4 md:px-8 md:pb-5 md:pt-5">
-          <div className="flex items-center justify-between gap-3">
+        <div className="relative mx-auto max-w-5xl px-4 pb-3 pt-3 md:px-8 md:pb-4 md:pt-4">
+          <div className="grid grid-cols-[auto_1fr_auto] items-center gap-3">
             <Link
               to="/home"
-              className="inline-flex h-11 items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 text-sm font-medium text-white transition-colors hover:bg-white/15"
+              className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-white/10 text-white transition-colors hover:bg-white/15 md:h-11 md:w-auto md:px-3"
             >
               <span className="material-symbols-outlined text-lg" aria-hidden="true">arrow_back</span>
               <span className="hidden sm:inline">Archivo</span>
             </Link>
 
+            <div className="min-w-0 text-center">
+              <p className="truncate text-[11px] font-semibold uppercase tracking-[0.22em] text-white/80 md:text-xs">
+                Centro de imágenes
+              </p>
+            </div>
+
             <button
               type="button"
               onClick={() => void loadJobs('refresh')}
               disabled={refreshing || loading}
-              className="inline-flex h-11 items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 text-sm font-medium text-white transition-colors hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-white/10 text-white transition-colors hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-60 md:h-11 md:w-auto md:px-3"
             >
               <span className={`material-symbols-outlined text-lg ${refreshing ? 'animate-spin' : ''}`} aria-hidden="true">sync</span>
               <span className="hidden sm:inline">Actualizar</span>
             </button>
-          </div>
-
-          <div className="mt-3 text-center">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/70 md:text-xs">Centro de imágenes</p>
-            <h1 className="mx-auto mt-1 max-w-[14rem] text-lg font-bold leading-tight text-white md:max-w-none md:text-2xl">
-              Seguimiento de creación automática
-            </h1>
           </div>
         </div>
       </header>
