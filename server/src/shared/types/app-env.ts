@@ -5,6 +5,7 @@ import type { ProverbImageJobMessage } from '../../modules/proverb-images/prover
 export type AuthenticatedUser = {
   username: string
   role: string
+  tokenVersion: number
 }
 
 export type WorkersAiBinding = {

@@ -1,9 +1,13 @@
 import type { MiddlewareHandler } from 'hono'
 
+import type { UserRepository } from '../../modules/auth/user.repository'
 import type { TokenService } from '../security/jwt.service'
 import type { AppEnv } from '../types/app-env'
 
-export function createRequireAdmin(tokenService: TokenService): MiddlewareHandler<AppEnv> {
+export function createRequireAdmin(
+  tokenService: TokenService,
+  getUserRepository: (env: AppEnv['Bindings']) => UserRepository
+): MiddlewareHandler<AppEnv> {
   return async (c, next) => {
     const authHeader = c.req.header('Authorization')
 
@@ -17,6 +21,16 @@ export function createRequireAdmin(tokenService: TokenService): MiddlewareHandle
 
       if (!payload) {
         return c.json({ error: 'Unauthorized - Invalid token' }, 401)
+      }
+
+      if (typeof payload.tokenVersion !== 'number') {
+        return c.json({ error: 'Unauthorized - Session expired' }, 401)
+      }
+
+      const user = await getUserRepository(c.env).findByUsername(payload.username)
+
+      if (!user || user.tokenVersion !== payload.tokenVersion) {
+        return c.json({ error: 'Unauthorized - Session expired' }, 401)
       }
 
       if (payload.role !== 'admin') {

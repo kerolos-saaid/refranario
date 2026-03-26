@@ -12,13 +12,14 @@ import {
   createAuthService,
   createProverbImageJobService,
   createProverbService,
+  createUserRepository,
   createUploadService,
   getTokenService
 } from './create-services'
 
 export function createApp() {
   const app = new Hono<AppEnv>()
-  const requireAdmin = createRequireAdmin(getTokenService())
+  const requireAdmin = createRequireAdmin(getTokenService(), createUserRepository)
 
   app.use('*', logger())
   app.use('*', cors())

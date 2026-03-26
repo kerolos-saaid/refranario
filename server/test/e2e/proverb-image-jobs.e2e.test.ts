@@ -83,7 +83,7 @@ function createEnv(queue?: FakeQueue): AppBindings {
 }
 
 async function adminHeaders() {
-  const token = await new HmacJwtService().sign({ username: 'admin', role: 'admin' })
+  const token = await new HmacJwtService().sign({ username: 'admin', role: 'admin', tokenVersion: 1 })
 
   return {
     Authorization: `Bearer ${token}`,
@@ -342,4 +342,5 @@ describe('proverb image jobs', () => {
     expect(row?.image_prompt_hash).toBeTruthy()
   })
 })
+
 

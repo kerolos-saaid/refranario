@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import Splash from './pages/Splash'
 import Home from './pages/Home'
@@ -8,6 +8,7 @@ import Login from './pages/Login'
 import ImageJobs from './pages/ImageJobs'
 import OfflineBanner from './components/OfflineBanner'
 import { PWAInstallBanner } from './hooks/usePWAInstall'
+import { AUTH_EXPIRED_EVENT } from './lib/api'
 
 function UpdateBanner() {
   const [showUpdate, setShowUpdate] = useState(false)
@@ -53,9 +54,29 @@ function AnimatedRoutes() {
   )
 }
 
+function AuthSessionRedirect() {
+  const navigate = useNavigate()
+  const location = useLocation()
+
+  useEffect(() => {
+    const handleExpired = () => {
+      if (location.pathname !== '/login') {
+        navigate('/login', { replace: true })
+      }
+    }
+
+    window.addEventListener(AUTH_EXPIRED_EVENT, handleExpired)
+
+    return () => window.removeEventListener(AUTH_EXPIRED_EVENT, handleExpired)
+  }, [location.pathname, navigate])
+
+  return null
+}
+
 export default function App() {
   return (
     <BrowserRouter>
+      <AuthSessionRedirect />
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[70] focus:rounded-md focus:bg-white focus:px-4 focus:py-2 focus:text-primary focus:shadow-lg"

@@ -1,6 +1,21 @@
 import { getApiBase } from './api-base'
 
 const API_BASE = getApiBase()
+export const AUTH_EXPIRED_EVENT = 'senor-shabi-auth-expired'
+const AUTH_NOTICE_KEY = 'senor_shabi_auth_notice'
+
+function getToken(): string | null {
+  return localStorage.getItem('token')
+}
+
+function handleExpiredSession() {
+  localStorage.removeItem('token')
+  localStorage.removeItem('role')
+  localStorage.removeItem('username')
+  localStorage.removeItem('isLoggedIn')
+  sessionStorage.setItem(AUTH_NOTICE_KEY, 'Tu sesión expiró después de un cambio de seguridad. Inicia sesión de nuevo.')
+  window.dispatchEvent(new CustomEvent(AUTH_EXPIRED_EVENT))
+}
 
 async function readApiResponse<T>(res: Response, fallbackMessage: string): Promise<T> {
   const rawBody = await res.text()
@@ -24,6 +39,13 @@ async function readApiResponse<T>(res: Response, fallbackMessage: string): Promi
   }
 
   if (!res.ok) {
+    const isUnauthorized = res.status === 401
+    const isLoginRequest = res.url.endsWith('/login')
+
+    if (isUnauthorized && !isLoginRequest && getToken()) {
+      handleExpiredSession()
+    }
+
     if (data && typeof data === 'object' && 'error' in data) {
       throw new Error(String((data as { error?: unknown }).error || fallbackMessage))
     }
@@ -36,11 +58,6 @@ async function readApiResponse<T>(res: Response, fallbackMessage: string): Promi
   }
 
   return data as T
-}
-
-// Get JWT token for protected requests
-function getToken(): string | null {
-  return localStorage.getItem('token')
 }
 
 // Get auth header for protected requests using JWT
@@ -179,10 +196,20 @@ export function logout() {
   localStorage.removeItem('role')
   localStorage.removeItem('username')
   localStorage.removeItem('isLoggedIn')
+  sessionStorage.removeItem(AUTH_NOTICE_KEY)
 }
 
 export function isAdmin() {
   return localStorage.getItem('role') === 'admin'
+}
+
+export function consumeAuthNotice() {
+  const value = sessionStorage.getItem(AUTH_NOTICE_KEY)
+  if (value) {
+    sessionStorage.removeItem(AUTH_NOTICE_KEY)
+  }
+
+  return value
 }
 
 export interface Proverb {

@@ -14,7 +14,11 @@ export class AuthService {
       return null
     }
 
-    const token = await this.tokenService.sign({ username: user.username, role: user.role })
+    const token = await this.tokenService.sign({
+      username: user.username,
+      role: user.role,
+      tokenVersion: user.tokenVersion
+    })
 
     return {
       success: true as const,

@@ -24,9 +24,13 @@ export function getTokenService() {
 
 export function createAuthService(bindings: AppBindings) {
   return new AuthService(
-    new D1UserRepository(bindings.senor_shabi_db),
+    createUserRepository(bindings),
     tokenService
   )
+}
+
+export function createUserRepository(bindings: AppBindings) {
+  return new D1UserRepository(bindings.senor_shabi_db)
 }
 
 export function createProverbService(bindings: AppBindings) {

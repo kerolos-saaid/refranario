@@ -1,12 +1,12 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { login } from '../lib/api'
+import { consumeAuthNotice, login } from '../lib/api'
 
 export default function Login() {
   const navigate = useNavigate()
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
+  const [error, setError] = useState(() => consumeAuthNotice() || '')
   const [loading, setLoading] = useState(false)
   const [shake, setShake] = useState(false)
 
