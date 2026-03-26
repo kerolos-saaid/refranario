@@ -214,29 +214,33 @@ export default function ImageJobs() {
         style={{ background: 'linear-gradient(135deg, #B02C33 0%, #8A1F25 100%)' }}
       >
         <div className="absolute inset-0 opacity-[0.06] pointer-events-none" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='40' height='40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0h20v20H0zm20 20h20v20H20z' fill='%23fff' fill-opacity='0.3'/%3E%3C/svg%3E\")" }} />
-        <div className="relative mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 pb-4 pt-5 md:px-8">
-          <Link
-            to="/home"
-            className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-white/15"
-          >
-            <span className="material-symbols-outlined text-lg" aria-hidden="true">arrow_back</span>
-            <span>Archivo</span>
-          </Link>
+        <div className="relative mx-auto max-w-5xl px-4 pb-4 pt-4 md:px-8 md:pb-5 md:pt-5">
+          <div className="flex items-center justify-between gap-3">
+            <Link
+              to="/home"
+              className="inline-flex h-11 items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 text-sm font-medium text-white transition-colors hover:bg-white/15"
+            >
+              <span className="material-symbols-outlined text-lg" aria-hidden="true">arrow_back</span>
+              <span className="hidden sm:inline">Archivo</span>
+            </Link>
 
-          <div className="min-w-0 flex-1 text-center">
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/70">Centro de imágenes</p>
-            <h1 className="mt-1 text-xl font-bold text-white md:text-2xl">Seguimiento de creación automática</h1>
+            <button
+              type="button"
+              onClick={() => void loadJobs('refresh')}
+              disabled={refreshing || loading}
+              className="inline-flex h-11 items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 text-sm font-medium text-white transition-colors hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <span className={`material-symbols-outlined text-lg ${refreshing ? 'animate-spin' : ''}`} aria-hidden="true">sync</span>
+              <span className="hidden sm:inline">Actualizar</span>
+            </button>
           </div>
 
-          <button
-            type="button"
-            onClick={() => void loadJobs('refresh')}
-            disabled={refreshing || loading}
-            className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            <span className={`material-symbols-outlined text-lg ${refreshing ? 'animate-spin' : ''}`} aria-hidden="true">sync</span>
-            <span className="hidden md:inline">Actualizar</span>
-          </button>
+          <div className="mt-3 text-center">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/70 md:text-xs">Centro de imágenes</p>
+            <h1 className="mx-auto mt-1 max-w-[14rem] text-lg font-bold leading-tight text-white md:max-w-none md:text-2xl">
+              Seguimiento de creación automática
+            </h1>
+          </div>
         </div>
       </header>
 
@@ -247,19 +251,19 @@ export default function ImageJobs() {
         style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + var(--fixed-bottom-stack-height, 0px) + 7rem)' }}
       >
         <div className="mx-auto flex max-w-5xl flex-col gap-5">
-          <section className="bookplate-border overflow-hidden p-5 md:p-6">
+          <section className="bookplate-border overflow-hidden p-4 md:p-6">
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-              <div className="max-w-2xl">
-                <p className="text-sm text-muted">
-                  Aquí ves la cola de creación de imágenes sin logs ni términos técnicos. Cada tarjeta indica si el refrán está esperando,
-                  generándose, reintentándose solo o si necesita revisión manual.
+              <div className="max-w-xl">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary/70">Panel de seguimiento</p>
+                <p className="mt-2 text-sm leading-6 text-muted">
+                  Aquí ves si cada imagen está en fila, generándose o esperando un nuevo intento automático.
                 </p>
               </div>
               <button
                 type="button"
                 onClick={handleBackfill}
                 disabled={backfilling}
-                className="inline-flex items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-white shadow-md transition-transform hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-full px-4 py-3 text-sm font-semibold text-white shadow-md transition-transform hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-60 md:w-auto md:py-2"
                 style={{ background: 'linear-gradient(135deg, #F79F3F 0%, #DF3D4C 100%)' }}
               >
                 <span className={`material-symbols-outlined text-lg ${backfilling ? 'animate-spin' : ''}`} aria-hidden="true">playlist_add_check</span>
