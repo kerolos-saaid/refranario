@@ -51,14 +51,14 @@ export default function Login() {
           <div className="flex flex-col items-center text-center space-y-8">
             <div className="flex flex-col items-center space-y-4">
               <div className="text-primary flex items-center justify-center p-2">
-                <img src="/new_logo_no_text.png" alt="SeÃ±or ShaØ¹bi Logo" className="w-24 h-24 object-contain" />
+                <img src="/new_logo_no_text.png" alt="Señor Shaʿbi Logo" className="w-24 h-24 object-contain" />
               </div>
               <div>
                 <h1 className="font-display text-3xl text-primary font-bold tracking-wide uppercase leading-tight">
                   Acceso de Curador
                 </h1>
                 <p className="font-sans text-xs tracking-widest text-muted uppercase mt-2">
-                  El Archivo del AcadÃ©mico
+                  El Archivo del Académico
                 </p>
               </div>
               <div className="w-16 h-px mt-2" style={{ background: 'linear-gradient(90deg, #B02C33, #F79F3F)' }} />
@@ -92,7 +92,7 @@ export default function Login() {
 
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-widest mb-2" htmlFor="login-password" style={{ color: '#B02C33' }}>
-                    ContraseÃ±a
+                    Contraseña
                   </label>
                   <input
                     id="login-password"
@@ -119,7 +119,7 @@ export default function Login() {
             </form>
 
             <Link to="/home" className="text-muted text-sm hover:text-primary transition-colors">
-              â† Volver al Archivo
+              ← Volver al Archivo
             </Link>
           </div>
         </div>
@@ -145,5 +145,3 @@ export default function Login() {
     </div>
   )
 }
-
-
