@@ -1,4 +1,4 @@
-const CACHE_NAME = 'senor-shabi-v65';
+const CACHE_NAME = 'senor-shabi-v66';
 const STATIC_CACHE = 'senor-shabi-static-v3';
 const DATA_CACHE = 'senor-shabi-data-v3';
 

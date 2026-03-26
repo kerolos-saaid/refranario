@@ -136,7 +136,13 @@ export async function backfillProverbImageJobs(limit?: number) {
     headers,
     body: JSON.stringify(limit ? { limit } : {}),
   })
-  return await readApiResponse<{ enqueued: number; scanned: number }>(res, 'Failed to scan missing images')
+  return await readApiResponse<{
+    enqueued: number
+    scanned: number
+    deferred?: number
+    throttled?: boolean
+    queueError?: string | null
+  }>(res, 'Failed to scan missing images')
 }
 
 export async function regenerateProverbImage(id: string) {

@@ -1,5 +1,6 @@
 import {
   DEFAULT_PROVERB_IMAGE_MODEL,
+  DEFAULT_PROVERB_IMAGE_QUEUE_BATCH_SIZE,
   DEFAULT_PROVERB_PROMPT_BATCH_SIZE,
   DEFAULT_PROVERB_PROMPT_MODEL,
   DEFAULT_PROVERB_IMAGE_PROCESSING_LEASE_SECONDS,
@@ -15,6 +16,7 @@ export type ProverbImageJobConfig = {
   model: string
   promptModel?: string
   promptBatchSize?: number
+  queueBatchSize: number
   sweepLimit: number
   retryDelaySeconds: number
   quotaCooldownSeconds: number
@@ -40,6 +42,7 @@ export function getProverbImageJobConfig(bindings: AppBindings): ProverbImageJob
     model: bindings.PROVERB_IMAGE_MODEL || DEFAULT_PROVERB_IMAGE_MODEL,
     promptModel: bindings.PROVERB_PROMPT_MODEL || DEFAULT_PROVERB_PROMPT_MODEL,
     promptBatchSize: parseInteger(bindings.PROVERB_PROMPT_BATCH_SIZE, DEFAULT_PROVERB_PROMPT_BATCH_SIZE),
+    queueBatchSize: parseInteger(bindings.PROVERB_IMAGE_QUEUE_BATCH_SIZE, DEFAULT_PROVERB_IMAGE_QUEUE_BATCH_SIZE),
     sweepLimit: parseInteger(bindings.PROVERB_IMAGE_SWEEP_LIMIT, DEFAULT_PROVERB_IMAGE_SWEEP_LIMIT),
     retryDelaySeconds: parseInteger(bindings.PROVERB_IMAGE_RETRY_DELAY_SECONDS, DEFAULT_PROVERB_IMAGE_RETRY_DELAY_SECONDS),
     quotaCooldownSeconds: parseInteger(

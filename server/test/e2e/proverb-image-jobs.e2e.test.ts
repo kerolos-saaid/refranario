@@ -147,6 +147,7 @@ function createService(provider: FakeProvider, queue?: FakeQueue) {
     {
       apiKeys: ['key-1', 'key-2'],
       model: 'gemini-2.5-flash-image',
+      queueBatchSize: 25,
       sweepLimit: 10,
       retryDelaySeconds: 60,
       quotaCooldownSeconds: 300,
@@ -341,3 +342,4 @@ describe('proverb image jobs', () => {
     expect(row?.image_prompt_hash).toBeTruthy()
   })
 })
+

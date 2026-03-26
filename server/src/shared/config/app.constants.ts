@@ -4,6 +4,7 @@ export const MANAGED_R2_DELETE_HOST_MATCH = 'r2.cloudflarestorage.com'
 export const DEFAULT_PROVERB_IMAGE_MODEL = '@cf/black-forest-labs/flux-2-klein-4b'
 export const DEFAULT_PROVERB_PROMPT_MODEL = 'gemini-2.5-flash-lite'
 export const DEFAULT_PROVERB_PROMPT_BATCH_SIZE = 5
+export const DEFAULT_PROVERB_IMAGE_QUEUE_BATCH_SIZE = 25
 export const DEFAULT_PROVERB_IMAGE_SWEEP_LIMIT = 10
 export const DEFAULT_PROVERB_IMAGE_RETRY_DELAY_SECONDS = 60
 export const DEFAULT_PROVERB_IMAGE_QUOTA_COOLDOWN_SECONDS = 300

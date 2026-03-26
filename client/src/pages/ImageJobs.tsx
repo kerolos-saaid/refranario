@@ -182,12 +182,16 @@ export default function ImageJobs() {
 
     try {
       const result = await backfillProverbImageJobs()
-      const message = result.enqueued > 0
-        ? `Se mandaron ${result.enqueued} refranes a preparación de imagen.`
-        : 'No encontramos refranes nuevos sin seguimiento de imagen.'
+      const message = result.deferred && result.enqueued > 0
+        ? `Se mandaron ${result.enqueued} refranes ahora y ${result.deferred} quedaron pendientes para reintentarse solos.`
+        : result.deferred
+          ? `La cola está con mucha actividad. ${result.deferred} refranes quedaron pendientes y se reintentaran solos en el próximo barrido.`
+          : result.enqueued > 0
+            ? `Se mandaron ${result.enqueued} refranes a preparación de imagen.`
+            : 'No encontramos refranes nuevos sin seguimiento de imagen.'
 
       setNotice({
-        tone: 'success',
+        tone: result.deferred ? 'info' : 'success',
         message,
       })
       await loadJobs('refresh')

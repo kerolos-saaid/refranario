@@ -17,7 +17,9 @@ import type {
   ProverbImageJobStatusItem
 } from './proverb-image.types'
 
-type QueueSendLike = Pick<Queue<ProverbImageJobMessage>, 'send'>
+type QueueSendLike =
+  & Pick<Queue<ProverbImageJobMessage>, 'send'>
+  & Partial<Pick<Queue<ProverbImageJobMessage>, 'sendBatch'>>
 
 type ProcessMessageResult =
   | { kind: 'ack' }
@@ -33,6 +35,18 @@ type PreparedJob = {
 type MessageAction = {
   message: Message<ProverbImageJobMessage>
   result: ProcessMessageResult
+}
+
+type QueueEnqueueRequest = {
+  body: ProverbImageJobMessage
+  delaySeconds?: number
+}
+
+type QueueEnqueueResult = {
+  sentCount: number
+  deferredCount: number
+  throttled: boolean
+  reason: string | null
 }
 
 function hasImageValue(image: string | null | undefined) {
@@ -66,6 +80,22 @@ function computeAutomaticRetryDelay(attempts: number | null | undefined, baseDel
   const multiplier = 2 ** Math.min(normalizedAttempts - 1, 8)
 
   return Math.min(maxDelaySeconds, baseDelaySeconds * multiplier)
+}
+
+function classifyQueueSendError(error: unknown) {
+  const reason = error instanceof Error ? error.message : String(error)
+  const normalized = reason.toLowerCase()
+
+  const throttled =
+    normalized.includes('too many requests')
+    || normalized.includes('rate limit')
+    || normalized.includes('rate-limited')
+    || normalized.includes('429')
+
+  return {
+    throttled,
+    reason
+  }
 }
 
 export class ProverbImageJobService {
@@ -115,23 +145,37 @@ export class ProverbImageJobService {
     }
 
     await this.repository.markPending(proverb.id, promptHash, true)
-    await this.enqueueMessage({
+    const enqueueResult = await this.enqueueMessage({
       proverbId: proverb.id,
       promptHash,
       requestedAt: this.now().toISOString()
     })
 
-    console.log('[ProverbImageJob] Enqueued proverb for generation', {
-      proverbId: proverb.id,
-      promptHash
-    })
+    if (enqueueResult.sentCount === 1) {
+      console.log('[ProverbImageJob] Enqueued proverb for generation', {
+        proverbId: proverb.id,
+        promptHash
+      })
+    } else {
+      console.warn('[ProverbImageJob] Deferred proverb enqueue after producer pressure', {
+        proverbId: proverb.id,
+        promptHash,
+        throttled: enqueueResult.throttled,
+        reason: enqueueResult.reason
+      })
+    }
 
-    return { queued: true, promptHash }
+    return {
+      queued: enqueueResult.sentCount === 1,
+      deferred: enqueueResult.deferredCount === 1,
+      promptHash,
+      queueError: enqueueResult.reason
+    }
   }
 
   async backfill(limit = this.config.sweepLimit) {
     const candidates = await this.repository.listSweepCandidates(formatSqlTimestamp(this.now()), limit)
-    let enqueued = 0
+    const messages: QueueEnqueueRequest[] = []
 
     for (const candidate of candidates) {
       const promptHash = candidate.image_prompt_hash || await createProverbPromptHash(candidate.spanish, candidate.english)
@@ -148,20 +192,39 @@ export class ProverbImageJobService {
         )
       }
 
-      await this.enqueueMessage({
-        proverbId: candidate.id,
-        promptHash,
-        requestedAt: this.now().toISOString()
+      messages.push({
+        body: {
+          proverbId: candidate.id,
+          promptHash,
+          requestedAt: this.now().toISOString()
+        }
       })
-      enqueued += 1
     }
 
-    console.log('[ProverbImageJob] Backfill sweep completed', {
-      enqueued,
-      scanned: candidates.length
-    })
+    const enqueueResult = await this.enqueueMessages(messages)
 
-    return { enqueued, scanned: candidates.length }
+    if (enqueueResult.deferredCount > 0) {
+      console.warn('[ProverbImageJob] Backfill sweep deferred some jobs after producer pressure', {
+        enqueued: enqueueResult.sentCount,
+        deferred: enqueueResult.deferredCount,
+        scanned: candidates.length,
+        throttled: enqueueResult.throttled,
+        reason: enqueueResult.reason
+      })
+    } else {
+      console.log('[ProverbImageJob] Backfill sweep completed', {
+        enqueued: enqueueResult.sentCount,
+        scanned: candidates.length
+      })
+    }
+
+    return {
+      enqueued: enqueueResult.sentCount,
+      deferred: enqueueResult.deferredCount,
+      scanned: candidates.length,
+      throttled: enqueueResult.throttled,
+      queueError: enqueueResult.reason
+    }
   }
 
   async listActiveJobs(limit = this.config.statusLimit): Promise<ProverbImageJobStatusItem[]> {
@@ -181,18 +244,31 @@ export class ProverbImageJobService {
 
     const promptHash = await createProverbPromptHash(proverb.spanish, proverb.english)
     await this.repository.clearImageAndMarkPending(proverbId, promptHash)
-    await this.enqueueMessage({
+    const enqueueResult = await this.enqueueMessage({
       proverbId,
       promptHash,
       requestedAt: this.now().toISOString()
     })
 
-    console.log('[ProverbImageJob] Manual regenerate requested', {
-      proverbId,
-      promptHash
-    })
+    if (enqueueResult.sentCount === 1) {
+      console.log('[ProverbImageJob] Manual regenerate requested', {
+        proverbId,
+        promptHash
+      })
+    } else {
+      console.warn('[ProverbImageJob] Manual regenerate deferred after producer pressure', {
+        proverbId,
+        promptHash,
+        throttled: enqueueResult.throttled,
+        reason: enqueueResult.reason
+      })
+    }
 
-    return { kind: 'queued' } as const
+    return {
+      kind: 'queued',
+      deferred: enqueueResult.deferredCount === 1,
+      queueError: enqueueResult.reason
+    } as const
   }
 
   async processBatch(batch: MessageBatch<ProverbImageJobMessage>) {
@@ -499,14 +575,56 @@ export class ProverbImageJobService {
   }
 
   private async enqueueMessage(message: ProverbImageJobMessage, delaySeconds?: number) {
+    return await this.enqueueMessages([{ body: message, delaySeconds }])
+  }
+
+  private async enqueueMessages(messages: QueueEnqueueRequest[]): Promise<QueueEnqueueResult> {
     if (!this.queue) {
       console.warn('[ProverbImageJob] Queue binding missing; skipping enqueue', {
-        proverbId: message.proverbId
+        count: messages.length
       })
-      return
+
+      return {
+        sentCount: 0,
+        deferredCount: messages.length,
+        throttled: false,
+        reason: 'Queue binding missing.'
+      }
     }
 
-    await this.queue.send(message, delaySeconds ? { delaySeconds } : undefined)
+    let sentCount = 0
+    const queueBatchSize = Math.max(1, Math.min(100, this.config.queueBatchSize || 25))
+    const chunks = chunkArray(messages, queueBatchSize)
+
+    for (const chunk of chunks) {
+      try {
+        if (this.queue.sendBatch && chunk.length > 1) {
+          await this.queue.sendBatch(chunk)
+        } else {
+          for (const message of chunk) {
+            await this.queue.send(message.body, message.delaySeconds ? { delaySeconds: message.delaySeconds } : undefined)
+          }
+        }
+
+        sentCount += chunk.length
+      } catch (error) {
+        const classification = classifyQueueSendError(error)
+
+        return {
+          sentCount,
+          deferredCount: messages.length - sentCount,
+          throttled: classification.throttled,
+          reason: classification.reason
+        }
+      }
+    }
+
+    return {
+      sentCount,
+      deferredCount: 0,
+      throttled: false,
+      reason: null
+    }
   }
 
   private getAutomaticRetryDelay(attempts: number | null | undefined) {
