@@ -243,16 +243,6 @@ export default function Detail() {
                   {proverb.note}
                 </p>
               </div>
-
-              <div className="pt-4 border-t border-primary/10">
-                <h2 className="text-ink font-ui text-sm font-bold mb-2">Ejemplo de Uso</h2>
-                <div className="p-4 rounded-lg" style={{ background: 'linear-gradient(90deg, rgba(247,159,63,0.08), rgba(223,61,76,0.04))', borderLeft: '3px solid #F79F3F' }}>
-                  <p className="font-serif text-ink text-sm leading-relaxed">
-                    <span className="text-accent font-ui text-xs uppercase block mb-1 font-bold">Uso</span>
-                    No hagas cosas sin sentido, recuerda que el que come pan con leche se duerme.
-                  </p>
-                </div>
-              </div>
             </div>
           </div>
         </div>
