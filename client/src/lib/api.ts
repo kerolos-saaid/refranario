@@ -181,8 +181,12 @@ export async function login(username: string, password: string) {
     body: JSON.stringify({ username, password }),
   })
   const data = await readApiResponse<{ token: string; role?: string; username: string }>(res, 'Login failed')
-  
-  // Store JWT token and role (NOT username/password)
+
+  if (data.role !== 'admin') {
+    logout()
+    throw new Error('Forbidden - Admin only')
+  }
+
   localStorage.setItem('token', data.token)
   localStorage.setItem('role', data.role || 'user')
   localStorage.setItem('username', data.username)
@@ -200,7 +204,7 @@ export function logout() {
 }
 
 export function isAdmin() {
-  return localStorage.getItem('role') === 'admin'
+  return Boolean(localStorage.getItem('token')) && localStorage.getItem('role') === 'admin'
 }
 
 export function consumeAuthNotice() {

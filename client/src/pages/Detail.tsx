@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom'
 import {
   fetchProverb,
   deleteProverb,
+  isAdmin,
   type Proverb,
 } from '../lib/api'
 import { useSpeechSynthesisPlayback } from '../hooks/useSpeechSynthesisPlayback'
@@ -12,13 +13,13 @@ export default function Detail() {
   const navigate = useNavigate()
   const [proverb, setProverb] = useState<Proverb | null>(null)
   const [loading, setLoading] = useState(true)
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [isAdminUser, setIsAdminUser] = useState(false)
 
   useEffect(() => {
     if (id) {
       loadProverb()
     }
-    setIsLoggedIn(localStorage.getItem('isLoggedIn') === 'true')
+    setIsAdminUser(isAdmin())
   }, [id])
 
   const loadProverb = async () => {
@@ -248,7 +249,7 @@ export default function Detail() {
         </div>
       </main>
 
-      {isLoggedIn && (
+      {isAdminUser && (
         <div
           className="sticky w-full border-t border-primary/10 p-4 shadow-lg z-40 fixed-bottom-stack-offset"
           style={{ background: 'linear-gradient(135deg, #B02C33 0%, #8A1F25 100%)' }}

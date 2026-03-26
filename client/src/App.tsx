@@ -8,7 +8,7 @@ import Login from './pages/Login'
 import ImageJobs from './pages/ImageJobs'
 import OfflineBanner from './components/OfflineBanner'
 import { PWAInstallBanner } from './hooks/usePWAInstall'
-import { AUTH_EXPIRED_EVENT } from './lib/api'
+import { AUTH_EXPIRED_EVENT, isAdmin } from './lib/api'
 
 function UpdateBanner() {
   const [showUpdate, setShowUpdate] = useState(false)
@@ -46,12 +46,20 @@ function AnimatedRoutes() {
       <Route path="/splash" element={<Splash />} />
       <Route path="/home" element={<Home />} />
       <Route path="/detail/:id" element={<Detail />} />
-      <Route path="/add" element={<AddEdit />} />
-      <Route path="/edit/:id" element={<AddEdit />} />
-      <Route path="/admin/images" element={<ImageJobs />} />
+      <Route path="/add" element={<AdminOnlyRoute><AddEdit /></AdminOnlyRoute>} />
+      <Route path="/edit/:id" element={<AdminOnlyRoute><AddEdit /></AdminOnlyRoute>} />
+      <Route path="/admin/images" element={<AdminOnlyRoute><ImageJobs /></AdminOnlyRoute>} />
       <Route path="/login" element={<Login />} />
     </Routes>
   )
+}
+
+function AdminOnlyRoute({ children }: { children: React.ReactElement }) {
+  if (!isAdmin()) {
+    return <Navigate to="/login" replace />
+  }
+
+  return children
 }
 
 function AuthSessionRedirect() {

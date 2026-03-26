@@ -15,8 +15,12 @@ export function createRequireAdmin(
       return c.json({ error: 'Unauthorized - No token' }, 401)
     }
 
+    if (!authHeader.startsWith('Bearer ')) {
+      return c.json({ error: 'Unauthorized - Invalid token' }, 401)
+    }
+
     try {
-      const token = authHeader.replace('Bearer ', '')
+      const token = authHeader.slice('Bearer '.length)
       const payload = await tokenService.verify(token)
 
       if (!payload) {
@@ -33,11 +37,19 @@ export function createRequireAdmin(
         return c.json({ error: 'Unauthorized - Session expired' }, 401)
       }
 
-      if (payload.role !== 'admin') {
+      if (user.role !== payload.role) {
+        return c.json({ error: 'Unauthorized - Session expired' }, 401)
+      }
+
+      if (user.role !== 'admin') {
         return c.json({ error: 'Forbidden - Admin only' }, 403)
       }
 
-      c.set('user', payload)
+      c.set('user', {
+        username: user.username,
+        role: user.role,
+        tokenVersion: user.tokenVersion
+      })
       await next()
     } catch {
       return c.json({ error: 'Unauthorized - Invalid token' }, 401)

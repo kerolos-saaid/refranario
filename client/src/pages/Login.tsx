@@ -1,4 +1,4 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { consumeAuthNotice, login } from '../lib/api'
 
@@ -16,16 +16,12 @@ export default function Login() {
     setError('')
 
     try {
-      const result = await login(username, password)
-      if (result.role === 'admin') {
-        navigate('/home')
-      } else {
-        setError('Acceso denegado: solo administradores')
-        setShake(true)
-        setTimeout(() => setShake(false), 820)
-      }
+      await login(username, password)
+      navigate('/home')
     } catch (err) {
-      setError('Usuario o contraseña incorrectos')
+      setError(err instanceof Error && err.message === 'Forbidden - Admin only'
+        ? 'Acceso denegado: solo administradores'
+        : 'Usuario o contraseña incorrectos')
       setShake(true)
       setTimeout(() => setShake(false), 820)
     } finally {
@@ -55,14 +51,14 @@ export default function Login() {
           <div className="flex flex-col items-center text-center space-y-8">
             <div className="flex flex-col items-center space-y-4">
               <div className="text-primary flex items-center justify-center p-2">
-                <img src="/new_logo_no_text.png" alt="Señor Shaعbi Logo" className="w-24 h-24 object-contain" />
+                <img src="/new_logo_no_text.png" alt="SeÃ±or ShaØ¹bi Logo" className="w-24 h-24 object-contain" />
               </div>
               <div>
                 <h1 className="font-display text-3xl text-primary font-bold tracking-wide uppercase leading-tight">
                   Acceso de Curador
                 </h1>
                 <p className="font-sans text-xs tracking-widest text-muted uppercase mt-2">
-                  El Archivo del Académico
+                  El Archivo del AcadÃ©mico
                 </p>
               </div>
               <div className="w-16 h-px mt-2" style={{ background: 'linear-gradient(90deg, #B02C33, #F79F3F)' }} />
@@ -96,7 +92,7 @@ export default function Login() {
 
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-widest mb-2" htmlFor="login-password" style={{ color: '#B02C33' }}>
-                    Contraseña
+                    ContraseÃ±a
                   </label>
                   <input
                     id="login-password"
@@ -123,7 +119,7 @@ export default function Login() {
             </form>
 
             <Link to="/home" className="text-muted text-sm hover:text-primary transition-colors">
-              ← Volver al Archivo
+              â† Volver al Archivo
             </Link>
           </div>
         </div>
@@ -149,3 +145,5 @@ export default function Login() {
     </div>
   )
 }
+
+
