@@ -77,6 +77,30 @@ function formatDateTime(value: string | null) {
   }).format(parsed)
 }
 
+function formatJobError(error: string) {
+  const normalized = error.toLowerCase()
+
+  if (
+    normalized.includes('daily free allocation')
+    || normalized.includes('10,000 neurons')
+    || normalized.includes('workers paid plan')
+    || normalized.includes('used up your daily free allocation')
+  ) {
+    return 'Se alcanzó el cupo diario de imágenes por hoy. El sistema volverá a intentarlo cuando el límite se renueve.'
+  }
+
+  if (
+    normalized.includes('rate limit')
+    || normalized.includes('rate-limited')
+    || normalized.includes('quota')
+    || normalized.includes('resource_exhausted')
+  ) {
+    return 'La capacidad disponible se agotó por ahora. El sistema esperará un poco antes de volver a intentarlo.'
+  }
+
+  return error
+}
+
 function summarizeJobs(jobs: ProverbImageJob[]) {
   return jobs.reduce(
     (summary, job) => {
@@ -408,7 +432,7 @@ export default function ImageJobs() {
                             {job.error && (
                               <details className="mt-4 rounded-2xl border border-black/5 bg-white/70 px-4 py-3 text-sm text-muted">
                                 <summary className="cursor-pointer font-medium text-primary">Ver detalle</summary>
-                                <p className="mt-2 whitespace-pre-wrap break-words">{job.error}</p>
+                                <p className="mt-2 whitespace-pre-wrap break-words">{formatJobError(job.error)}</p>
                               </details>
                             )}
                           </div>
