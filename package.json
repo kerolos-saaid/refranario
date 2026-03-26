@@ -3,8 +3,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "bun run --hot server/src/index.ts",
+    "dev": "wrangler dev --test-scheduled",
     "dev:client": "vite",
+    "test:server": "bun test server/test",
     "test:e2e:server": "bun test server/test/e2e",
     "build": "vite build",
     "preview": "vite preview",
@@ -13,6 +14,8 @@
     "deploy:api:prod": "npm run bump-sw && wrangler deploy --env production",
     "d1:create": "wrangler d1 create senor-shabi-db",
     "d1:migrate": "wrangler d1 execute senor-shabi-db --local --file=./server/src/schema.sql",
+    "d1:migrate:image-jobs": "wrangler d1 execute senor-shabi-db --local --file=./server/src/migrations/001_proverb_image_job_columns.sql",
+    "d1:migrate:image-prompts": "wrangler d1 execute senor-shabi-db --local --file=./server/src/migrations/002_proverb_image_generation_prompt.sql",
     "d1:seed": "wrangler d1 execute senor-shabi-db --local --file=./server/src/seed.sql",
     "pages:deploy": "npm run bump-sw && npm run build && npx wrangler pages deploy dist/client"
   },

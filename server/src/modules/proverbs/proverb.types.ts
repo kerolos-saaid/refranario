@@ -22,6 +22,11 @@ export type ProverbRow = {
   curator: string
   date: string
   bookmarked: number | boolean
+  image_job_status?: 'pending' | 'processing' | 'retry' | 'failed' | 'complete' | null
+  image_job_attempts?: number | null
+  image_job_next_retry_at?: string | null
+  image_job_error?: string | null
+  image_prompt_hash?: string | null
 }
 
 export type ProverbListFilters = {

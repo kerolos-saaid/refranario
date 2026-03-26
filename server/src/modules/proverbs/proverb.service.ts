@@ -1,5 +1,6 @@
 import type { ImageStorage } from '../../shared/storage/r2-image-storage'
 
+import type { ProverbImageJobService } from '../proverb-images/proverb-image.service'
 import { rowToProverb } from './proverb.mapper'
 import type { CreateProverbInput, ProverbListFilters, UpdateProverbInput } from './proverb.types'
 import type { ProverbRepository } from './proverb.repository'
@@ -7,7 +8,8 @@ import type { ProverbRepository } from './proverb.repository'
 export class ProverbService {
   constructor(
     private readonly proverbRepository: ProverbRepository,
-    private readonly imageStorage: Pick<ImageStorage, 'deleteFromManagedUrl'>
+    private readonly imageStorage: Pick<ImageStorage, 'deleteFromManagedUrl'>,
+    private readonly proverbImageJobService: Pick<ProverbImageJobService, 'syncForProverb'>
   ) {}
 
   async list(filters: ProverbListFilters) {
@@ -44,16 +46,17 @@ export class ProverbService {
       curator: input.curator || 'Admin',
       date: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
     })
+    await this.proverbImageJobService.syncForProverb(record, {
+      forceEnqueue: !(record.image || '').trim()
+    })
 
     return rowToProverb(record)
   }
 
   async update(id: string, updates: UpdateProverbInput) {
     const currentProverb = await this.proverbRepository.findById(id)
-
-    if (updates.image !== undefined && currentProverb?.image && updates.image !== currentProverb.image) {
-      await this.imageStorage.deleteFromManagedUrl(currentProverb.image)
-    }
+    const englishChanged = updates.english !== undefined && updates.english !== currentProverb?.english
+    const spanishChanged = updates.spanish !== undefined && updates.spanish !== currentProverb?.spanish
 
     const statement = this.proverbRepository.buildUpdateStatement(updates)
 
@@ -66,6 +69,17 @@ export class ProverbService {
     if (!updatedProverb) {
       return { kind: 'not-found' } as const
     }
+
+    await this.proverbImageJobService.syncForProverb(updatedProverb, {
+      forceEnqueue: Boolean(
+        !(updatedProverb.image || '').trim()
+        && (
+          updates.image !== undefined
+          || englishChanged
+          || spanishChanged
+        )
+      )
+    })
 
     return {
       kind: 'updated',

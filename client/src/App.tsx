@@ -5,6 +5,7 @@ import Home from './pages/Home'
 import Detail from './pages/Detail'
 import AddEdit from './pages/AddEdit'
 import Login from './pages/Login'
+import ImageJobs from './pages/ImageJobs'
 import OfflineBanner from './components/OfflineBanner'
 import { PWAInstallBanner } from './hooks/usePWAInstall'
 
@@ -46,6 +47,7 @@ function AnimatedRoutes() {
       <Route path="/detail/:id" element={<Detail />} />
       <Route path="/add" element={<AddEdit />} />
       <Route path="/edit/:id" element={<AddEdit />} />
+      <Route path="/admin/images" element={<ImageJobs />} />
       <Route path="/login" element={<Login />} />
     </Routes>
   )

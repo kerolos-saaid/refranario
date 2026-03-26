@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import { getApiBase } from '../lib/api-base'
 
 // Storage key for offline queue
 const OFFLINE_QUEUE_KEY = 'senor_shabi_offline_queue'
@@ -83,10 +84,7 @@ export function useOfflineSync() {
 
     setIsSyncing(true)
     
-    // Get the API base URL from the environment
-    const API_BASE = import.meta.env.VITE_API_URL 
-      ? `${import.meta.env.VITE_API_URL}/api`
-      : '/api'
+    const API_BASE = getApiBase()
 
     const remainingActions: OfflineAction[] = []
 

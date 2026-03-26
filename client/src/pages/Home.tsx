@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
-import { fetchProverbs, isAdmin, type Proverb } from '../lib/api'
+import { isAdmin, type Proverb } from '../lib/api'
+import { getApiBase } from '../lib/api-base'
 import { OptimizedImage } from '../components/OptimizedImage'
 import { ProverbCardSkeleton, ProverbListSkeleton } from '../components/Skeleton'
 
@@ -43,10 +44,6 @@ export default function Home() {
     setSearchLoading(true)
 
     try {
-      const API_BASE = import.meta.env.VITE_API_URL
-        ? `${import.meta.env.VITE_API_URL}/api`
-        : 'https://senor-shabi-api.kerolos-saaid.workers.dev/api'
-
       const params = new URLSearchParams({
         page: currentPage.toString(),
         limit: ITEMS_PER_PAGE.toString(),
@@ -55,7 +52,7 @@ export default function Home() {
       if (searchQuery) params.append('search', searchQuery)
       if (selectedLetter) params.append('letter', selectedLetter)
 
-      const res = await fetch(`${API_BASE}/proverbs?${params}`)
+      const res = await fetch(`${getApiBase()}/proverbs?${params}`)
       const data = await res.json()
 
       if (shouldReset) {
@@ -125,6 +122,16 @@ export default function Home() {
 
         <div className="relative px-4 md:px-8 pb-4 pt-5 flex flex-col gap-3 max-w-4xl mx-auto">
           <div className="flex items-center justify-center relative">
+            {isAdminUser && (
+              <Link
+                to="/admin/images"
+                aria-label="Ver el estado de creación de imágenes"
+                className="absolute left-0 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-2 text-white/85 transition-colors hover:bg-white/15 hover:text-white"
+              >
+                <span className="material-symbols-outlined text-xl" aria-hidden="true">photo_library</span>
+                <span className="hidden md:inline text-sm font-medium">Imágenes</span>
+              </Link>
+            )}
             <div className="flex items-center gap-3">
               <img src="/new_logo_name_only.png" alt="Señor Shaعbi" className="h-8 md:h-10 object-contain brightness-0 invert" />
             </div>

@@ -1,3 +1,11 @@
 export const JWT_SECRET = 'senor-shabi-secret-key-2024'
 export const R2_PUBLIC_BASE_URL = 'https://pub-15bc35ea99c24da4a92e7cd73a098679.r2.dev'
 export const MANAGED_R2_DELETE_HOST_MATCH = 'r2.cloudflarestorage.com'
+export const DEFAULT_PROVERB_IMAGE_MODEL = '@cf/black-forest-labs/flux-2-klein-4b'
+export const DEFAULT_PROVERB_PROMPT_MODEL = 'gemini-2.5-flash-lite'
+export const DEFAULT_PROVERB_PROMPT_BATCH_SIZE = 5
+export const DEFAULT_PROVERB_IMAGE_SWEEP_LIMIT = 10
+export const DEFAULT_PROVERB_IMAGE_RETRY_DELAY_SECONDS = 60
+export const DEFAULT_PROVERB_IMAGE_QUOTA_COOLDOWN_SECONDS = 300
+export const DEFAULT_PROVERB_IMAGE_PROCESSING_LEASE_SECONDS = 300
+export const DEFAULT_PROVERB_IMAGE_STATUS_LIMIT = 50

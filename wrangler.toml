@@ -2,12 +2,63 @@ name = "senor-shabi-api"
 main = "server/src/index.ts"
 compatibility_date = "2024-12-01"
 compatibility_flags = ["nodejs_compat"]
+vars = { PROVERB_IMAGE_MODEL = "@cf/black-forest-labs/flux-2-klein-4b", PROVERB_PROMPT_MODEL = "gemini-2.5-flash-lite", PROVERB_PROMPT_BATCH_SIZE = "5", PROVERB_IMAGE_SWEEP_LIMIT = "10", PROVERB_IMAGE_RETRY_DELAY_SECONDS = "60", PROVERB_IMAGE_QUOTA_COOLDOWN_SECONDS = "300", PROVERB_IMAGE_PROCESSING_LEASE_SECONDS = "300" }
+
+[ai]
+binding = "AI"
+
+[triggers]
+crons = ["*/5 * * * *"]
 
 [env.production]
-vars = { ENVIRONMENT = "production" }
+vars = { ENVIRONMENT = "production", PROVERB_IMAGE_MODEL = "@cf/black-forest-labs/flux-2-klein-4b", PROVERB_PROMPT_MODEL = "gemini-2.5-flash-lite", PROVERB_PROMPT_BATCH_SIZE = "5", PROVERB_IMAGE_SWEEP_LIMIT = "10", PROVERB_IMAGE_RETRY_DELAY_SECONDS = "60", PROVERB_IMAGE_QUOTA_COOLDOWN_SECONDS = "300", PROVERB_IMAGE_PROCESSING_LEASE_SECONDS = "300" }
+
+[env.production.ai]
+binding = "AI"
+
+[[env.production.d1_databases]]
+binding = "senor_shabi_db"
+database_name = "senor-shabi-db"
+database_id = "e932169c-2609-44f5-9478-547d7b95c946"
+
+[[env.production.r2_buckets]]
+bucket_name = "senor-shabi-images"
+binding = "senor_shabi_images"
+
+[[env.production.queues.producers]]
+binding = "PROVERB_IMAGE_QUEUE"
+queue = "proverb-image-jobs"
+
+[[env.production.queues.consumers]]
+queue = "proverb-image-jobs"
+max_batch_size = 5
+max_batch_timeout = 5
+max_retries = 10
 
 [env.preview]
-vars = { ENVIRONMENT = "preview" }
+vars = { ENVIRONMENT = "preview", PROVERB_IMAGE_MODEL = "@cf/black-forest-labs/flux-2-klein-4b", PROVERB_PROMPT_MODEL = "gemini-2.5-flash-lite", PROVERB_PROMPT_BATCH_SIZE = "5", PROVERB_IMAGE_SWEEP_LIMIT = "10", PROVERB_IMAGE_RETRY_DELAY_SECONDS = "60", PROVERB_IMAGE_QUOTA_COOLDOWN_SECONDS = "300", PROVERB_IMAGE_PROCESSING_LEASE_SECONDS = "300" }
+
+[env.preview.ai]
+binding = "AI"
+
+[[env.preview.d1_databases]]
+binding = "senor_shabi_db"
+database_name = "senor-shabi-db"
+database_id = "e932169c-2609-44f5-9478-547d7b95c946"
+
+[[env.preview.r2_buckets]]
+bucket_name = "senor-shabi-images"
+binding = "senor_shabi_images"
+
+[[env.preview.queues.producers]]
+binding = "PROVERB_IMAGE_QUEUE"
+queue = "proverb-image-jobs"
+
+[[env.preview.queues.consumers]]
+queue = "proverb-image-jobs"
+max_batch_size = 5
+max_batch_timeout = 5
+max_retries = 10
 
 [[d1_databases]]
 binding = "senor_shabi_db"
@@ -17,3 +68,13 @@ database_id = "e932169c-2609-44f5-9478-547d7b95c946"
 [[r2_buckets]]
 bucket_name = "senor-shabi-images"
 binding = "senor_shabi_images"
+
+[[queues.producers]]
+binding = "PROVERB_IMAGE_QUEUE"
+queue = "proverb-image-jobs"
+
+[[queues.consumers]]
+queue = "proverb-image-jobs"
+max_batch_size = 5
+max_batch_timeout = 5
+max_retries = 10
