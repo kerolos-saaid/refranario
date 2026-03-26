@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
-import { isAdmin, type Proverb } from '../lib/api'
+import { isAdmin, logout, type Proverb } from '../lib/api'
 import { getApiBase } from '../lib/api-base'
 import { OptimizedImage } from '../components/OptimizedImage'
 import { ProverbCardSkeleton, ProverbListSkeleton } from '../components/Skeleton'
@@ -106,6 +106,11 @@ export default function Home() {
     setSelectedLetter('')
   }, [])
 
+  const handleLogout = useCallback(() => {
+    logout()
+    setIsAdminUser(false)
+  }, [])
+
   const filteredProverbs = proverbs
   const resultsSummary = loading
     ? 'Cargando refranes.'
@@ -135,13 +140,24 @@ export default function Home() {
             <div className="flex items-center gap-3">
               <img src="/new_logo_name_only.png" alt="Señor Shaعbi" className="h-8 md:h-10 object-contain brightness-0 invert" />
             </div>
-            <Link
-              to="/login"
-              aria-label="Abrir acceso de curador"
-              className="absolute right-0 text-white/70 hover:text-white transition-colors"
-            >
-              <span className="material-symbols-outlined text-2xl" aria-hidden="true">account_circle</span>
-            </Link>
+            {isAdminUser ? (
+              <button
+                type="button"
+                onClick={handleLogout}
+                aria-label="Cerrar sesión de curador"
+                className="absolute right-0 text-white/70 hover:text-white transition-colors"
+              >
+                <span className="material-symbols-outlined text-2xl" aria-hidden="true">logout</span>
+              </button>
+            ) : (
+              <Link
+                to="/login"
+                aria-label="Abrir acceso de curador"
+                className="absolute right-0 text-white/70 hover:text-white transition-colors"
+              >
+                <span className="material-symbols-outlined text-2xl" aria-hidden="true">account_circle</span>
+              </Link>
+            )}
           </div>
 
           <div className="relative w-full max-w-xl mx-auto">
