@@ -1,4 +1,4 @@
-const DEFAULT_API_ORIGIN = 'https://senor-shabi-api-production.kerolos-saaid.workers.dev'
+const DEFAULT_API_ORIGIN = 'https://api.senor-sha3by.site'
 
 function trimTrailingSlash(value: string) {
   return value.replace(/\/+$/, '')
