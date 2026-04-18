@@ -175,7 +175,7 @@ export default function Home() {
               id="search-input"
               aria-controls="proverb-results"
               className="w-full bg-white/15 border border-white/20 rounded-xl py-3 md:py-2.5 pl-12 pr-4 text-white placeholder-white/50 font-ui text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent/50 focus:bg-white/20 transition-all"
-              placeholder="Buscar por frase, palabra o significado..."
+              placeholder="Buscar en español, العربية, or English..."
               type="search"
               autoComplete="off"
               value={searchQuery}

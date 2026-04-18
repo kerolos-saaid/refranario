@@ -32,25 +32,25 @@ export class D1ProverbRepository implements ProverbRepository {
 
     if (search && letter) {
       const countResult = await this.db.prepare(
-        'SELECT COUNT(*) as total FROM proverbs WHERE (spanish LIKE ?1 OR english LIKE ?2) AND spanish LIKE ?3'
-      ).bind(`%${search}%`, `%${search}%`, `${letter}%`).first<{ total: number }>()
+        'SELECT COUNT(*) as total FROM proverbs WHERE (spanish LIKE ?1 OR arabic LIKE ?2 OR english LIKE ?3) AND spanish LIKE ?4'
+      ).bind(`%${search}%`, `%${search}%`, `%${search}%`, `${letter}%`).first<{ total: number }>()
       total = countResult?.total || 0
 
       const offset = (page - 1) * limit
       const result = await this.db.prepare(
-        'SELECT * FROM proverbs WHERE (spanish LIKE ?1 OR english LIKE ?2) AND spanish LIKE ?3 ORDER BY spanish ASC LIMIT ?4 OFFSET ?5'
-      ).bind(`%${search}%`, `%${search}%`, `${letter}%`, limit, offset).all<ProverbRow>()
+        'SELECT * FROM proverbs WHERE (spanish LIKE ?1 OR arabic LIKE ?2 OR english LIKE ?3) AND spanish LIKE ?4 ORDER BY spanish ASC LIMIT ?5 OFFSET ?6'
+      ).bind(`%${search}%`, `%${search}%`, `%${search}%`, `${letter}%`, limit, offset).all<ProverbRow>()
       rows = result.results || []
     } else if (search) {
       const countResult = await this.db.prepare(
-        'SELECT COUNT(*) as total FROM proverbs WHERE spanish LIKE ?1 OR english LIKE ?2'
-      ).bind(`%${search}%`, `%${search}%`).first<{ total: number }>()
+        'SELECT COUNT(*) as total FROM proverbs WHERE spanish LIKE ?1 OR arabic LIKE ?2 OR english LIKE ?3'
+      ).bind(`%${search}%`, `%${search}%`, `%${search}%`).first<{ total: number }>()
       total = countResult?.total || 0
 
       const offset = (page - 1) * limit
       const result = await this.db.prepare(
-        'SELECT * FROM proverbs WHERE spanish LIKE ?1 OR english LIKE ?2 ORDER BY spanish ASC LIMIT ?3 OFFSET ?4'
-      ).bind(`%${search}%`, `%${search}%`, limit, offset).all<ProverbRow>()
+        'SELECT * FROM proverbs WHERE spanish LIKE ?1 OR arabic LIKE ?2 OR english LIKE ?3 ORDER BY spanish ASC LIMIT ?4 OFFSET ?5'
+      ).bind(`%${search}%`, `%${search}%`, `%${search}%`, limit, offset).all<ProverbRow>()
       rows = result.results || []
     } else if (letter) {
       const countResult = await this.db.prepare(

@@ -133,6 +133,12 @@ const scenarios: Scenario[] = [
     ]
   },
   {
+    name: 'lists proverbs with arabic search',
+    run: async (client) => [
+      await client.request({ method: 'GET', path: '/api/proverbs?search=من' })
+    ]
+  },
+  {
     name: 'gets a single proverb by id',
     run: async (client) => [
       await client.request({ method: 'GET', path: '/api/proverbs/1' })
