@@ -10,6 +10,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "bump-sw": "node -e \"const fs=require('fs'); const f='client/public/sw.js'; let c=fs.readFileSync(f,'utf8'); const v=c.match(/senor-shabi-v(\\d+)/); if(v){c=c.replace(/senor-shabi-v\\d+/g,'senor-shabi-v'+(parseInt(v[1])+1)); fs.writeFileSync(f,c); console.log('Bumped to v'+(parseInt(v[1])+1));}\"",
+    "deploy:backend": "npx wrangler@4.77.0 deploy",
+    "deploy:backend:prod": "npx wrangler@4.77.0 deploy --env production",
     "deploy:api": "npm run bump-sw && npx wrangler@4.77.0 deploy",
     "deploy:api:prod": "npm run bump-sw && npx wrangler@4.77.0 deploy --env production",
     "d1:create": "npx wrangler@4.77.0 d1 create senor-shabi-db",

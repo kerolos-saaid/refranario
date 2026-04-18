@@ -157,6 +157,30 @@ npx wrangler pages deploy dist/client \
    - Build command: `bun run build`
    - Build output directory: `dist/client`
 
+### GitHub Actions Auto-Deploy
+
+This repo includes `.github/workflows/deploy.yml`, which auto-deploys production when you push to `main`.
+
+What it does:
+- Deploys the Worker backend when backend files change
+- Builds and deploys the Pages frontend when frontend files change
+- Skips the untouched side so a frontend-only push does not redeploy the backend
+- A manual GitHub Actions run deploys both sides, which is useful for smoke-testing the pipeline
+
+Set these GitHub repository settings before using it:
+
+**Secrets**
+- `CLOUDFLARE_API_TOKEN`: Cloudflare API token with Workers Scripts Edit and Pages Edit permissions
+- `CLOUDFLARE_ACCOUNT_ID`: your Cloudflare account ID
+
+**Variables**
+- `CLOUDFLARE_PAGES_PROJECT_NAME`: your Pages project name, for example `senor-shabi`
+- `VITE_API_URL` (optional): override the frontend API base URL at build time
+
+After those are set, every push to `main` will apply to the running app automatically.
+
+If your Pages project is already connected directly to GitHub inside Cloudflare, disable that Pages-side Git integration or this workflow will trigger a second frontend deploy for the same push.
+
 ---
 
 ## Step 5: Connect Frontend to API

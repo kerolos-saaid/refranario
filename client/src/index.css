@@ -200,8 +200,8 @@ button *,
   transform: translateX(4px);
 }
 
-/* Card hover lift with icon animation */
-.group/card:hover .material-symbols-outlined {
+/* Tailwind's named group class contains a slash, which must be escaped in raw CSS. */
+.group\/card:hover .material-symbols-outlined {
   animation: icon-slide-right 0.3s ease forwards;
 }
 
