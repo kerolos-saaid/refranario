@@ -12,9 +12,11 @@ import type { ProverbImageProvider } from './proverb-image.provider'
 import type { ProverbPromptProvider } from './proverb-prompt.provider'
 import { D1ProverbImageJobRepository } from './proverb-image.repository'
 import type {
+  ProverbImageBackfillResult,
   ProverbImageGenerationRecord,
   ProverbImageJobMessage,
-  ProverbImageJobStatusItem
+  ProverbImageJobStatusItem,
+  ProverbImageRegenerateResult
 } from './proverb-image.types'
 
 type QueueSendLike =
@@ -47,6 +49,7 @@ type QueueEnqueueResult = {
   deferredCount: number
   throttled: boolean
   reason: string | null
+  deferredMessages: QueueEnqueueRequest[]
 }
 
 function hasImageValue(image: string | null | undefined) {
@@ -96,6 +99,33 @@ function classifyQueueSendError(error: unknown) {
     throttled,
     reason
   }
+}
+
+function sanitizeCapacityPressureReason(reason: string | null | undefined) {
+  if (!reason) {
+    return 'Image job capacity is temporarily exhausted. The system will retry automatically.'
+  }
+
+  const normalized = reason.toLowerCase()
+
+  if (
+    normalized.includes('daily free allocation')
+    || normalized.includes('free tier')
+    || normalized.includes('quota')
+    || normalized.includes('resource_exhausted')
+    || normalized.includes('too many requests')
+    || normalized.includes('rate limit')
+    || normalized.includes('rate-limited')
+    || normalized.includes('429')
+  ) {
+    return 'Image job capacity is temporarily exhausted. The system will retry automatically after the cooldown.'
+  }
+
+  if (normalized.includes('queue binding missing')) {
+    return 'Image job queue is temporarily unavailable. The system will retry automatically.'
+  }
+
+  return truncateError(reason)
 }
 
 export class ProverbImageJobService {
@@ -157,6 +187,7 @@ export class ProverbImageJobService {
         promptHash
       })
     } else {
+      await this.markDeferredMessages(enqueueResult)
       console.warn('[ProverbImageJob] Deferred proverb enqueue after producer pressure', {
         proverbId: proverb.id,
         promptHash,
@@ -169,12 +200,18 @@ export class ProverbImageJobService {
       queued: enqueueResult.sentCount === 1,
       deferred: enqueueResult.deferredCount === 1,
       promptHash,
-      queueError: enqueueResult.reason
+      queueError: enqueueResult.reason,
+      nextRetryAt: this.getDeferredNextRetryAt(enqueueResult)
     }
   }
 
-  async backfill(limit = this.config.sweepLimit) {
-    const candidates = await this.repository.listSweepCandidates(formatSqlTimestamp(this.now()), limit)
+  async backfill(limit = this.config.sweepLimit): Promise<ProverbImageBackfillResult> {
+    const now = this.now()
+    const candidates = await this.repository.listSweepCandidates(
+      formatSqlTimestamp(now),
+      limit,
+      formatSqlTimestamp(addSeconds(now, -this.config.processingLeaseSeconds))
+    )
     const messages: QueueEnqueueRequest[] = []
 
     for (const candidate of candidates) {
@@ -202,6 +239,8 @@ export class ProverbImageJobService {
     }
 
     const enqueueResult = await this.enqueueMessages(messages)
+    await this.markDeferredMessages(enqueueResult)
+    const nextRetryAt = this.getDeferredNextRetryAt(enqueueResult)
 
     if (enqueueResult.deferredCount > 0) {
       console.warn('[ProverbImageJob] Backfill sweep deferred some jobs after producer pressure', {
@@ -223,7 +262,8 @@ export class ProverbImageJobService {
       deferred: enqueueResult.deferredCount,
       scanned: candidates.length,
       throttled: enqueueResult.throttled,
-      queueError: enqueueResult.reason
+      queueError: enqueueResult.reason,
+      nextRetryAt
     }
   }
 
@@ -231,7 +271,7 @@ export class ProverbImageJobService {
     return await this.repository.listActiveJobs(limit)
   }
 
-  async regenerate(proverbId: string) {
+  async regenerate(proverbId: string): Promise<ProverbImageRegenerateResult> {
     const proverb = await this.repository.findById(proverbId)
 
     if (!proverb) {
@@ -249,6 +289,8 @@ export class ProverbImageJobService {
       promptHash,
       requestedAt: this.now().toISOString()
     })
+    await this.markDeferredMessages(enqueueResult)
+    const nextRetryAt = this.getDeferredNextRetryAt(enqueueResult)
 
     if (enqueueResult.sentCount === 1) {
       console.log('[ProverbImageJob] Manual regenerate requested', {
@@ -267,7 +309,8 @@ export class ProverbImageJobService {
     return {
       kind: 'queued',
       deferred: enqueueResult.deferredCount === 1,
-      queueError: enqueueResult.reason
+      queueError: enqueueResult.reason,
+      nextRetryAt
     } as const
   }
 
@@ -579,6 +622,16 @@ export class ProverbImageJobService {
   }
 
   private async enqueueMessages(messages: QueueEnqueueRequest[]): Promise<QueueEnqueueResult> {
+    if (messages.length === 0) {
+      return {
+        sentCount: 0,
+        deferredCount: 0,
+        throttled: false,
+        reason: null,
+        deferredMessages: []
+      }
+    }
+
     if (!this.queue) {
       console.warn('[ProverbImageJob] Queue binding missing; skipping enqueue', {
         count: messages.length
@@ -588,7 +641,8 @@ export class ProverbImageJobService {
         sentCount: 0,
         deferredCount: messages.length,
         throttled: false,
-        reason: 'Queue binding missing.'
+        reason: sanitizeCapacityPressureReason('Queue binding missing.'),
+        deferredMessages: messages
       }
     }
 
@@ -600,13 +654,13 @@ export class ProverbImageJobService {
       try {
         if (this.queue.sendBatch && chunk.length > 1) {
           await this.queue.sendBatch(chunk)
+          sentCount += chunk.length
         } else {
           for (const message of chunk) {
             await this.queue.send(message.body, message.delaySeconds ? { delaySeconds: message.delaySeconds } : undefined)
+            sentCount += 1
           }
         }
-
-        sentCount += chunk.length
       } catch (error) {
         const classification = classifyQueueSendError(error)
 
@@ -614,7 +668,8 @@ export class ProverbImageJobService {
           sentCount,
           deferredCount: messages.length - sentCount,
           throttled: classification.throttled,
-          reason: classification.reason
+          reason: sanitizeCapacityPressureReason(classification.reason),
+          deferredMessages: messages.slice(sentCount)
         }
       }
     }
@@ -623,8 +678,37 @@ export class ProverbImageJobService {
       sentCount,
       deferredCount: 0,
       throttled: false,
-      reason: null
+      reason: null,
+      deferredMessages: []
     }
+  }
+
+  private async markDeferredMessages(enqueueResult: QueueEnqueueResult) {
+    if (enqueueResult.deferredMessages.length === 0) return
+
+    const nextRetryAt = this.getDeferredNextRetryAt(enqueueResult)
+    if (!nextRetryAt) return
+
+    const reason = sanitizeCapacityPressureReason(enqueueResult.reason)
+
+    for (const message of enqueueResult.deferredMessages) {
+      await this.repository.markRetry(
+        message.body.proverbId,
+        message.body.promptHash,
+        reason,
+        nextRetryAt
+      )
+    }
+  }
+
+  private getDeferredNextRetryAt(enqueueResult: QueueEnqueueResult) {
+    if (enqueueResult.deferredMessages.length === 0) return null
+
+    const retryAfterSeconds = enqueueResult.throttled
+      ? Math.max(this.config.quotaCooldownSeconds, this.config.retryDelaySeconds)
+      : this.config.retryDelaySeconds
+
+    return formatSqlTimestamp(addSeconds(this.now(), retryAfterSeconds))
   }
 
   private getAutomaticRetryDelay(attempts: number | null | undefined) {

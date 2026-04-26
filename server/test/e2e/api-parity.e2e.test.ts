@@ -116,6 +116,30 @@ function createAuthorizedHeaders(token: string) {
   }
 }
 
+function normalizeDynamicValues(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return value.map(normalizeDynamicValues)
+  }
+
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, entry]) => {
+        if (key === 'id' && typeof entry === 'string' && /^\d{13}$/.test(entry)) {
+          return [key, '<dynamic-id>']
+        }
+
+        return [key, normalizeDynamicValues(entry)]
+      })
+    )
+  }
+
+  if (typeof value === 'string') {
+    return value.replace(/\d{13}(-[a-z0-9]+\.png)/g, '<dynamic-file>$1')
+  }
+
+  return value
+}
+
 const validImageData =
   'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9sW0N1cAAAAASUVORK5CYII='
 
@@ -341,7 +365,7 @@ describe('backend parity with legacy implementation', () => {
       const legacyResponses = await withDeterministicRuntime(() => scenario.run(legacyClient))
       const refactoredResponses = await withDeterministicRuntime(() => scenario.run(refactoredClient))
 
-      expect(refactoredResponses).toEqual(legacyResponses)
+      expect(normalizeDynamicValues(refactoredResponses)).toEqual(normalizeDynamicValues(legacyResponses))
     }, { timeout: 20000 })
   }
 })

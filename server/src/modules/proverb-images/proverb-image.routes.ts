@@ -38,7 +38,9 @@ export function createProverbImageJobRouter(
 
     return c.json({
       success: true,
-      skipped: result.kind === 'skipped-existing-image'
+      skipped: result.kind === 'skipped-existing-image',
+      deferred: result.kind === 'queued' ? result.deferred : false,
+      nextRetryAt: result.kind === 'queued' ? result.nextRetryAt : null
     })
   })
 

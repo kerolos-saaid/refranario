@@ -159,6 +159,7 @@ export async function backfillProverbImageJobs(limit?: number) {
     deferred?: number
     throttled?: boolean
     queueError?: string | null
+    nextRetryAt?: string | null
   }>(res, 'Failed to scan missing images')
 }
 
@@ -171,7 +172,12 @@ export async function regenerateProverbImage(id: string) {
     method: 'POST',
     headers,
   })
-  return await readApiResponse<{ success: boolean }>(res, 'Failed to regenerate image')
+  return await readApiResponse<{
+    success: boolean
+    skipped?: boolean
+    deferred?: boolean
+    nextRetryAt?: string | null
+  }>(res, 'Failed to regenerate image')
 }
 
 export async function login(username: string, password: string) {

@@ -18,7 +18,13 @@ import {
 class FakeQueue {
   public readonly sent: Array<{ body: ProverbImageJobMessage; options?: { delaySeconds?: number } }> = []
 
+  constructor(private readonly failAfter = Number.POSITIVE_INFINITY) {}
+
   async send(body: ProverbImageJobMessage, options?: { delaySeconds?: number }) {
+    if (this.sent.length >= this.failAfter) {
+      throw new Error('429 Too many requests: free tier limit reached')
+    }
+
     this.sent.push({ body, options })
   }
 }
@@ -115,6 +121,7 @@ async function loadRow(id: string) {
       SELECT
         id,
         spanish,
+        arabic,
         english,
         image,
         image_job_status,
@@ -128,6 +135,7 @@ async function loadRow(id: string) {
   ).bind(id).first<{
     id: string
     spanish: string
+    arabic: string
     english: string
     image: string | null
     image_job_status: string | null
@@ -136,6 +144,66 @@ async function loadRow(id: string) {
     image_job_error: string | null
     image_prompt_hash: string | null
   }>()
+}
+
+async function insertMissingProverb(id: string, overrides: Partial<{
+  spanish: string
+  arabic: string
+  english: string
+  image_job_status: string | null
+  image_job_attempts: number
+  image_job_next_retry_at: string | null
+  image_job_error: string | null
+  image_prompt_hash: string | null
+  updated_at: string
+}> = {}) {
+  const db = runtime.platform.env.senor_shabi_db
+  const values = {
+    spanish: overrides.spanish ?? `Refrán ${id}`,
+    arabic: overrides.arabic ?? `مثل ${id}`,
+    english: overrides.english ?? `Proverb ${id}`,
+    image_job_status: overrides.image_job_status ?? null,
+    image_job_attempts: overrides.image_job_attempts ?? 0,
+    image_job_next_retry_at: overrides.image_job_next_retry_at ?? null,
+    image_job_error: overrides.image_job_error ?? null,
+    image_prompt_hash: overrides.image_prompt_hash ?? null,
+    updated_at: overrides.updated_at ?? '2026-03-25 00:00:00'
+  }
+
+  await db.prepare(
+    `
+      INSERT INTO proverbs (
+        id,
+        spanish,
+        arabic,
+        english,
+        category,
+        note,
+        image,
+        curator,
+        date,
+        bookmarked,
+        image_job_status,
+        image_job_attempts,
+        image_job_next_retry_at,
+        image_job_error,
+        image_prompt_hash,
+        updated_at
+      )
+      VALUES (?1, ?2, ?3, ?4, 'Wisdom', '', '', 'Admin', '25 Mar 2026', 0, ?5, ?6, ?7, ?8, ?9, ?10)
+    `
+  ).bind(
+    id,
+    values.spanish,
+    values.arabic,
+    values.english,
+    values.image_job_status,
+    values.image_job_attempts,
+    values.image_job_next_retry_at,
+    values.image_job_error,
+    values.image_prompt_hash,
+    values.updated_at
+  ).run()
 }
 
 function createService(provider: FakeProvider, queue?: FakeQueue) {
@@ -271,7 +339,7 @@ describe('proverb image jobs', () => {
   })
 
   test('retryable queue processing stores retry state and delays the message', async () => {
-    const proverbId = await createBlankProverb()
+    const proverbId = await createBlankProverb(new FakeQueue())
     const row = await loadRow(proverbId)
     const message = createFakeMessage({
       proverbId,
@@ -295,8 +363,8 @@ describe('proverb image jobs', () => {
     expect(updated?.image_job_next_retry_at).toBe('2026-03-25 00:05:00')
   })
 
-  test('non-retryable queue processing marks the proverb row as failed', async () => {
-    const proverbId = await createBlankProverb()
+  test('image generation failure stores retry state instead of losing the job', async () => {
+    const proverbId = await createBlankProverb(new FakeQueue())
     const row = await loadRow(proverbId)
     const message = createFakeMessage({
       proverbId,
@@ -312,8 +380,9 @@ describe('proverb image jobs', () => {
 
     const updated = await loadRow(proverbId)
 
-    expect(message.acked).toBe(true)
-    expect(updated?.image_job_status).toBe('failed')
+    expect(message.acked).toBe(false)
+    expect(message.retriedWith).toEqual({ delaySeconds: 60 })
+    expect(updated?.image_job_status).toBe('retry')
     expect(updated?.image_job_error).toContain('Prompt blocked')
   })
 
@@ -340,6 +409,194 @@ describe('proverb image jobs', () => {
     expect(queue.sent[0]?.body.proverbId).toBe('sweep-test')
     expect(row?.image_job_status).toBe('pending')
     expect(row?.image_prompt_hash).toBeTruthy()
+  })
+
+  test('partial queue producer failure preserves deferred jobs for retry', async () => {
+    await insertMissingProverb('partial-1')
+    await insertMissingProverb('partial-2')
+    await insertMissingProverb('partial-3')
+
+    const queue = new FakeQueue(1)
+    const service = createService(new FakeProvider({
+      kind: 'failed',
+      reason: 'not used'
+    }), queue)
+
+    const result = await service.backfill(10)
+    const accepted = await loadRow('partial-1')
+    const deferred = await loadRow('partial-2')
+
+    expect(result.enqueued).toBe(1)
+    expect(result.deferred).toBe(2)
+    expect(result.throttled).toBe(true)
+    expect(result.queueError).toContain('capacity')
+    expect(result.nextRetryAt).toBe('2026-03-25 00:05:00')
+    expect(queue.sent).toHaveLength(1)
+    expect(accepted?.image_job_status).toBe('pending')
+    expect(deferred?.image_job_status).toBe('retry')
+    expect(deferred?.image_job_error).toContain('capacity')
+    expect(deferred?.image_job_next_retry_at).toBe('2026-03-25 00:05:00')
+  })
+
+  test('repeated backfill creates no duplicate active jobs during cooldown', async () => {
+    await insertMissingProverb('cooldown-1')
+    await insertMissingProverb('cooldown-2')
+
+    const queue = new FakeQueue(1)
+    const service = createService(new FakeProvider({
+      kind: 'failed',
+      reason: 'not used'
+    }), queue)
+
+    const first = await service.backfill(10)
+    const second = await service.backfill(10)
+
+    expect(first.enqueued).toBe(1)
+    expect(first.deferred).toBe(1)
+    expect(second.scanned).toBe(0)
+    expect(second.enqueued).toBe(0)
+    expect(second.deferred).toBe(0)
+    expect(queue.sent).toHaveLength(1)
+  })
+
+  test('missing queue binding returns deferred work without permanent failure', async () => {
+    await insertMissingProverb('missing-queue')
+    const service = createService(new FakeProvider({
+      kind: 'failed',
+      reason: 'not used'
+    }))
+
+    const result = await service.backfill(10)
+    const row = await loadRow('missing-queue')
+
+    expect(result.enqueued).toBe(0)
+    expect(result.deferred).toBe(1)
+    expect(result.throttled).toBe(false)
+    expect(result.nextRetryAt).toBe('2026-03-25 00:01:00')
+    expect(row?.image_job_status).toBe('retry')
+    expect(row?.image_job_error).toContain('queue')
+  })
+
+  test('regenerate response distinguishes deferred queue pressure', async () => {
+    await insertMissingProverb('regen-deferred', {
+      image_job_status: 'failed',
+      image_job_error: 'previous failure'
+    })
+    const queue = new FakeQueue(0)
+
+    const response = await performRequest(createEnv(queue), {
+      method: 'POST',
+      path: '/api/proverbs/regen-deferred/regenerate-image'
+    })
+    const row = await loadRow('regen-deferred')
+
+    expect(response.status).toBe(200)
+    expect(response.body.success).toBe(true)
+    expect(response.body.deferred).toBe(true)
+    expect(response.body.nextRetryAt).toMatch(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/)
+    expect(row?.image_job_status).toBe('retry')
+    expect(row?.image_job_next_retry_at).toBe(response.body.nextRetryAt)
+  })
+
+  test('active jobs list retry reason and next retry time after capacity pressure', async () => {
+    await insertMissingProverb('active-retry')
+    const service = createService(new FakeProvider({
+      kind: 'failed',
+      reason: 'not used'
+    }), new FakeQueue(0))
+
+    await service.backfill(10)
+    const response = await performRequest(createEnv(), {
+      method: 'GET',
+      path: '/api/proverb-image-jobs'
+    })
+    const job = response.body.jobs.find((item: { id: string }) => item.id === 'active-retry')
+
+    expect(response.status).toBe(200)
+    expect(job.status).toBe('retry')
+    expect(job.error).toContain('capacity')
+    expect(job.nextRetryAt).toBe('2026-03-25 00:05:00')
+  })
+
+  test('due retry jobs are prioritized before new missing-image jobs', async () => {
+    await insertMissingProverb('new-missing')
+    await insertMissingProverb('due-retry', {
+      image_job_status: 'retry',
+      image_job_next_retry_at: '2026-03-24 23:59:00',
+      image_job_error: 'capacity',
+      image_prompt_hash: 'existing-hash'
+    })
+
+    const queue = new FakeQueue()
+    const service = createService(new FakeProvider({
+      kind: 'failed',
+      reason: 'not used'
+    }), queue)
+
+    const result = await service.backfill(1)
+
+    expect(result.scanned).toBe(1)
+    expect(queue.sent).toHaveLength(1)
+    expect(queue.sent[0]?.body.proverbId).toBe('due-retry')
+  })
+
+  test('stale pending jobs become eligible after the safety window', async () => {
+    await insertMissingProverb('fresh-pending', {
+      image_job_status: 'pending',
+      image_prompt_hash: 'fresh-hash',
+      updated_at: '2026-03-24 23:59:00'
+    })
+    await insertMissingProverb('stale-pending', {
+      image_job_status: 'pending',
+      image_prompt_hash: 'stale-hash',
+      updated_at: '2026-03-24 23:50:00'
+    })
+
+    const queue = new FakeQueue()
+    const service = createService(new FakeProvider({
+      kind: 'failed',
+      reason: 'not used'
+    }), queue)
+
+    const result = await service.backfill(10)
+
+    expect(result.enqueued).toBe(1)
+    expect(queue.sent).toHaveLength(1)
+    expect(queue.sent[0]?.body.proverbId).toBe('stale-pending')
+  })
+
+  test('successful recovery preserves proverb language fields', async () => {
+    await insertMissingProverb('language-safe', {
+      spanish: 'Camarón que se duerme se lo lleva la corriente.',
+      arabic: 'اللي ينام يجرفه التيار.',
+      english: 'The shrimp that sleeps is carried away by the current.',
+      image_job_status: 'retry',
+      image_job_next_retry_at: '2026-03-24 23:59:00',
+      image_job_error: 'capacity',
+      image_prompt_hash: 'language-hash'
+    })
+    const row = await loadRow('language-safe')
+    const message = createFakeMessage({
+      proverbId: 'language-safe',
+      promptHash: row!.image_prompt_hash!,
+      requestedAt: '2026-03-25T00:00:00.000Z'
+    })
+    const service = createService(new FakeProvider({
+      kind: 'success',
+      image: {
+        mimeType: 'image/png',
+        base64Data: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9sW0N1cAAAAASUVORK5CYII=',
+        model: 'gemini-2.5-flash-image'
+      }
+    }))
+
+    await service.processBatch(createBatch([message]))
+    const updated = await loadRow('language-safe')
+
+    expect(updated?.image_job_status).toBe('complete')
+    expect(updated?.spanish).toBe('Camarón que se duerme se lo lleva la corriente.')
+    expect(updated?.arabic).toBe('اللي ينام يجرفه التيار.')
+    expect(updated?.english).toBe('The shrimp that sleeps is carried away by the current.')
   })
 })
 

@@ -1,0 +1,10 @@
+{
+  "ai": "skills",
+  "ai_skills": true,
+  "branch_numbering": "sequential",
+  "context_file": "AGENTS.md",
+  "here": true,
+  "integration": "speckit",
+  "script": "ps",
+  "speckit_version": "0.8.2.dev0"
+}

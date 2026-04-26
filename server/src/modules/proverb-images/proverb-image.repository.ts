@@ -173,7 +173,7 @@ export class D1ProverbImageJobRepository {
     ).bind(id, promptHash, generatedPrompt).run()
   }
 
-  async listSweepCandidates(now: string, limit: number): Promise<ProverbImageGenerationRecord[]> {
+  async listSweepCandidates(now: string, limit: number, stalePendingBefore: string): Promise<ProverbImageGenerationRecord[]> {
     const result = await this.db.prepare(
       `
         SELECT
@@ -191,7 +191,7 @@ export class D1ProverbImageJobRepository {
         WHERE (image IS NULL OR TRIM(image) = '')
           AND (
             image_job_status IS NULL
-            OR image_job_status = 'pending'
+            OR (image_job_status = 'pending' AND updated_at <= ?3)
             OR (image_job_status IN ('retry', 'processing', 'failed') AND (image_job_next_retry_at IS NULL OR image_job_next_retry_at <= ?1))
           )
         ORDER BY
@@ -205,7 +205,7 @@ export class D1ProverbImageJobRepository {
           COALESCE(image_job_next_retry_at, updated_at, created_at) ASC
         LIMIT ?2
       `
-    ).bind(now, limit).all<ProverbImageGenerationRecord>()
+    ).bind(now, limit, stalePendingBefore).all<ProverbImageGenerationRecord>()
 
     return result.results || []
   }

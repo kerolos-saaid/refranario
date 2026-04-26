@@ -98,6 +98,13 @@ function splitSqlStatements(sql: string) {
     }
 
     if (char === ';' && !inString) {
+      const normalized = current.trim().toUpperCase()
+      const isTriggerStatement = normalized.startsWith('CREATE TRIGGER') || normalized.startsWith('CREATE TEMP TRIGGER')
+
+      if (isTriggerStatement && !normalized.endsWith('END;')) {
+        continue
+      }
+
       statements.push(current.slice(0, -1))
       current = ''
     }

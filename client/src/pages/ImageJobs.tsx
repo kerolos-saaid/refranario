@@ -182,10 +182,11 @@ export default function ImageJobs() {
 
     try {
       const result = await backfillProverbImageJobs()
+      const retryAt = result.nextRetryAt ? ` Próximo intento: ${formatDateTime(result.nextRetryAt) || result.nextRetryAt}.` : ''
       const message = result.deferred && result.enqueued > 0
-        ? `Se mandaron ${result.enqueued} refranes ahora y ${result.deferred} quedaron pendientes para reintentarse solos.`
+        ? `Se mandaron ${result.enqueued} refranes ahora y ${result.deferred} quedaron pendientes para reintentarse solos.${retryAt}`
         : result.deferred
-          ? `La cola está con mucha actividad. ${result.deferred} refranes quedaron pendientes y se reintentaran solos en el próximo barrido.`
+          ? `La capacidad de imágenes está agotada por ahora. ${result.deferred} refranes quedaron guardados y se reintentarán solos en el próximo barrido disponible.${retryAt}`
           : result.enqueued > 0
             ? `Se mandaron ${result.enqueued} refranes a preparación de imagen.`
             : 'No encontramos refranes nuevos sin seguimiento de imagen.'
@@ -210,10 +211,13 @@ export default function ImageJobs() {
     setNotice(null)
 
     try {
-      await regenerateProverbImage(jobId)
+      const result = await regenerateProverbImage(jobId)
+      const retryAt = result.nextRetryAt ? ` Próximo intento: ${formatDateTime(result.nextRetryAt) || result.nextRetryAt}.` : ''
       setNotice({
-        tone: 'success',
-        message: 'Se volvió a poner este refrán en preparación.',
+        tone: result.deferred ? 'info' : 'success',
+        message: result.deferred
+          ? `La capacidad está agotada por ahora. Este refrán quedó guardado para reintentarse solo.${retryAt}`
+          : 'Se volvió a poner este refrán en preparación.',
       })
       await loadJobs('refresh')
     } catch (error) {

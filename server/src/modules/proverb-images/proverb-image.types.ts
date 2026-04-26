@@ -30,6 +30,25 @@ export type ProverbImageJobStatusItem = {
   promptHash: string | null
 }
 
+export type ProverbImageBackfillResult = {
+  enqueued: number
+  deferred: number
+  scanned: number
+  throttled: boolean
+  queueError: string | null
+  nextRetryAt: string | null
+}
+
+export type ProverbImageRegenerateResult =
+  | { kind: 'not-found' }
+  | { kind: 'skipped-existing-image' }
+  | {
+      kind: 'queued'
+      deferred: boolean
+      queueError: string | null
+      nextRetryAt: string | null
+    }
+
 export type GeneratedImagePayload = {
   mimeType: string
   base64Data: string
