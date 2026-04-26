@@ -9,6 +9,10 @@ export type Proverb = {
   curator: string
   date: string
   bookmarked: boolean
+  arabicAudio?: {
+    status: 'ready' | 'generating' | 'failed' | 'limited' | 'unavailable' | null
+    url: string | null
+  }
 }
 
 export type ProverbRow = {
@@ -27,6 +31,16 @@ export type ProverbRow = {
   image_job_next_retry_at?: string | null
   image_job_error?: string | null
   image_prompt_hash?: string | null
+  arabic_audio_url?: string | null
+  arabic_audio_object_key?: string | null
+  arabic_audio_text_hash?: string | null
+  arabic_audio_status?: 'ready' | 'generating' | 'failed' | 'limited' | null
+  arabic_audio_error?: string | null
+  arabic_audio_model?: string | null
+  arabic_audio_voice_id?: string | null
+  arabic_audio_content_type?: string | null
+  arabic_audio_created_at?: string | null
+  arabic_audio_updated_at?: string | null
 }
 
 export type ProverbListFilters = {

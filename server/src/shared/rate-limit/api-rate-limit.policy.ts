@@ -77,5 +77,12 @@ export const apiRateLimitPolicies = {
     rules: [
       { key: 'auth_user_ip', scope: 'auth-user-ip', limit: 30, windowMs: 10 * 60_000 }
     ]
+  },
+  arabicAudioGenerate: {
+    key: 'arabic_audio_generate',
+    errorMessage: 'Too many Arabic audio requests. Please wait a moment and try again.',
+    rules: [
+      { key: 'ip', scope: 'ip', limit: 20, windowMs: 10 * 60_000 }
+    ]
   }
 } satisfies Record<string, ApiRateLimitPolicy>

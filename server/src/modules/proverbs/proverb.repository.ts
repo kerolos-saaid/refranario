@@ -114,6 +114,16 @@ export class D1ProverbRepository implements ProverbRepository {
     if (updates.arabic !== undefined) {
       fields.push(`arabic = ?${paramIndex++}`)
       values.push(updates.arabic)
+      fields.push('arabic_audio_url = NULL')
+      fields.push('arabic_audio_object_key = NULL')
+      fields.push('arabic_audio_text_hash = NULL')
+      fields.push('arabic_audio_status = NULL')
+      fields.push('arabic_audio_error = NULL')
+      fields.push('arabic_audio_model = NULL')
+      fields.push('arabic_audio_voice_id = NULL')
+      fields.push('arabic_audio_content_type = NULL')
+      fields.push('arabic_audio_created_at = NULL')
+      fields.push('arabic_audio_updated_at = NULL')
     }
     if (updates.english !== undefined) {
       fields.push(`english = ?${paramIndex++}`)

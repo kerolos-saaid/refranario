@@ -17,11 +17,11 @@
 
 **Purpose**: Confirm feature scope, affected files, and operational inputs before changing runtime behavior.
 
-- [ ] T001 Review current browser speech synthesis usage in `client/src/hooks/useSpeechSynthesisPlayback.ts`, `client/src/pages/Detail.tsx`, and `client/src/pages/AddEdit.tsx`
-- [ ] T002 Review current Hono route/service wiring in `server/src/app/create-app.ts` and `server/src/app/create-services.ts`
-- [ ] T003 [P] Review existing R2 storage conventions in `server/src/shared/storage/r2-image-storage.ts` and `server/src/shared/config/app.constants.ts`
-- [ ] T004 [P] Review current e2e test platform support in `server/test/support/dev-platform.ts`
-- [ ] T005 Confirm no ElevenLabs API keys are committed by scanning `server/`, `client/`, `.specify/`, and `specs/002-arabic-elevenlabs-tts/`
+- [X] T001 Review current browser speech synthesis usage in `client/src/hooks/useSpeechSynthesisPlayback.ts`, `client/src/pages/Detail.tsx`, and `client/src/pages/AddEdit.tsx`
+- [X] T002 Review current Hono route/service wiring in `server/src/app/create-app.ts` and `server/src/app/create-services.ts`
+- [X] T003 [P] Review existing R2 storage conventions in `server/src/shared/storage/r2-image-storage.ts` and `server/src/shared/config/app.constants.ts`
+- [X] T004 [P] Review current e2e test platform support in `server/test/support/dev-platform.ts`
+- [X] T005 Confirm no ElevenLabs API keys are committed by scanning `server/`, `client/`, `.specify/`, and `specs/002-arabic-elevenlabs-tts/`
 
 ---
 
@@ -31,17 +31,17 @@
 
 **CRITICAL**: No user story work can begin until this phase is complete.
 
-- [ ] T006 Add Arabic audio metadata columns to `server/src/migrations/006_arabic_audio_cache.sql`
-- [ ] T007 Add matching Arabic audio metadata columns to `server/src/schema.sql`
-- [ ] T008 Add `d1:migrate:arabic-audio` script to `package.json` without overwriting unrelated existing local script changes
-- [ ] T009 Add ElevenLabs and Arabic audio binding types to `server/src/shared/types/app-env.ts`
-- [ ] T010 Create Arabic audio response and state types in `server/src/modules/proverb-audio/proverb-audio.types.ts`
-- [ ] T011 Create Arabic audio config parser with defaults for `eleven_v3`, `cgSgspJ2msm6clMCkdW9`, `mp3_44100_128`, and key cooldown in `server/src/modules/proverb-audio/proverb-audio.config.ts`
-- [ ] T012 Create R2 MP3 audio storage helper in `server/src/shared/storage/r2-audio-storage.ts`
-- [ ] T013 Add proverb Arabic audio row fields and public `arabicAudio` type shape in `server/src/modules/proverbs/proverb.types.ts`
-- [ ] T014 Update proverb mapper to expose additive `arabicAudio` metadata in `server/src/modules/proverbs/proverb.mapper.ts`
-- [ ] T015 Add Arabic audio rate-limit policy in `server/src/shared/rate-limit/api-rate-limit.policy.ts`
-- [ ] T016 Wire Arabic audio service factory and route placeholder in `server/src/app/create-services.ts` and `server/src/app/create-app.ts`
+- [X] T006 Add Arabic audio metadata columns to `server/src/migrations/006_arabic_audio_cache.sql`
+- [X] T007 Add matching Arabic audio metadata columns to `server/src/schema.sql`
+- [X] T008 Add `d1:migrate:arabic-audio` script to `package.json` without overwriting unrelated existing local script changes
+- [X] T009 Add ElevenLabs and Arabic audio binding types to `server/src/shared/types/app-env.ts`
+- [X] T010 Create Arabic audio response and state types in `server/src/modules/proverb-audio/proverb-audio.types.ts`
+- [X] T011 Create Arabic audio config parser with defaults for `eleven_v3`, `cgSgspJ2msm6clMCkdW9`, `mp3_44100_128`, and key cooldown in `server/src/modules/proverb-audio/proverb-audio.config.ts`
+- [X] T012 Create R2 MP3 audio storage helper in `server/src/shared/storage/r2-audio-storage.ts`
+- [X] T013 Add proverb Arabic audio row fields and public `arabicAudio` type shape in `server/src/modules/proverbs/proverb.types.ts`
+- [X] T014 Update proverb mapper to expose additive `arabicAudio` metadata in `server/src/modules/proverbs/proverb.mapper.ts`
+- [X] T015 Add Arabic audio rate-limit policy in `server/src/shared/rate-limit/api-rate-limit.policy.ts`
+- [X] T016 Wire Arabic audio service factory and route placeholder in `server/src/app/create-services.ts` and `server/src/app/create-app.ts`
 
 **Checkpoint**: Foundation ready - user story implementation can now begin.
 
@@ -55,22 +55,22 @@
 
 ### Tests for User Story 1
 
-- [ ] T017 [P] [US1] Add e2e test for successful first-time Arabic audio generation in `server/test/e2e/proverb-arabic-audio.e2e.test.ts`
-- [ ] T018 [P] [US1] Add e2e test for missing proverb and missing Arabic text responses in `server/test/e2e/proverb-arabic-audio.e2e.test.ts`
-- [ ] T019 [P] [US1] Add unit test for ElevenLabs provider request shape and sanitized failures in `server/test/unit/proverb-audio-provider.test.ts`
+- [X] T017 [P] [US1] Add e2e test for successful first-time Arabic audio generation in `server/test/e2e/proverb-arabic-audio.e2e.test.ts`
+- [X] T018 [P] [US1] Add e2e test for missing proverb and missing Arabic text responses in `server/test/e2e/proverb-arabic-audio.e2e.test.ts`
+- [X] T019 [P] [US1] Add unit test for ElevenLabs provider request shape and sanitized failures in `server/test/unit/proverb-audio-provider.test.ts`
 
 ### Implementation for User Story 1
 
-- [ ] T020 [P] [US1] Implement ElevenLabs REST provider for `POST /v1/text-to-speech/:voice_id` in `server/src/modules/proverb-audio/proverb-audio.provider.ts`
-- [ ] T021 [P] [US1] Implement Arabic text normalization and hash helpers in `server/src/modules/proverb-audio/proverb-audio.service.ts`
-- [ ] T022 [US1] Implement D1 repository methods for loading proverbs and writing Arabic audio status in `server/src/modules/proverb-audio/proverb-audio.repository.ts`
-- [ ] T023 [US1] Implement generation service path for no-cache first playback in `server/src/modules/proverb-audio/proverb-audio.service.ts`
-- [ ] T024 [US1] Implement `POST /api/proverbs/:id/arabic-audio` with status codes from the contract in `server/src/modules/proverb-audio/proverb-audio.routes.ts`
-- [ ] T025 [US1] Register Arabic audio route with public rate limit in `server/src/app/create-app.ts`
-- [ ] T026 [US1] Add `generateArabicAudio` client API function and response types in `client/src/lib/api.ts`
-- [ ] T027 [US1] Create server-audio playback hook with loading, playing, error, stop, and offline handling in `client/src/hooks/useArabicAudioPlayback.ts`
-- [ ] T028 [US1] Replace only the Arabic detail-page playback button with the server audio hook in `client/src/pages/Detail.tsx`
-- [ ] T029 [US1] Disable create-form Arabic preview with a clear save-first state while preserving saved edit behavior in `client/src/pages/AddEdit.tsx`
+- [X] T020 [P] [US1] Implement ElevenLabs REST provider for `POST /v1/text-to-speech/:voice_id` in `server/src/modules/proverb-audio/proverb-audio.provider.ts`
+- [X] T021 [P] [US1] Implement Arabic text normalization and hash helpers in `server/src/modules/proverb-audio/proverb-audio.service.ts`
+- [X] T022 [US1] Implement D1 repository methods for loading proverbs and writing Arabic audio status in `server/src/modules/proverb-audio/proverb-audio.repository.ts`
+- [X] T023 [US1] Implement generation service path for no-cache first playback in `server/src/modules/proverb-audio/proverb-audio.service.ts`
+- [X] T024 [US1] Implement `POST /api/proverbs/:id/arabic-audio` with status codes from the contract in `server/src/modules/proverb-audio/proverb-audio.routes.ts`
+- [X] T025 [US1] Register Arabic audio route with public rate limit in `server/src/app/create-app.ts`
+- [X] T026 [US1] Add `generateArabicAudio` client API function and response types in `client/src/lib/api.ts`
+- [X] T027 [US1] Create server-audio playback hook with loading, playing, error, stop, and offline handling in `client/src/hooks/useArabicAudioPlayback.ts`
+- [X] T028 [US1] Replace only the Arabic detail-page playback button with the server audio hook in `client/src/pages/Detail.tsx`
+- [X] T029 [US1] Disable create-form Arabic preview with a clear save-first state while preserving saved edit behavior in `client/src/pages/AddEdit.tsx`
 
 **Checkpoint**: User Story 1 is independently functional and testable.
 
@@ -84,18 +84,18 @@
 
 ### Tests for User Story 2
 
-- [ ] T030 [P] [US2] Add e2e test for cached ready audio reuse with no provider call in `server/test/e2e/proverb-arabic-audio.e2e.test.ts`
-- [ ] T031 [P] [US2] Add e2e test for stale cached audio when Arabic text hash changes in `server/test/e2e/proverb-arabic-audio.e2e.test.ts`
-- [ ] T032 [P] [US2] Add e2e test for duplicate rapid requests returning generating state instead of duplicate generation in `server/test/e2e/proverb-arabic-audio.e2e.test.ts`
+- [X] T030 [P] [US2] Add e2e test for cached ready audio reuse with no provider call in `server/test/e2e/proverb-arabic-audio.e2e.test.ts`
+- [X] T031 [P] [US2] Add e2e test for stale cached audio when Arabic text hash changes in `server/test/e2e/proverb-arabic-audio.e2e.test.ts`
+- [X] T032 [P] [US2] Add e2e test for duplicate rapid requests returning generating state instead of duplicate generation in `server/test/e2e/proverb-arabic-audio.e2e.test.ts`
 
 ### Implementation for User Story 2
 
-- [ ] T033 [US2] Add ready-cache detection using URL, object key, status, model, voice id, and text hash in `server/src/modules/proverb-audio/proverb-audio.service.ts`
-- [ ] T034 [US2] Add compare-and-set generating guard to prevent duplicate generation in `server/src/modules/proverb-audio/proverb-audio.repository.ts`
-- [ ] T035 [US2] Return `200 cached: true` for reusable audio and `202 generating` for in-flight audio in `server/src/modules/proverb-audio/proverb-audio.routes.ts`
-- [ ] T036 [US2] Update `GET /api/proverbs/:id` mapping to include current `arabicAudio` state without breaking existing fields in `server/src/modules/proverbs/proverb.mapper.ts`
-- [ ] T037 [US2] Use existing `arabicAudio.url` as an immediate playback source when available in `client/src/hooks/useArabicAudioPlayback.ts` and `client/src/pages/Detail.tsx`
-- [ ] T038 [US2] Clear stale Arabic audio metadata when Arabic text changes through update flow in `server/src/modules/proverbs/proverb.repository.ts`
+- [X] T033 [US2] Add ready-cache detection using URL, object key, status, model, voice id, and text hash in `server/src/modules/proverb-audio/proverb-audio.service.ts`
+- [X] T034 [US2] Add compare-and-set generating guard to prevent duplicate generation in `server/src/modules/proverb-audio/proverb-audio.repository.ts`
+- [X] T035 [US2] Return `200 cached: true` for reusable audio and `202 generating` for in-flight audio in `server/src/modules/proverb-audio/proverb-audio.routes.ts`
+- [X] T036 [US2] Update `GET /api/proverbs/:id` mapping to include current `arabicAudio` state without breaking existing fields in `server/src/modules/proverbs/proverb.mapper.ts`
+- [X] T037 [US2] Use existing `arabicAudio.url` as an immediate playback source when available in `client/src/hooks/useArabicAudioPlayback.ts` and `client/src/pages/Detail.tsx`
+- [X] T038 [US2] Clear stale Arabic audio metadata when Arabic text changes through update flow in `server/src/modules/proverbs/proverb.repository.ts`
 
 **Checkpoint**: User Stories 1 and 2 both work independently.
 
@@ -109,18 +109,18 @@
 
 ### Tests for User Story 3
 
-- [ ] T039 [P] [US3] Add unit tests for ordered key parsing and empty-key filtering in `server/test/unit/proverb-audio-config.test.ts`
-- [ ] T040 [P] [US3] Add unit tests for provider error classification covering quota, rate limit, auth, timeout, and unexpected failures in `server/test/unit/proverb-audio-provider.test.ts`
-- [ ] T041 [P] [US3] Add e2e test for fallback from exhausted first key to valid second key in `server/test/e2e/proverb-arabic-audio.e2e.test.ts`
-- [ ] T042 [P] [US3] Add e2e test for all keys exhausted returning safe `limited` response with no saved broken URL in `server/test/e2e/proverb-arabic-audio.e2e.test.ts`
+- [X] T039 [P] [US3] Add unit tests for ordered key parsing and empty-key filtering in `server/test/unit/proverb-audio-config.test.ts`
+- [X] T040 [P] [US3] Add unit tests for provider error classification covering quota, rate limit, auth, timeout, and unexpected failures in `server/test/unit/proverb-audio-provider.test.ts`
+- [X] T041 [P] [US3] Add e2e test for fallback from exhausted first key to valid second key in `server/test/e2e/proverb-arabic-audio.e2e.test.ts`
+- [X] T042 [P] [US3] Add e2e test for all keys exhausted returning safe `limited` response with no saved broken URL in `server/test/e2e/proverb-arabic-audio.e2e.test.ts`
 
 ### Implementation for User Story 3
 
-- [ ] T043 [US3] Implement ordered credential rotation and per-isolate cooldown in `server/src/modules/proverb-audio/proverb-audio.provider.ts`
-- [ ] T044 [US3] Sanitize provider errors before saving status or returning responses in `server/src/modules/proverb-audio/proverb-audio.service.ts`
-- [ ] T045 [US3] Return `503 limited` with `Retry-After` when all credentials are unavailable in `server/src/modules/proverb-audio/proverb-audio.routes.ts`
-- [ ] T046 [US3] Update client Arabic audio error copy for temporary limits and retry states in `client/src/hooks/useArabicAudioPlayback.ts`
-- [ ] T047 [US3] Document secret setup and rotation commands without real keys in `specs/002-arabic-elevenlabs-tts/quickstart.md`
+- [X] T043 [US3] Implement ordered credential rotation and per-isolate cooldown in `server/src/modules/proverb-audio/proverb-audio.provider.ts`
+- [X] T044 [US3] Sanitize provider errors before saving status or returning responses in `server/src/modules/proverb-audio/proverb-audio.service.ts`
+- [X] T045 [US3] Return `503 limited` with `Retry-After` when all credentials are unavailable in `server/src/modules/proverb-audio/proverb-audio.routes.ts`
+- [X] T046 [US3] Update client Arabic audio error copy for temporary limits and retry states in `client/src/hooks/useArabicAudioPlayback.ts`
+- [X] T047 [US3] Document secret setup and rotation commands without real keys in `specs/002-arabic-elevenlabs-tts/quickstart.md`
 
 **Checkpoint**: All user stories should now be independently functional.
 
@@ -130,14 +130,14 @@
 
 **Purpose**: Validation, cleanup, and deployment readiness across all stories.
 
-- [ ] T048 [P] Verify no ElevenLabs API keys or credential identifiers are present in `server/`, `client/`, `.specify/`, and `specs/002-arabic-elevenlabs-tts/`
-- [ ] T049 [P] Verify Arabic RTL layout, button disabled states, loading states, and alert text in `client/src/pages/Detail.tsx` and `client/src/pages/AddEdit.tsx`
-- [ ] T050 [P] Verify service worker/media cache behavior does not break saved MP3 playback in `client/public/sw.js`
-- [ ] T051 Run targeted server tests with `bun test server/test/e2e/proverb-arabic-audio.e2e.test.ts`
-- [ ] T052 Run full server tests with `bun test server/test`
-- [ ] T053 Run production build with `npm.cmd run build`
-- [ ] T054 Apply local D1 migration using `npm.cmd run d1:migrate:arabic-audio`
-- [ ] T055 Record production rollout steps for `ELEVENLABS_API_KEYS` and remote D1 migration in `specs/002-arabic-elevenlabs-tts/quickstart.md`
+- [X] T048 [P] Verify no ElevenLabs API keys or credential identifiers are present in `server/`, `client/`, `.specify/`, and `specs/002-arabic-elevenlabs-tts/`
+- [X] T049 [P] Verify Arabic RTL layout, button disabled states, loading states, and alert text in `client/src/pages/Detail.tsx` and `client/src/pages/AddEdit.tsx`
+- [X] T050 [P] Verify service worker/media cache behavior does not break saved MP3 playback in `client/public/sw.js`
+- [X] T051 Run targeted server tests with `bun test server/test/e2e/proverb-arabic-audio.e2e.test.ts`
+- [X] T052 Run full server tests with `bun test server/test`
+- [X] T053 Run production build with `npm.cmd run build`
+- [X] T054 Apply local D1 migration using `npm.cmd run d1:migrate:arabic-audio`
+- [X] T055 Record production rollout steps for `ELEVENLABS_API_KEYS` and remote D1 migration in `specs/002-arabic-elevenlabs-tts/quickstart.md`
 
 ---
 

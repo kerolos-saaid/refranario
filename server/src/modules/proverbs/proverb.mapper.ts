@@ -1,7 +1,7 @@
 import type { Proverb, ProverbRow } from './proverb.types'
 
 export function rowToProverb(row: ProverbRow): Proverb {
-  return {
+  const proverb: Proverb = {
     id: row.id,
     spanish: row.spanish,
     arabic: row.arabic,
@@ -13,4 +13,13 @@ export function rowToProverb(row: ProverbRow): Proverb {
     date: row.date,
     bookmarked: Boolean(row.bookmarked)
   }
+
+  if (row.arabic_audio_status || row.arabic_audio_url) {
+    proverb.arabicAudio = {
+      status: row.arabic_audio_status || null,
+      url: row.arabic_audio_url || null
+    }
+  }
+
+  return proverb
 }

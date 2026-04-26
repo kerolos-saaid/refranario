@@ -3,6 +3,7 @@ import { cors } from 'hono/cors'
 import { logger } from 'hono/logger'
 
 import { createAuthRouter } from '../modules/auth/auth.routes'
+import { createProverbAudioRouter } from '../modules/proverb-audio/proverb-audio.routes'
 import { createProverbImageJobRouter } from '../modules/proverb-images/proverb-image.routes'
 import { createProverbRouter } from '../modules/proverbs/proverb.routes'
 import { createUploadRouter } from '../modules/uploads/upload.routes'
@@ -13,6 +14,7 @@ import type { AppEnv } from '../shared/types/app-env'
 import {
   createApiRateLimitService,
   createAuthService,
+  createProverbAudioService,
   createProverbImageJobService,
   createProverbService,
   createUserRepository,
@@ -32,6 +34,7 @@ export function createApp() {
   const imageJobStatusRateLimit = createRateLimit(createApiRateLimitService, apiRateLimitPolicies.imageJobStatus)
   const imageJobBackfillRateLimit = createRateLimit(createApiRateLimitService, apiRateLimitPolicies.imageJobBackfill)
   const imageJobRegenerateRateLimit = createRateLimit(createApiRateLimitService, apiRateLimitPolicies.imageJobRegenerate)
+  const arabicAudioGenerateRateLimit = createRateLimit(createApiRateLimitService, apiRateLimitPolicies.arabicAudioGenerate)
 
   app.use('*', logger())
   app.use('*', cors())
@@ -49,6 +52,10 @@ export function createApp() {
     imageJobBackfillRateLimit,
     imageJobStatusRateLimit,
     imageJobRegenerateRateLimit
+  ))
+  app.route('/api', createProverbAudioRouter(
+    createProverbAudioService,
+    arabicAudioGenerateRateLimit
   ))
   app.route('/api', createUploadRouter(
     createUploadService,

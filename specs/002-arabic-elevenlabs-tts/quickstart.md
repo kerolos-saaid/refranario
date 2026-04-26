@@ -4,6 +4,9 @@
 
 1. Store ElevenLabs keys as a Worker secret/config value named `ELEVENLABS_API_KEYS`.
    Use comma-separated or newline-separated values. Do not commit keys.
+   ```powershell
+   wrangler secret put ELEVENLABS_API_KEYS --env production
+   ```
 2. Configure defaults:
    - `ELEVENLABS_MODEL_ID=eleven_v3`
    - `ELEVENLABS_VOICE_ID=cgSgspJ2msm6clMCkdW9`
@@ -23,6 +26,9 @@ npm.cmd run d1:migrate:arabic-audio
 ```
 
 4. Apply remotely with Wrangler before production deploy.
+   ```powershell
+   npx wrangler@4.77.0 d1 execute senor-shabi-db --remote --file=./server/src/migrations/006_arabic_audio_cache.sql
+   ```
 
 ## Expected Flow
 
@@ -54,3 +60,11 @@ npm.cmd run build
 - Offline: saved media may play from browser cache; new generation shows a clear error.
 - Failure: one exhausted key falls through to the next configured key.
 - All keys exhausted: user sees a temporary failure message, no broken audio URL is saved.
+
+## Production Rollout
+
+1. Rotate any key that was ever shared outside the Cloudflare secret prompt.
+2. Set `ELEVENLABS_API_KEYS` as a Cloudflare Worker secret for each deployed environment.
+3. Apply `006_arabic_audio_cache.sql` to the remote D1 database.
+4. Deploy the Worker before deploying the Pages client so the new button has a live API.
+5. Deploy Pages and verify one saved proverb can generate and replay Arabic audio.

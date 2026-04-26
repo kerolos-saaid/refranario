@@ -15,6 +15,16 @@ CREATE TABLE IF NOT EXISTS proverbs (
     image_job_error TEXT,
     image_prompt_hash TEXT,
     image_generation_prompt TEXT,
+    arabic_audio_url TEXT,
+    arabic_audio_object_key TEXT,
+    arabic_audio_text_hash TEXT,
+    arabic_audio_status TEXT,
+    arabic_audio_error TEXT,
+    arabic_audio_model TEXT,
+    arabic_audio_voice_id TEXT,
+    arabic_audio_content_type TEXT,
+    arabic_audio_created_at TEXT,
+    arabic_audio_updated_at TEXT,
     curator TEXT NOT NULL,
     date TEXT NOT NULL,
     bookmarked INTEGER NOT NULL DEFAULT 0,
@@ -60,3 +70,4 @@ CREATE INDEX IF NOT EXISTS idx_api_rate_limits_window_end ON api_rate_limits(win
 -- Create index for faster searches
 CREATE INDEX IF NOT EXISTS idx_proverbs_category ON proverbs(category);
 CREATE INDEX IF NOT EXISTS idx_proverbs_spanish ON proverbs(spanish);
+CREATE INDEX IF NOT EXISTS idx_proverbs_arabic_audio_status ON proverbs(arabic_audio_status);

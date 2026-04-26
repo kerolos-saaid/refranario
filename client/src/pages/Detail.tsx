@@ -6,6 +6,7 @@ import {
   isAdmin,
   type Proverb,
 } from '../lib/api'
+import { useArabicAudioPlayback } from '../hooks/useArabicAudioPlayback'
 import { useSpeechSynthesisPlayback } from '../hooks/useSpeechSynthesisPlayback'
 
 export default function Detail() {
@@ -55,13 +56,15 @@ export default function Detail() {
 
   const {
     isSupported: isArabicAudioSupported,
+    isPreparing: isArabicAudioPreparing,
     isPlaying: isArabicAudioPlaying,
     error: arabicAudioError,
     togglePlayback: toggleArabicAudioPlayback,
-  } = useSpeechSynthesisPlayback({
-    sourceKey: proverb ? `${proverb.id}:${proverb.arabic}` : 'detail-empty',
+  } = useArabicAudioPlayback({
+    proverbId: proverb?.id,
+    sourceKey: proverb ? `${proverb.id}:arabic:${proverb.arabic}:${proverb.arabicAudio?.url || ''}` : 'detail-empty',
+    initialAudioUrl: proverb?.arabicAudio?.url,
     text: proverb?.arabic || '',
-    lang: 'ar',
     emptyTextMessage: 'No hay texto árabe para reproducir.',
   })
 
@@ -177,13 +180,15 @@ export default function Detail() {
                   aria-label={
                     isArabicAudioPlaying
                       ? 'Detener pronunciación árabe'
+                      : isArabicAudioPreparing
+                        ? 'Preparando pronunciación árabe'
                       : 'Escuchar pronunciación árabe'
                   }
                   title="Escuchar árabe"
                   className={speakerButtonClass}
                 >
                   <span className="material-symbols-outlined text-lg" aria-hidden="true">
-                    {isArabicAudioPlaying ? 'stop_circle' : 'volume_up'}
+                    {isArabicAudioPlaying ? 'stop_circle' : isArabicAudioPreparing ? 'sync' : 'volume_up'}
                   </span>
                 </button>
                 <h2 className="text-accent font-ui text-xs font-bold uppercase tracking-wide">Equivalente (Árabe)</h2>
@@ -193,7 +198,7 @@ export default function Detail() {
                 {proverb.arabic}
               </p>
               <span className="sr-only" role="status" aria-live="polite">
-                {isArabicAudioPlaying ? 'Audio árabe reproduciéndose.' : ''}
+                {isArabicAudioPlaying ? 'Audio árabe reproduciéndose.' : isArabicAudioPreparing ? 'Preparando audio árabe.' : ''}
               </span>
               {arabicAudioError && (
                 <p className="mt-3 text-sm text-red-600" dir="ltr" role="alert">

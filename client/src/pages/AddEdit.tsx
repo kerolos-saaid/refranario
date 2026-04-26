@@ -6,6 +6,7 @@ import {
   updateProverb,
   uploadImage,
 } from '../lib/api'
+import { useArabicAudioPlayback } from '../hooks/useArabicAudioPlayback'
 import { useSpeechSynthesisPlayback } from '../hooks/useSpeechSynthesisPlayback'
 
 function normalizeArabicPreviewText(text: string) {
@@ -32,6 +33,8 @@ export default function AddEdit() {
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState('')
   const [isDragOver, setIsDragOver] = useState(false)
+  const [savedArabicText, setSavedArabicText] = useState('')
+  const [savedArabicAudioUrl, setSavedArabicAudioUrl] = useState<string | null>(null)
 
   useEffect(() => {
     if (isEdit && id) {
@@ -51,6 +54,8 @@ export default function AddEdit() {
         image: data.image,
         curator: data.curator,
       })
+      setSavedArabicText(data.arabic)
+      setSavedArabicAudioUrl(data.arabicAudio?.url || null)
     } catch (err) {
       setError('Failed to load proverb')
     } finally {
@@ -180,13 +185,19 @@ export default function AddEdit() {
 
   const {
     isSupported: isArabicPreviewSupported,
+    isPreparing: isArabicPreviewPreparing,
     isPlaying: isArabicPreviewPlaying,
     error: arabicPreviewError,
     togglePlayback: toggleArabicPreviewPlayback,
-  } = useSpeechSynthesisPlayback({
-    sourceKey: formData.arabic,
+  } = useArabicAudioPlayback({
+    proverbId: id,
+    sourceKey: `${id || 'new'}:${formData.arabic}:${savedArabicAudioUrl || ''}`,
+    initialAudioUrl: savedArabicAudioUrl,
+    enabled: Boolean(isEdit && id && formData.arabic === savedArabicText),
     text: formData.arabic,
-    lang: 'ar',
+    disabledMessage: isEdit
+      ? 'Guarda los cambios antes de preparar una nueva pronunciacion arabe.'
+      : 'Guarda el refran antes de preparar el audio arabe.',
     emptyTextMessage: 'Escribe un texto árabe antes de escuchar la vista previa.',
   })
 
@@ -204,6 +215,11 @@ export default function AddEdit() {
 
   const speakerButtonClass =
     'inline-flex h-9 w-9 items-center justify-center rounded-full border border-accent/30 bg-accent/10 text-accent shadow-sm transition-all hover:bg-accent hover:text-white disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2'
+  const arabicPreviewHelp = !isEdit
+    ? 'Guarda el refran para preparar audio arabe con ElevenLabs.'
+    : formData.arabic !== savedArabicText
+      ? 'Guarda los cambios para preparar una nueva pronunciacion arabe.'
+      : ''
 
   if (loading) {
     return (
@@ -397,13 +413,15 @@ export default function AddEdit() {
                   aria-label={
                     isArabicPreviewPlaying
                       ? 'Detener pronunciación árabe'
+                      : isArabicPreviewPreparing
+                        ? 'Preparando pronunciación árabe'
                       : 'Escuchar pronunciación árabe'
                   }
                   title="Escuchar árabe"
                   className={speakerButtonClass}
                 >
                   <span className="material-symbols-outlined text-lg" aria-hidden="true">
-                    {isArabicPreviewPlaying ? 'stop_circle' : 'volume_up'}
+                    {isArabicPreviewPlaying ? 'stop_circle' : isArabicPreviewPreparing ? 'sync' : 'volume_up'}
                   </span>
                 </button>
               </div>
@@ -419,8 +437,13 @@ export default function AddEdit() {
                 placeholder="...عصفور في اليد"
               />
               <span className="sr-only" role="status" aria-live="polite">
-                {isArabicPreviewPlaying ? 'Vista previa de audio árabe reproduciéndose.' : ''}
+                {isArabicPreviewPlaying ? 'Vista previa de audio árabe reproduciéndose.' : isArabicPreviewPreparing ? 'Preparando vista previa de audio árabe.' : ''}
               </span>
+              {arabicPreviewHelp && (
+                <p className="mt-2 text-xs text-muted" role="status">
+                  {arabicPreviewHelp}
+                </p>
+              )}
               {arabicPreviewError && (
                 <p className="mt-2 text-sm text-red-600" role="alert">
                   {arabicPreviewError}

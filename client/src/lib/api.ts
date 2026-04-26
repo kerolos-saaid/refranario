@@ -180,6 +180,33 @@ export async function regenerateProverbImage(id: string) {
   }>(res, 'Failed to regenerate image')
 }
 
+export async function generateArabicAudio(id: string) {
+  const res = await fetch(`${API_BASE}/proverbs/${id}/arabic-audio`, {
+    method: 'POST',
+  })
+
+  const rawBody = await res.text()
+  let data: unknown = null
+
+  if (rawBody) {
+    try {
+      data = JSON.parse(rawBody)
+    } catch {
+      throw new Error(rawBody || 'Failed to prepare Arabic audio')
+    }
+  }
+
+  if (data && typeof data === 'object' && 'status' in data) {
+    return data as ArabicAudioResponse
+  }
+
+  if (!res.ok) {
+    throw new Error('Failed to prepare Arabic audio')
+  }
+
+  throw new Error('API returned invalid Arabic audio response')
+}
+
 export async function login(username: string, password: string) {
   const res = await fetch(`${API_BASE}/login`, {
     method: 'POST',
@@ -233,6 +260,20 @@ export interface Proverb {
   curator: string
   date: string
   bookmarked: boolean
+  arabicAudio?: {
+    status: ArabicAudioStatus
+    url: string | null
+  }
+}
+
+export type ArabicAudioStatus = 'ready' | 'generating' | 'failed' | 'limited' | 'unavailable' | null
+
+export interface ArabicAudioResponse {
+  status: Exclude<ArabicAudioStatus, null>
+  audioUrl?: string
+  cached: boolean
+  message?: string
+  retryAfterSeconds?: number
 }
 
 export type ProverbImageJobStatus = 'pending' | 'processing' | 'retry' | 'failed' | 'complete' | null

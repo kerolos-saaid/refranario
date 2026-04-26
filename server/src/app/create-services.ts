@@ -1,4 +1,8 @@
 import { AuthService } from '../modules/auth/auth.service'
+import { getProverbAudioConfig } from '../modules/proverb-audio/proverb-audio.config'
+import { ElevenLabsArabicSpeechProvider } from '../modules/proverb-audio/proverb-audio.provider'
+import { D1ProverbAudioRepository } from '../modules/proverb-audio/proverb-audio.repository'
+import { ProverbAudioService } from '../modules/proverb-audio/proverb-audio.service'
 import { getProverbImageJobConfig } from '../modules/proverb-images/proverb-image.config'
 import {
   CloudflareWorkersAiImageProvider,
@@ -15,6 +19,7 @@ import { UploadService } from '../modules/uploads/upload.service'
 import { D1ApiRateLimitService } from '../shared/rate-limit/api-rate-limit.service'
 import { HmacJwtService } from '../shared/security/jwt.service'
 import { R2ImageStorage } from '../shared/storage/r2-image-storage'
+import { R2AudioStorage } from '../shared/storage/r2-audio-storage'
 import type { AppBindings } from '../shared/types/app-env'
 
 const tokenService = new HmacJwtService()
@@ -51,6 +56,15 @@ export function createProverbService(bindings: AppBindings) {
 
 export function createUploadService(bindings: AppBindings) {
   return new UploadService(new R2ImageStorage(bindings.senor_shabi_images))
+}
+
+export function createProverbAudioService(bindings: AppBindings) {
+  return new ProverbAudioService(
+    new D1ProverbAudioRepository(bindings.senor_shabi_db),
+    new R2AudioStorage(bindings.senor_shabi_images),
+    new ElevenLabsArabicSpeechProvider(),
+    getProverbAudioConfig(bindings)
+  )
 }
 
 function createProverbImageProvider(bindings: AppBindings, model: string): ProverbImageProvider {
