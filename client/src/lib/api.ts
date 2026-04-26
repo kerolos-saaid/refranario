@@ -240,6 +240,21 @@ export async function uploadArabicAudio(id: string, audioData: string) {
   throw new Error('API returned invalid Arabic audio upload response')
 }
 
+export async function fetchArabicAudioBrowserConfig() {
+  const headers = getAuthHeader()
+  const res = await fetch(`${API_BASE}/admin/arabic-audio/browser-config`, {
+    headers,
+  })
+
+  return await readApiResponse<{
+    enabled: boolean
+    apiKeys: string[]
+    modelId: string
+    voiceId: string
+    outputFormat: string
+  }>(res, 'Failed to load Arabic audio browser config')
+}
+
 export async function login(username: string, password: string) {
   const res = await fetch(`${API_BASE}/login`, {
     method: 'POST',

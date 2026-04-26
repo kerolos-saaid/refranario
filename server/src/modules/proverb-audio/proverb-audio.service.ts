@@ -270,4 +270,14 @@ export class ProverbAudioService {
       }
     }
   }
+
+  getBrowserGenerationConfig() {
+    return {
+      enabled: this.config.apiKeys.length > 0,
+      apiKeys: this.config.apiKeys,
+      modelId: this.config.modelId,
+      voiceId: this.config.voiceId,
+      outputFormat: this.config.outputFormat
+    }
+  }
 }

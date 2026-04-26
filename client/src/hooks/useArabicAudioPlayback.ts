@@ -1,11 +1,15 @@
 import { useEffect, useRef, useState } from 'react'
 
-import { generateArabicAudio, isAdmin, uploadArabicAudio } from '../lib/api'
 import {
+  fetchArabicAudioBrowserConfig,
+  generateArabicAudio,
+  isAdmin,
+  uploadArabicAudio
+} from '../lib/api'
+import {
+  type BrowserElevenLabsConfig,
   encodeAudioDataUrl,
-  generateArabicAudioInBrowser,
-  getBrowserElevenLabsApiKeys,
-  promptForBrowserElevenLabsApiKeys
+  generateArabicAudioInBrowser
 } from '../lib/browser-elevenlabs'
 
 type UseArabicAudioPlaybackOptions = {
@@ -29,6 +33,29 @@ function pickArabicVoice(voices: SpeechSynthesisVoice[]) {
     voices.find((voice) => voice.name.toLowerCase().includes('arab')) ||
     null
   )
+}
+
+let cachedAdminBrowserConfig: BrowserElevenLabsConfig | null = null
+let adminBrowserConfigRequest: Promise<BrowserElevenLabsConfig | null> | null = null
+
+async function loadAdminBrowserConfig() {
+  if (cachedAdminBrowserConfig) {
+    return cachedAdminBrowserConfig
+  }
+
+  if (!adminBrowserConfigRequest) {
+    adminBrowserConfigRequest = fetchArabicAudioBrowserConfig()
+      .then((config) => {
+        cachedAdminBrowserConfig = config
+        return config
+      })
+      .catch(() => null)
+      .finally(() => {
+        adminBrowserConfigRequest = null
+      })
+  }
+
+  return await adminBrowserConfigRequest
 }
 
 export function useArabicAudioPlayback({
@@ -146,29 +173,19 @@ export function useArabicAudioPlayback({
     })
   }
 
-  const getBrowserKeysForArabicAudio = () => {
-    const configuredKeys = getBrowserElevenLabsApiKeys()
-
-    if (configuredKeys.length > 0) {
-      return configuredKeys
-    }
-
-    if (!isAdmin()) {
-      return []
-    }
-
-    return promptForBrowserElevenLabsApiKeys() || []
-  }
-
   const playBrowserGeneratedAudio = async () => {
-    const normalizedText = normalizeText(text)
-    const browserKeys = getBrowserKeysForArabicAudio()
-
-    if (!normalizedText || browserKeys.length === 0) {
+    if (!isAdmin()) {
       return false
     }
 
-    const browserResult = await generateArabicAudioInBrowser(normalizedText, browserKeys)
+    const normalizedText = normalizeText(text)
+    const browserConfig = await loadAdminBrowserConfig()
+
+    if (!normalizedText || !browserConfig || !browserConfig.enabled || browserConfig.apiKeys.length === 0) {
+      return false
+    }
+
+    const browserResult = await generateArabicAudioInBrowser(normalizedText, browserConfig)
 
     if (browserResult.kind !== 'success') {
       return false

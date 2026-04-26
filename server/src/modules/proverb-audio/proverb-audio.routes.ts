@@ -24,6 +24,10 @@ export function createProverbAudioRouter(
     return c.json(result.response, result.httpStatus as 200)
   })
 
+  router.get('/admin/arabic-audio/browser-config', requireAdmin, arabicAudioUploadRateLimit, async (c) => {
+    return c.json(getProverbAudioService(c.env).getBrowserGenerationConfig())
+  })
+
   router.post('/proverbs/:id/arabic-audio/upload', requireAdmin, arabicAudioUploadRateLimit, async (c) => {
     const body = await c.req.json().catch(() => ({})) as { audio?: string }
     const result = await getProverbAudioService(c.env).saveUploadedArabicAudio(c.req.param('id'), body.audio)

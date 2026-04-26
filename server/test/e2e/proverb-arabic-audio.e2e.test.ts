@@ -365,4 +365,28 @@ describe('Arabic audio API', () => {
     expect(response.status).toBe(401)
     expect(response.body).toEqual({ error: 'Unauthorized - No token' })
   })
+
+  test('admin browser config returns ElevenLabs settings only for admins', async () => {
+    const adminToken = await loginAsAdmin()
+    const authorized = await performJsonRequest({
+      path: '/api/admin/arabic-audio/browser-config',
+      method: 'GET',
+      headers: createAuthorizedHeaders(adminToken)
+    })
+    const unauthorized = await performJsonRequest({
+      path: '/api/admin/arabic-audio/browser-config',
+      method: 'GET'
+    })
+
+    expect(authorized.status).toBe(200)
+    expect(authorized.body).toEqual({
+      enabled: true,
+      apiKeys: ['key-1', 'key-2'],
+      modelId: 'eleven_v3',
+      voiceId: 'cgSgspJ2msm6clMCkdW9',
+      outputFormat: 'mp3_44100_128'
+    })
+    expect(unauthorized.status).toBe(401)
+    expect(unauthorized.body).toEqual({ error: 'Unauthorized - No token' })
+  })
 })

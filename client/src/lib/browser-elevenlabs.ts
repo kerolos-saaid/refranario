@@ -1,7 +1,3 @@
-const ELEVENLABS_BROWSER_API_KEYS_STORAGE_KEY = 'senor_shabi_elevenlabs_browser_api_keys'
-const ELEVENLABS_BROWSER_VOICE_ID = 'cgSgspJ2msm6clMCkdW9'
-const ELEVENLABS_BROWSER_MODEL_ID = 'eleven_v3'
-const ELEVENLABS_BROWSER_OUTPUT_FORMAT = 'mp3_44100_128'
 const ELEVENLABS_BROWSER_BASE_URL = 'https://api.elevenlabs.io/v1/text-to-speech'
 
 type BrowserProviderErrorKind = 'quota' | 'auth' | 'blocked' | 'transient' | 'failed'
@@ -9,6 +5,14 @@ type BrowserProviderErrorKind = 'quota' | 'auth' | 'blocked' | 'transient' | 'fa
 type BrowserProviderError = {
   kind: BrowserProviderErrorKind
   reason: string
+}
+
+export type BrowserElevenLabsConfig = {
+  enabled: boolean
+  apiKeys: string[]
+  modelId: string
+  voiceId: string
+  outputFormat: string
 }
 
 export type BrowserElevenLabsAudioResult =
@@ -21,34 +25,6 @@ export type BrowserElevenLabsAudioResult =
       kind: 'failed'
       reason: string
     }
-
-function parseStoredKeys(rawValue: string | null) {
-  if (!rawValue) {
-    return []
-  }
-
-  const trimmed = rawValue.trim()
-
-  if (!trimmed) {
-    return []
-  }
-
-  if (trimmed.startsWith('[')) {
-    try {
-      const parsed = JSON.parse(trimmed)
-      if (Array.isArray(parsed)) {
-        return parsed.map((value) => String(value).trim()).filter(Boolean)
-      }
-    } catch {
-      // Fall through to plain-text parsing.
-    }
-  }
-
-  return trimmed
-    .split(/[\n,]+/)
-    .map((value) => value.trim())
-    .filter(Boolean)
-}
 
 async function readProviderError(response: Response) {
   const raw = await response.text()
@@ -128,62 +104,23 @@ function shouldTryNextKey(error: BrowserProviderError) {
   )
 }
 
-export function getBrowserElevenLabsApiKeys() {
-  if (typeof window === 'undefined') {
-    return []
-  }
-
-  return parseStoredKeys(window.localStorage.getItem(ELEVENLABS_BROWSER_API_KEYS_STORAGE_KEY))
-}
-
-export function saveBrowserElevenLabsApiKeys(rawValue: string) {
-  if (typeof window === 'undefined') {
-    return []
-  }
-
-  const parsed = parseStoredKeys(rawValue)
-
-  if (parsed.length === 0) {
-    window.localStorage.removeItem(ELEVENLABS_BROWSER_API_KEYS_STORAGE_KEY)
-    return []
-  }
-
-  window.localStorage.setItem(ELEVENLABS_BROWSER_API_KEYS_STORAGE_KEY, parsed.join('\n'))
-  return parsed
-}
-
-export function promptForBrowserElevenLabsApiKeys() {
-  if (typeof window === 'undefined') {
-    return []
-  }
-
-  const currentValue = window.localStorage.getItem(ELEVENLABS_BROWSER_API_KEYS_STORAGE_KEY) || ''
-  const rawValue = window.prompt(
-    'Paste one or more ElevenLabs API keys for browser-side Arabic audio. Separate multiple keys with commas or new lines. They stay only in this browser.',
-    currentValue
-  )
-
-  if (rawValue === null) {
-    return null
-  }
-
-  return saveBrowserElevenLabsApiKeys(rawValue)
-}
-
-export async function generateArabicAudioInBrowser(text: string, apiKeys = getBrowserElevenLabsApiKeys()): Promise<BrowserElevenLabsAudioResult> {
-  if (apiKeys.length === 0) {
+export async function generateArabicAudioInBrowser(
+  text: string,
+  config: BrowserElevenLabsConfig
+): Promise<BrowserElevenLabsAudioResult> {
+  if (!config.enabled || config.apiKeys.length === 0) {
     return {
       kind: 'failed',
-      reason: 'No browser ElevenLabs keys are configured.'
+      reason: 'No browser ElevenLabs keys are configured for the admin session.'
     }
   }
 
   let lastError: BrowserProviderError | null = null
 
-  for (const apiKey of apiKeys) {
+  for (const apiKey of config.apiKeys) {
     try {
       const response = await fetch(
-        `${ELEVENLABS_BROWSER_BASE_URL}/${encodeURIComponent(ELEVENLABS_BROWSER_VOICE_ID)}?output_format=${encodeURIComponent(ELEVENLABS_BROWSER_OUTPUT_FORMAT)}`,
+        `${ELEVENLABS_BROWSER_BASE_URL}/${encodeURIComponent(config.voiceId)}?output_format=${encodeURIComponent(config.outputFormat)}`,
         {
           method: 'POST',
           headers: {
@@ -192,7 +129,7 @@ export async function generateArabicAudioInBrowser(text: string, apiKeys = getBr
           },
           body: JSON.stringify({
             text,
-            model_id: ELEVENLABS_BROWSER_MODEL_ID,
+            model_id: config.modelId,
             language_code: 'ar'
           })
         }
