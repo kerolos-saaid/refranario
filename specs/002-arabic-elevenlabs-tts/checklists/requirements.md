@@ -31,4 +31,4 @@
 
 ## Notes
 
-- Validation passed. The named voice provider is captured as an operator-selected product constraint while keeping credentials and code-level details out of the specification.
+- Validation passed. The named voice provider, model, and voice identity are captured as operator-selected product constraints while keeping credentials and code-level details out of the specification.

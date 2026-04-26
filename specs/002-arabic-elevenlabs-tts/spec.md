@@ -81,6 +81,8 @@ A visitor should still get Arabic audio when one configured voice service creden
 - **FR-012**: System MUST keep enough status information to distinguish saved, generating, failed, and unavailable Arabic audio states.
 - **FR-013**: System MUST allow future operators to add or remove credentials without changing user-facing behavior.
 - **FR-014**: System MUST preserve the selected Arabic voice identity and quality settings consistently across generated Arabic audio unless operators intentionally change them.
+- **FR-015**: System MUST use the operator-selected Arabic voice identity `cgSgspJ2msm6clMCkdW9` for the first production version.
+- **FR-016**: System MUST use the operator-selected expressive Arabic generation model `eleven_v3` for the first production version.
 
 ### Cultural & Content Requirements
 
@@ -124,7 +126,7 @@ A visitor should still get Arabic audio when one configured voice service creden
 - The selected premium Arabic voice provider is ElevenLabs, but credential values are managed outside source control.
 - Operators will provide one or more credentials in a secure ordered configuration.
 - Arabic audio is generated from the stored Arabic proverb text only.
-- A single default Arabic voice identity and voice quality profile will be used for the first version.
+- The first version uses voice identity `cgSgspJ2msm6clMCkdW9` with model `eleven_v3`.
 - Existing storage used for generated media can store the generated Arabic audio assets unless planning identifies a capacity or compatibility issue.
 - Existing playback UI can be extended to show generating, saved, and temporary failure states.
 - The example credential shared during discussion is treated as sensitive and must not be committed to source control.
