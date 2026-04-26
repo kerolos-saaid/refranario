@@ -5,7 +5,7 @@ import type {
 } from './proverb-audio.types'
 import type { ProverbAudioConfig } from './proverb-audio.config'
 
-type ProviderErrorKind = 'quota' | 'rate-limit' | 'auth' | 'transient' | 'failed'
+type ProviderErrorKind = 'quota' | 'rate-limit' | 'auth' | 'blocked' | 'transient' | 'failed'
 
 export type ClassifiedElevenLabsError = {
   kind: ProviderErrorKind
@@ -14,21 +14,59 @@ export type ClassifiedElevenLabsError = {
 }
 
 const ELEVENLABS_BASE_URL = 'https://api.elevenlabs.io/v1/text-to-speech'
-const keyCooldownUntil = new Map<string, number>()
+type KeyCooldownMode = 'soft' | 'hard'
+
+type KeyCooldown = {
+  until: number
+  mode: KeyCooldownMode
+}
+
+const keyCooldowns = new Map<string, KeyCooldown>()
+type FetchLike = (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>
 
 function keyFingerprint(apiKey: string) {
   return apiKey.slice(-8)
+}
+
+function hasRateLimitSignal(message: string) {
+  return (
+    message.includes('rate limit')
+    || message.includes('rate-limit')
+    || message.includes('too many requests')
+    || message.includes('quota')
+    || message.includes('credit')
+    || message.includes('capacity')
+  )
+}
+
+function isFreeTierServerBlock(status: number, message: string) {
+  return (
+    (status === 401 || status === 403) && (
+      message.includes('unusual activity detected')
+      || message.includes('free tier usage disabled')
+      || message.includes('purchase a paid plan')
+      || message.includes('proxy/vpn')
+      || message.includes('abuse detectors')
+    )
+  )
 }
 
 export function classifyElevenLabsError(status: number, message: string, retryAfterHeader?: string | null): ClassifiedElevenLabsError {
   const normalizedMessage = message.toLowerCase()
   const retryAfterSeconds = retryAfterHeader ? Number.parseInt(retryAfterHeader, 10) : undefined
 
+  if (isFreeTierServerBlock(status, normalizedMessage)) {
+    return {
+      kind: 'blocked',
+      reason: 'Voice provider blocked free-tier server-side generation from this environment.'
+    }
+  }
+
   if (status === 401 || status === 403) {
     return { kind: 'auth', reason: 'Voice provider credential was rejected.' }
   }
 
-  if (status === 429 || normalizedMessage.includes('quota') || normalizedMessage.includes('limit')) {
+  if (status === 429 || hasRateLimitSignal(normalizedMessage)) {
     return {
       kind: status === 429 ? 'rate-limit' : 'quota',
       reason: 'Voice provider limit reached.',
@@ -45,6 +83,38 @@ export function classifyElevenLabsError(status: number, message: string, retryAf
 
 function shouldCooldown(error: ClassifiedElevenLabsError) {
   return error.kind === 'quota' || error.kind === 'rate-limit' || error.kind === 'auth' || error.kind === 'transient'
+}
+
+function toCooldownMode(error: ClassifiedElevenLabsError): KeyCooldownMode {
+  if (error.kind === 'auth') {
+    return 'hard'
+  }
+
+  return error.retryAfterSeconds ? 'hard' : 'soft'
+}
+
+function setKeyCooldown(apiKey: string, error: ClassifiedElevenLabsError, fallbackSeconds: number) {
+  const cooldownSeconds = error.retryAfterSeconds || fallbackSeconds
+  keyCooldowns.set(keyFingerprint(apiKey), {
+    until: Date.now() + (cooldownSeconds * 1000),
+    mode: toCooldownMode(error)
+  })
+}
+
+function clearKeyCooldown(apiKey: string) {
+  keyCooldowns.delete(keyFingerprint(apiKey))
+}
+
+function getRetryAfterSeconds(until: number, now: number) {
+  return Math.max(1, Math.ceil((until - now) / 1000))
+}
+
+export function resetElevenLabsKeyCooldowns() {
+  keyCooldowns.clear()
+}
+
+function toLogMessage(value: string) {
+  return value.replace(/\s+/g, ' ').trim().slice(0, 180)
 }
 
 function toRetry(reason: string, retryAfterSeconds: number): ElevenLabsSpeechRetry {
@@ -70,7 +140,13 @@ async function readProviderError(response: Response) {
 }
 
 export class ElevenLabsArabicSpeechProvider {
-  constructor(private readonly fetcher: typeof fetch = fetch) {}
+  private readonly fetcher: FetchLike
+
+  constructor(fetcher?: FetchLike) {
+    // Cloudflare Workers can throw "Illegal invocation" when the global fetch
+    // reference is detached and invoked later without the original receiver.
+    this.fetcher = fetcher || ((input, init) => fetch(input, init))
+  }
 
   async generate(text: string, config: ProverbAudioConfig): Promise<ElevenLabsSpeechResult> {
     if (config.apiKeys.length === 0) {
@@ -78,10 +154,20 @@ export class ElevenLabsArabicSpeechProvider {
     }
 
     const now = Date.now()
-    const availableKeys = config.apiKeys.filter((key) => (keyCooldownUntil.get(keyFingerprint(key)) || 0) <= now)
+    const keyStates = config.apiKeys.map((apiKey) => ({
+      apiKey,
+      cooldown: keyCooldowns.get(keyFingerprint(apiKey)) || null
+    }))
+    const immediatelyAvailable = keyStates.filter(({ cooldown }) => !cooldown || cooldown.until <= now)
+    const softCooldownKeys = keyStates
+      .filter(({ cooldown }) => cooldown && cooldown.until > now && cooldown.mode === 'soft')
+      .sort((left, right) => left.cooldown!.until - right.cooldown!.until)
+    const hardCooldownKeys = keyStates.filter(({ cooldown }) => cooldown && cooldown.until > now && cooldown.mode === 'hard')
+    const availableKeys = [...immediatelyAvailable, ...softCooldownKeys].map(({ apiKey }) => apiKey)
 
     if (availableKeys.length === 0) {
-      return toRetry('All configured voice credentials are cooling down.', config.keyCooldownSeconds)
+      const nextRetryAt = Math.min(...hardCooldownKeys.map(({ cooldown }) => cooldown!.until))
+      return toRetry('All configured voice credentials are cooling down.', getRetryAfterSeconds(nextRetryAt, now))
     }
 
     let lastFailure: ClassifiedElevenLabsError | null = null
@@ -105,6 +191,7 @@ export class ElevenLabsArabicSpeechProvider {
         )
 
         if (response.ok) {
+          clearKeyCooldown(apiKey)
           const audio = new Uint8Array(await response.arrayBuffer())
           if (audio.byteLength === 0) {
             lastFailure = { kind: 'failed', reason: 'Voice provider returned empty audio.' }
@@ -122,17 +209,26 @@ export class ElevenLabsArabicSpeechProvider {
         const classified = classifyElevenLabsError(response.status, message, response.headers.get('Retry-After'))
         lastFailure = classified
 
+        if (classified.kind === 'blocked') {
+          console.warn('[ArabicAudio] ElevenLabs blocked server-side free-tier request', {
+            status: response.status,
+            message: toLogMessage(message)
+          })
+        }
+
         if (shouldCooldown(classified)) {
-          const cooldownSeconds = classified.retryAfterSeconds || config.keyCooldownSeconds
-          keyCooldownUntil.set(keyFingerprint(apiKey), Date.now() + (cooldownSeconds * 1000))
+          setKeyCooldown(apiKey, classified, config.keyCooldownSeconds)
         }
 
         if (classified.kind === 'failed') {
           return toFailure(classified.reason)
         }
-      } catch {
+      } catch (error) {
+        console.error('[ArabicAudio] ElevenLabs request threw', {
+          message: error instanceof Error ? toLogMessage(error.message) : toLogMessage(String(error))
+        })
         lastFailure = { kind: 'transient', reason: 'Voice provider request failed.' }
-        keyCooldownUntil.set(keyFingerprint(apiKey), Date.now() + (config.keyCooldownSeconds * 1000))
+        setKeyCooldown(apiKey, lastFailure, config.keyCooldownSeconds)
       }
     }
 
