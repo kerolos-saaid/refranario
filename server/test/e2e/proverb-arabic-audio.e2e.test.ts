@@ -21,11 +21,33 @@ function createEnv(overrides?: Partial<AppBindings>): AppBindings {
   }
 }
 
-async function performRequest(options: { id: string; env?: AppBindings }) {
+function createAuthorizedHeaders(token: string) {
+  return {
+    Authorization: `Bearer ${token}`
+  }
+}
+
+async function performJsonRequest(options: {
+  path: string
+  method: string
+  env?: AppBindings
+  headers?: Record<string, string>
+  json?: unknown
+}) {
   const app = createApp()
+  const headers = new Headers(options.headers)
+  let body: BodyInit | undefined
+
+  if (options.json !== undefined) {
+    headers.set('Content-Type', 'application/json')
+    body = JSON.stringify(options.json)
+  }
+
   const response = await app.fetch(
-    new Request(`http://localhost/api/proverbs/${options.id}/arabic-audio`, {
-      method: 'POST'
+    new Request(`http://localhost${options.path}`, {
+      method: options.method,
+      headers,
+      body
     }),
     options.env || createEnv(),
     runtime.platform.ctx
@@ -36,6 +58,32 @@ async function performRequest(options: { id: string; env?: AppBindings }) {
     retryAfter: response.headers.get('Retry-After'),
     body: await response.json() as Record<string, unknown>
   }
+}
+
+async function performRequest(options: { id: string; env?: AppBindings }) {
+  return await performJsonRequest({
+    path: `/api/proverbs/${options.id}/arabic-audio`,
+    method: 'POST',
+    env: options.env
+  })
+}
+
+async function loginAsAdmin(env?: AppBindings) {
+  const response = await performJsonRequest({
+    path: '/api/login',
+    method: 'POST',
+    env,
+    json: {
+      username: 'admin',
+      password: 'password123'
+    }
+  })
+
+  if (response.status !== 200 || typeof response.body !== 'object' || response.body === null || !('token' in response.body)) {
+    throw new Error(`Expected admin login token but received ${JSON.stringify(response)}`)
+  }
+
+  return String(response.body.token)
 }
 
 async function loadAudioColumns(id: string) {
@@ -259,5 +307,62 @@ describe('Arabic audio API', () => {
     } finally {
       fetchMock.restore()
     }
+  })
+
+  test('admin upload saves browser-generated Arabic audio and then reuses cache', async () => {
+    const adminToken = await loginAsAdmin()
+    const uploadResponse = await performJsonRequest({
+      path: '/api/proverbs/1/arabic-audio/upload',
+      method: 'POST',
+      headers: createAuthorizedHeaders(adminToken),
+      json: {
+        audio: 'data:audio/mpeg;base64,AQID'
+      }
+    })
+    const fetchMock = installFetchMock([])
+
+    try {
+      const cachedResponse = await performRequest({ id: '1' })
+      const row = await loadAudioColumns('1')
+
+      expect(uploadResponse.status).toBe(201)
+      expect(uploadResponse.body.status).toBe('ready')
+      expect(String(uploadResponse.body.audioUrl)).toContain('/audio/arabic/1-')
+      expect(cachedResponse.status).toBe(200)
+      expect(cachedResponse.body.status).toBe('ready')
+      expect(cachedResponse.body.cached).toBe(true)
+      expect(fetchMock.callCount).toBe(0)
+      expect(row?.arabic_audio_status).toBe('ready')
+    } finally {
+      fetchMock.restore()
+    }
+  })
+
+  test('admin upload rejects invalid audio payloads', async () => {
+    const adminToken = await loginAsAdmin()
+    const response = await performJsonRequest({
+      path: '/api/proverbs/1/arabic-audio/upload',
+      method: 'POST',
+      headers: createAuthorizedHeaders(adminToken),
+      json: {
+        audio: 'not-valid-audio'
+      }
+    })
+
+    expect(response.status).toBe(422)
+    expect(response.body.status).toBe('failed')
+  })
+
+  test('admin upload requires an authenticated admin session', async () => {
+    const response = await performJsonRequest({
+      path: '/api/proverbs/1/arabic-audio/upload',
+      method: 'POST',
+      json: {
+        audio: 'data:audio/mpeg;base64,AQID'
+      }
+    })
+
+    expect(response.status).toBe(401)
+    expect(response.body).toEqual({ error: 'Unauthorized - No token' })
   })
 })

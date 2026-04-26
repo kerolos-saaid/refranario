@@ -55,7 +55,9 @@ export function createApp() {
   ))
   app.route('/api', createProverbAudioRouter(
     createProverbAudioService,
-    arabicAudioGenerateRateLimit
+    arabicAudioGenerateRateLimit,
+    requireAdmin,
+    adminUploadsRateLimit
   ))
   app.route('/api', createUploadRouter(
     createUploadService,

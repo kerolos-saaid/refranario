@@ -207,6 +207,39 @@ export async function generateArabicAudio(id: string) {
   throw new Error('API returned invalid Arabic audio response')
 }
 
+export async function uploadArabicAudio(id: string, audioData: string) {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+  const authHeader = getAuthHeader()
+  Object.assign(headers, authHeader)
+
+  const res = await fetch(`${API_BASE}/proverbs/${id}/arabic-audio/upload`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ audio: audioData }),
+  })
+
+  const rawBody = await res.text()
+  let data: unknown = null
+
+  if (rawBody) {
+    try {
+      data = JSON.parse(rawBody)
+    } catch {
+      throw new Error(rawBody || 'Failed to save Arabic audio')
+    }
+  }
+
+  if (data && typeof data === 'object' && 'status' in data) {
+    return data as ArabicAudioResponse
+  }
+
+  if (!res.ok) {
+    throw new Error('Failed to save Arabic audio')
+  }
+
+  throw new Error('API returned invalid Arabic audio upload response')
+}
+
 export async function login(username: string, password: string) {
   const res = await fetch(`${API_BASE}/login`, {
     method: 'POST',

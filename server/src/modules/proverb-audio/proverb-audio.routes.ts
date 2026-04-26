@@ -8,7 +8,9 @@ type ProverbAudioServiceFactory = (bindings: AppBindings) => ProverbAudioService
 
 export function createProverbAudioRouter(
   getProverbAudioService: ProverbAudioServiceFactory,
-  arabicAudioRateLimit: MiddlewareHandler<AppEnv>
+  arabicAudioRateLimit: MiddlewareHandler<AppEnv>,
+  requireAdmin: MiddlewareHandler<AppEnv>,
+  arabicAudioUploadRateLimit: MiddlewareHandler<AppEnv>
 ) {
   const router = new Hono<AppEnv>()
 
@@ -19,6 +21,12 @@ export function createProverbAudioRouter(
       c.header('Retry-After', String(result.retryAfterSeconds))
     }
 
+    return c.json(result.response, result.httpStatus as 200)
+  })
+
+  router.post('/proverbs/:id/arabic-audio/upload', requireAdmin, arabicAudioUploadRateLimit, async (c) => {
+    const body = await c.req.json().catch(() => ({})) as { audio?: string }
+    const result = await getProverbAudioService(c.env).saveUploadedArabicAudio(c.req.param('id'), body.audio)
     return c.json(result.response, result.httpStatus as 200)
   })
 

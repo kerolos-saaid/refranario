@@ -4,6 +4,8 @@ import type { ElevenLabsArabicSpeechProvider } from './proverb-audio.provider'
 import type { ArabicAudioResponse, ArabicAudioRow } from './proverb-audio.types'
 import type { ProverbAudioRepository } from './proverb-audio.repository'
 
+const MAX_UPLOADED_AUDIO_BYTES = 2 * 1024 * 1024
+
 function normalizeArabicText(text: string) {
   return text.replace(/\s+/g, ' ').trim()
 }
@@ -31,6 +33,32 @@ function safeMessage(message: string) {
     .replace(secretKeyPattern, '[redacted]')
     .replace(/[a-z0-9_-]{24,}/gi, '[redacted]')
     .slice(0, 180)
+}
+
+function decodeUploadedMp3(audioBase64: string | undefined) {
+  if (!audioBase64) {
+    return null
+  }
+
+  const trimmed = audioBase64.trim()
+  const dataUrlMatch = trimmed.match(/^data:audio\/(?:mpeg|mp3)(?:;[a-z-]+=[a-z0-9-]+)*;base64,(.+)$/i)
+  const rawBase64 = (dataUrlMatch?.[1] || trimmed).replace(/\s+/g, '')
+
+  if (!rawBase64 || /[^a-z0-9+/=]/i.test(rawBase64)) {
+    return null
+  }
+
+  try {
+    const binary = atob(rawBase64)
+
+    if (!binary.length || binary.length > MAX_UPLOADED_AUDIO_BYTES) {
+      return null
+    }
+
+    return Uint8Array.from(binary, (char) => char.charCodeAt(0))
+  } catch {
+    return null
+  }
 }
 
 export class ProverbAudioService {
@@ -162,6 +190,83 @@ export class ProverbAudioService {
         status: 'failed',
         cached: false,
         message: 'Arabic audio could not be prepared right now.'
+      }
+    }
+  }
+
+  async saveUploadedArabicAudio(
+    proverbId: string,
+    audioBase64: string | undefined
+  ): Promise<{ httpStatus: number; response: ArabicAudioResponse }> {
+    const row = await this.repository.findById(proverbId)
+
+    if (!row) {
+      return {
+        httpStatus: 404,
+        response: {
+          status: 'unavailable',
+          cached: false,
+          message: 'Proverb not found.'
+        }
+      }
+    }
+
+    const normalizedText = normalizeArabicText(row.arabic)
+
+    if (!normalizedText) {
+      return {
+        httpStatus: 422,
+        response: {
+          status: 'unavailable',
+          cached: false,
+          message: 'No Arabic text is available for this proverb.'
+        }
+      }
+    }
+
+    const uploadedAudio = decodeUploadedMp3(audioBase64)
+
+    if (!uploadedAudio) {
+      return {
+        httpStatus: 422,
+        response: {
+          status: 'failed',
+          cached: false,
+          message: 'Uploaded Arabic audio must be a valid MP3 payload.'
+        }
+      }
+    }
+
+    const textHash = await createArabicAudioTextHash(normalizedText)
+
+    if (isReadyCache(row, textHash, this.config)) {
+      return {
+        httpStatus: 200,
+        response: {
+          status: 'ready',
+          audioUrl: row.arabic_audio_url!,
+          cached: true
+        }
+      }
+    }
+
+    const storedAudio = await this.audioStorage.uploadMp3(uploadedAudio, proverbId, textHash)
+    await this.repository.saveReady({
+      id: proverbId,
+      url: storedAudio.url,
+      objectKey: storedAudio.objectKey,
+      textHash,
+      modelId: this.config.modelId,
+      voiceId: this.config.voiceId,
+      contentType: storedAudio.contentType
+    })
+
+    return {
+      httpStatus: 201,
+      response: {
+        status: 'ready',
+        audioUrl: storedAudio.url,
+        cached: false
       }
     }
   }
